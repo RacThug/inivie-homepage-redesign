@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------------------
+# Client documents
+# The original technical test brief is the client's document, not project
+# output. It is kept locally and never committed.
+# ---------------------------------------------------------------------------
+docs/*.pdf
+
+# ---------------------------------------------------------------------------
+# Environment and secrets
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Laravel (cms/)
+# ---------------------------------------------------------------------------
+/cms/vendor/
+/cms/public/storage
+/cms/public/hot
+/cms/storage/*.key
+/cms/storage/pail
+/cms/storage/app/public/*
+!/cms/storage/app/public/.gitkeep
+/cms/storage/framework/cache/*
+/cms/storage/framework/sessions/*
+/cms/storage/framework/testing/*
+/cms/storage/framework/views/*
+/cms/storage/logs/*
+/cms/.phpunit.result.cache
+/cms/auth.json
+
+# ---------------------------------------------------------------------------
+# Node and Next.js (web/)
+# ---------------------------------------------------------------------------
+node_modules/
+/web/.next/
+/web/out/
+/web/build/
+/web/.vercel
+/web/next-env.d.ts
+/web/playwright-report/
+/web/test-results/
+/web/blob-report/
+/web/.playwright/
+*.tsbuildinfo
+
+# ---------------------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------------------
+# Editors and OS
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Agent and tooling scratch
+# ---------------------------------------------------------------------------
+.claude/

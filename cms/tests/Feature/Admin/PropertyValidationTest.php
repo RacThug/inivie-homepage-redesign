@@ -163,6 +163,10 @@ describe('the optional fields', function () {
         'a negative rating' => ['rating', -0.1],
         'a link that is not a URL' => ['cta_url', 'inivie'],
         'a negative order' => ['sort_order', -1],
+        // The column is a smallint unsigned, per DATA-MODEL ch. 1. Without
+        // the ceiling the write reaches MySQL and comes back as a 500, or
+        // outside strict mode is truncated while the admin is told it saved.
+        'an order the column cannot hold' => ['sort_order', 65536],
         'a category that does not exist' => ['category', 'glamping'],
     ]);
 });

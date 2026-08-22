@@ -20,6 +20,18 @@ use Illuminate\Support\Facades\Storage;
 #[ObservedBy(PropertyObserver::class)]
 class Property extends Model
 {
+    /**
+     * The ceiling of the `sort_order` column, which DATA-MODEL ch. 1
+     * declares as a `smallint unsigned`.
+     *
+     * Named here because two form requests validate against it, and a
+     * literal in each is a literal that outlives the next column change.
+     * A position above it is not a rounding error: MySQL either rejects the
+     * write or, outside strict mode, silently stores the maximum, and the
+     * admin is told the order saved.
+     */
+    public const MAX_SORT_ORDER = 65535;
+
     /** @use HasFactory<PropertyFactory> */
     use HasFactory;
 

@@ -341,7 +341,7 @@ Enforced through `StorePropertyRequest` and `UpdatePropertyRequest`, never inlin
 | `price_from` | optional, integer, min 0 |
 | `rating` | optional, numeric, between 0 and 5 |
 | `cta_url` | optional, valid URL |
-| `sort_order` | required, integer, min 0 |
+| `sort_order` | required, integer, min 0, max 65535 |
 | `is_published` | boolean |
 
 Validation failures return the user to the form with old input and per field error messages, satisfying capability C8 in PRD ch. 7.1. The one value a browser will not let a form repopulate is the file input, so a failure elsewhere costs the admin that field alone.
@@ -351,6 +351,8 @@ Validation failures return the user to the form with old input and per field err
 The rules themselves live in an abstract `PropertyRequest`, with `StorePropertyRequest` and `UpdatePropertyRequest` supplying only the two that differ: whether an image is required, and whether the slug uniqueness check excludes the record being edited. Two copies of a twelve row table drift, and the copy that drifts is discovered as a card the API accepted and the homepage cannot render.
 
 An unchecked checkbox is not submitted at all, so `is_published` is normalised in the same hook. Without it an update would keep the old value, and an admin who unpublished a property would be told it worked while the property stayed on the homepage.
+
+The ceiling on `sort_order` is the column's, not a preference: DATA-MODEL ch. 1 declares it a `smallint unsigned`. It is named once as `Property::MAX_SORT_ORDER`, because both this form and the reorder batch in ch. 5.6 validate against it. Without it the write reaches MySQL and comes back either as a 500 or, on a server that is not in strict mode, as a value silently truncated to the maximum while the admin is told the save worked.
 
 ### 5.4 Image handling
 
@@ -391,8 +393,19 @@ Three rules make that true. Each is cheap now and expensive to retrofit.
 
 ### 5.6 Reordering
 
+The index page allows editing the order column inline. Submission sends a position for every row the page is showing, as `order[{id}] = {position}`, and the batch is applied inside a database transaction, so a partial failure cannot leave a half reordered list.
 
-The index page allows editing the order column inline. Submission sends the full ordered list of ids and is applied inside a database transaction, so a partial failure cannot leave a half reordered list.
+The scope is the page rather than the whole table. With a pager in play, saving moves the rows the admin can see and leaves the rest where they were, and the footer bar says so in as many words once there is a second page to be confused with.
+
+The batch is accepted or refused whole, and refusing it is validation's job before it is the transaction's. A position that is not a whole number, or is outside the column's range, comes back as a message at its own input. A position naming an id that no longer resolves comes back as one message about the list, because a table left open while a property was deleted elsewhere is not a database error: applying the part of the submission that still resolves would save a running order the admin never saw, and nothing downstream would notice.
+
+`ReorderPropertiesRequest` resolves the whole set in one query rather than one per row, and checks the shape of each key before it reaches the database. The ids arrive as array *keys*, which `exists` cannot reach, so the check is an after hook rather than a rule.
+
+**The form and the table are one document.** Each position input carries `form="reorder"` and belongs to the footer bar's form by id rather than by nesting. The rows also carry a publish form and a delete form, and a form cannot contain a form. Associating by id is what lets one submission gather a position from every row while each row keeps its own actions.
+
+That is also why the stacked list below 640px relays the same cells rather than rendering the rows a second time. Two renderings would put two copies of every position input in the document under one name, and the copy the admin cannot see would be the one that wins.
+
+The cost of belonging to a form the row does not contain is that a row action does not carry the positions with it. An admin who retypes three numbers and then hits Publish on a fourth row loses the three, because the publish form submits its own field and the redirect renders the table from the database again. That is the ordinary behaviour of unsaved input on a server rendered page, and it is the same for Edit, Delete and the pager, so it is left alone rather than papered over with a script that guesses when to interrupt. It is written down here because the `form` attribute makes the three inputs look like they are part of the page rather than part of one unsaved form.
 
 ---
 
@@ -529,7 +542,7 @@ Naming principles: components in PascalCase, folders in kebab-case, one componen
 
 | Layer | Tooling | Minimum coverage |
 | --- | --- | --- |
-| Laravel feature | Pest | The public endpoint returns only published properties in the correct order, `limit` and `category` are validated, admin CRUD works end to end, guests are rejected from admin routes, validation rules hold, and the old file is deleted on image update |
+| Laravel feature | Pest | The public endpoint returns only published properties in the correct order, `limit` and `category` are validated, admin CRUD works end to end, the publish toggle moves a property on and off the public endpoint without rewriting its first `published_at`, a reorder is applied whole or not at all, guests are rejected from admin routes, validation rules hold, and the old file is deleted on image update |
 | Laravel unit | Pest | The `published_at` transition rule and slug generation (see DATA-MODEL ch. 3) |
 | Next.js component | Vitest + Testing Library | The property card renders every field, and hides price and rating when null |
 | Next.js end to end | Playwright | The homepage loads and shows cards, the section is hidden on empty data, the fallback appears when the API is down, and the mobile navigation opens and closes |

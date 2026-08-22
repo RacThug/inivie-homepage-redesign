@@ -385,11 +385,19 @@ Each is specified once here and reused by the issues named, rather than reinvent
 
 **Data table.** Header row in label size `ink-muted` on `surface-alt`, with a 1px `border` beneath. Rows separated by 1px `border`, 12px vertical cell padding, and no zebra striping. Row hover fills `surface-alt`. The thumbnail column is a 56 by 42 image at the 8px control radius rather than the 12px card radius, because 12px on a 42px tall image reads as a squircle instead of a photograph. The actions column is right aligned and last.
 
+A row is one rendering, laid out twice. The stacked list in ch. 8.7 relays the same cells rather than repeating them, because the row holds form controls: two renderings would put two copies of every position input in the document under one name, and the copy the admin cannot see would be the one that wins.
+
+That layout is bought with CSS, and CSS charges for it: changing the `display` of a table element drops its implicit semantics in every major browser, so the roles are written out explicitly on the table, the row groups, the rows, and the cells. They restate what the elements already are, and unlike the implicit ones they survive the display change. Without them the stacked list reaches a screen reader as undifferentiated text at exactly the width where the visual grouping is carrying the most meaning.
+
 **Pager.** Below the data table, only when there is more than one page: the range and total on the left in label size `ink-muted`, then Previous and Next as secondary buttons on the right. A page that cannot be reached keeps its place as the disabled treatment rather than disappearing, so the pair does not shift sideways between the first page and the second. Laravel's own pagination view is not used, because it is written in another design system's classes and would arrive carrying shadows and a blue focus ring.
 
 **Status badge.** Published is an `ink` fill with `surface` text. Draft is a `surface` fill with a 1px `border` and `ink-muted` text. Both take the 8px control radius and label size.
 
 This pair introduces no new colour, and it stays unambiguous in greyscale and under any colour vision deficiency, because the difference is fill against outline rather than green against grey.
+
+**Inline position.** The order column is editable in place: a 36px number control, 72px wide, otherwise the form field of this chapter unchanged, with the same `aria-invalid` border and the same message directly below it. Its label is the column header on a table and there is no column header once the table becomes a stacked list, so the label is rendered visibly below 640px and read only above it, and it names the property either way. "Order" repeated twenty times names nothing.
+
+**Table footer bar.** A `surface-alt` strip inside the table container, above the 1px `border` that closes it, holding a sentence in label size `ink-muted` on the left and one secondary button on the right. Below 640px the two stack and the button goes full width. It is where a table level action lives, as against a row level one: the reorder submission is the only one, and it is secondary rather than primary because the primary action of the screen is adding a property, and two filled buttons on one page leave neither of them meaning "the main thing here".
 
 **Form field.** Label in label size `ink` above the control. Control on `surface` with a 1px `border`, 8px control radius, 40px tall, 12px horizontal padding. Focus per ch. 6.3. The invalid state replaces the border with `danger` and places the message directly below in `danger` at label size. Optional help text sits below the control in `ink-muted`, and is replaced by the error rather than pushed down by it. Optional fields are marked, required ones are not: on a form where most fields are required, marking the exceptions is the shorter and quieter of the two conventions. Errors are per field with the submitted values preserved, which is C8.
 
@@ -407,6 +415,8 @@ The dialog is the only thing that submits a delete. The control in the row is a 
 
 A row level delete is the ghost variant in `danger` text, not the danger fill. A table of six rows carrying six filled red buttons reads as an alarm rather than as a list, and the fill is reserved for the confirm modal, where the destructive action genuinely is the subject of the screen.
 
+The other two row level actions are the ghost variant in `ink`. The publish control names the state it is asking for rather than the state the row is in, so a published row offers "Unpublish" and a draft offers "Publish", and the status badge beside it stays the only thing that reports the current state. A control that repeated the state would be a second indicator to keep in agreement with the first.
+
 ### 8.6 Login screen
 
 The one admin screen with no shell. A `surface-alt` page holding a single centred `surface` panel, at most 380px wide, card radius, 1px `border`, 32px padding: brand mark, heading, email and password fields, then a full width primary button.
@@ -419,7 +429,7 @@ RS1 and RS2 apply to the admin unchanged. PRD ch. 7.2 sets 768px as the width th
 
 | Rule | Behaviour |
 | --- | --- |
-| Below 640px | The data table becomes a stacked list, one panel per property, with the actions on their own row. Six columns cannot be made to work at 375px, and a horizontally scrolling table hides the actions column exactly where it is hardest to discover |
+| Below 640px | The data table becomes a stacked list, one panel per property: the thumbnail, title and status on the first line, the inline position on the second, and the actions on their own row. Six columns cannot be made to work at 375px, and a horizontally scrolling table hides the actions column exactly where it is hardest to discover. The category loses its column and joins the location under the title. Three actions and a position control do not fit on one line at 375px, which is the second reason the actions get a row of their own |
 | Forms | A single column at every width. Never two columns |
 | Navigation | Expanded sidebar at 1024px and up, collapsible to a 64px rail. A drawer below that, per ch. 8.3. The rail is a desktop state only |
 | Page header | The primary action drops below the title below 640px, at full width |

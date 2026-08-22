@@ -2,7 +2,7 @@
 
 Homepage redesign for inivie.com, built as a technical test. Two applications in one repository: `cms/` (Laravel, the CMS and REST API) and `web/` (Next.js, the frontend).
 
-**Current state: `cms/` is built, `web/` is still a scaffold.** `cms/` has the properties table, model, factory and seeder, the public `/api/v1/properties` and `/api/v1/health`, and the admin panel in full: session authentication, the dashboard, property CRUD with image replacement and cleanup, the publish toggle, and inline reordering. What is left there is a coverage pass (#11) and real seed imagery (#27). `web/` has the Next.js scaffold, the design system foundation, and `src/types/property.ts` mirroring the API payload. The layout shell, the homepage sections, and the wiring to the API are not built, and neither is the revalidation that connects the two applications (#16).
+**Current state: `cms/` is built, `web/` is still a scaffold.** `cms/` has the properties table, model, factory and seeder, the public `/api/v1/properties` and `/api/v1/health`, and the admin panel in full: session authentication, the dashboard, property CRUD with image replacement and cleanup, the publish toggle, and inline reordering, under a Pest suite that covers every line of `cms/app`. What is left there is real seed imagery (#27). `web/` has the Next.js scaffold, the design system foundation, and `src/types/property.ts` mirroring the API payload. The layout shell, the homepage sections, and the wiring to the API are not built, and neither is the revalidation that connects the two applications (#16).
 
 ## Find the document that owns the topic
 

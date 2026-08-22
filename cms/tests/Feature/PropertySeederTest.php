@@ -2,12 +2,15 @@
 
 use App\Models\Property;
 use Database\Seeders\PropertySeeder;
+use Illuminate\Support\Facades\Storage;
 
 /*
 | Seed data, docs/DATA-MODEL.md ch. 4.
 */
 
 beforeEach(function () {
+    Storage::fake(config('filesystems.default'));
+
     $this->seed(PropertySeeder::class);
 });
 
@@ -32,6 +35,41 @@ it('gives every seeded property alternative text and an image', function () {
         expect($property->image_alt)->not->toBeEmpty()
             ->and($property->image_path)->not->toBeEmpty();
     });
+});
+
+it('puts the picture of every seeded property on the configured disk', function () {
+    // ch. 4 promises that `migrate --seed` alone produces a populated
+    // homepage. A row whose image_path points at nothing keeps that promise
+    // in the database and breaks it on every screen that renders a card.
+    $disk = Storage::disk(config('filesystems.default'));
+
+    Property::each(fn (Property $property) => $disk->assertExists($property->image_path));
+});
+
+it('seeds pictures the upload rules would themselves accept', function () {
+    // TECHNICAL-DESIGN ch. 5.3 governs what an admin may upload. Seed data
+    // held to a lower bar is seed data that looks fine until the first
+    // reviewer re-uploads one of these files and is told it is too small.
+    $disk = Storage::disk(config('filesystems.default'));
+
+    Property::each(function (Property $property) use ($disk) {
+        [$width, $height] = getimagesizefromstring($disk->get($property->image_path));
+
+        expect($width)->toBeGreaterThanOrEqual(800)
+            ->and($height)->toBeGreaterThanOrEqual(600)
+            ->and($disk->size($property->image_path))->toBeLessThan(2 * 1024 * 1024)
+            ->and($disk->mimeType($property->image_path))->toBe('image/webp');
+    });
+});
+
+it('puts a seed picture back when the disk has lost it', function () {
+    $property = Property::where('slug', 'ajowa-resort')->firstOrFail();
+    $disk = Storage::disk(config('filesystems.default'));
+    $disk->delete($property->image_path);
+
+    $this->seed(PropertySeeder::class);
+
+    $disk->assertExists($property->image_path);
 });
 
 it('gives every published property a published_at', function () {

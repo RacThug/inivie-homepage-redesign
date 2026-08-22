@@ -362,6 +362,7 @@ The ceiling on `sort_order` is the column's, not a preference: DATA-MODEL ch. 1 
 - An upload lands before the row that will point at it, on both the create and the update path, because `image_path` is not nullable. If that write then throws, the upload is removed on the way out. Otherwise the disk accumulates files no row has ever pointed at, and nothing will ever collect them.
 - Deleting a property is a soft delete, so its image is retained. Files are removed only on force delete.
 - No server side resizing. Size optimisation is handled by `next/image`. The 2 MB cap and minimum dimensions already protect quality and storage.
+- The seed images of DATA-MODEL ch. 4 are committed under `cms/database/seeders/images/` and copied onto the disk by the seeder, overwriting whatever is at the destination. Seeding is a reset to a known state: the seeder rewrites `image_path` back to the canonical path either way, so leaving a replaced file in place would only put the row and the disk out of step. They are not committed under `storage/` because that is state the application writes and a force delete is entitled to empty.
 
 `PropertyImageStore` performs all of this, and decides none of it. Controllers never touch the filesystem directly.
 
@@ -377,7 +378,7 @@ Three rules make that true. Each is cheap now and expensive to retrofit.
 | --- | --- |
 | **`image_path` stores a relative path, never a URL** | A stored URL bakes the host into every row. Changing storage would then need a data migration to rewrite them, and any row missed stays broken forever. A relative path is location independent, so the same rows work on any disk |
 | **The absolute URL is derived once, in `Property::imageUrl()`, via `Storage::url()`** | Laravel's filesystem abstraction already knows how to build a URL for whichever disk is configured. One derivation point means one place to change, and consumers never learn where the bytes live. It sits on the model rather than in `PropertyResource` because the admin renders the same image in its index thumbnail and its edit preview, and a second derivation for the panel would be a second place to fix |
-| **`PropertyImageStore` is the only code that touches storage** | A controller that reaches for the filesystem directly is a second seam nobody remembers to move |
+| **`PropertyImageStore` is the only code that touches storage** | A controller that reaches for the filesystem directly is a second seam nobody remembers to move. This covers the seeder too: it reaches the disk through `import()` rather than copying files itself, so a move to object storage does not leave `migrate --seed` writing to a directory nothing serves any more |
 
 **Configuration.** The disk name and the frontend's media host are environment values, never literals in code.
 

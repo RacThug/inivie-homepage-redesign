@@ -2,7 +2,7 @@
 
 Homepage redesign for inivie.com, built as a technical test. Two applications in one repository: `cms/` (Laravel, the CMS and REST API) and `web/` (Next.js, the frontend).
 
-**Current state: both applications scaffolded.** `cms/` has the properties table, model, factory, and seeder. `web/` has the Next.js scaffold and the design system foundation. Neither has feature work on top of that yet.
+**Current state: the public API is the first feature across both applications.** `cms/` has the properties table, model, factory, and seeder, plus `/api/v1/properties` and `/api/v1/health`. `web/` has the Next.js scaffold, the design system foundation, and `src/types/property.ts` mirroring that payload. The admin panel and the homepage sections are not built yet.
 
 ## Find the document that owns the topic
 

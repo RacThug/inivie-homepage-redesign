@@ -46,8 +46,10 @@ This is one repository holding two apps, not a monorepo. There are no workspaces
 | | `cms/` | `web/` |
 | --- | --- | --- |
 | Manager | Composer | npm |
-| Install | `composer install` | `npm install` |
+| Runs in | Docker, with MySQL | Natively |
 | Port | 8000 | 3000 |
+
+**PHP and MySQL live in Docker, Node does not.** `cms/docker-compose.yml` is the only Docker in the repo, and application code stays unaware of it: no container hostnames in `config/`, no environment-specific helpers. Deleting the compose file must leave a working Laravel application, because a reviewer with PHP already installed skips Docker entirely. `docs/TECHNICAL-DESIGN.md` ch. 2.4 has the reasoning and the rules that keep both setup paths working.
 
 Quality gates run once per application. Both must be green before the final commit of a PR.
 

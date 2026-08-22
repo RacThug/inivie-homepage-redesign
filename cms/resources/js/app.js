@@ -1,14 +1,51 @@
 /**
- * The two pieces of the admin shell that need a browser.
+ * The three pieces of the admin panel that need a browser.
  *
- * Everything else in the panel is server rendered. These are here because a
- * collapse that costs a round trip is worse than no collapse, and because a
- * drawer without a focus trap is not accessible.
+ * Everything else is server rendered. These are here because a collapse that
+ * costs a round trip is worse than no collapse, because a drawer without a
+ * focus trap is not accessible, and because a delete without a question is a
+ * delete that happens by accident.
  *
- * docs/DESIGN-SYSTEM.md ch. 8.3.
+ * docs/DESIGN-SYSTEM.md ch. 8.3 and ch. 8.5.
  */
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * The keyboard contract every overlay in the panel owes, per RS3: Escape
+ * closes, and Tab cycles inside rather than escaping to the page behind.
+ *
+ * Written once and handed to both the drawer and the confirm modal. Two
+ * copies of a focus trap is two chances to fix a bug in one of them.
+ */
+function overlayKeydown(container, close) {
+    return (event) => {
+        if (event.key === 'Escape') {
+            close();
+
+            return;
+        }
+
+        if (event.key !== 'Tab') {
+            return;
+        }
+
+        // Read on every Tab rather than cached on open: these overlays hold
+        // forms, and a cached list would go stale the moment anything inside
+        // one of them changed.
+        const focusable = [...container.querySelectorAll(FOCUSABLE)];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    };
+}
 
 /**
  * The sidebar rail.
@@ -77,33 +114,70 @@ function initDrawer() {
     drawer.querySelector('[data-drawer-close]')?.addEventListener('click', close);
     drawer.querySelector('[data-drawer-scrim]')?.addEventListener('click', close);
 
-    drawer.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            close();
+    drawer.addEventListener('keydown', overlayKeydown(drawer, close));
+}
 
-            return;
-        }
+/**
+ * The delete confirmation of ch. 8.5.
+ *
+ * The dialog is the only thing that submits a delete. Its trigger is a plain
+ * button, so with scripting unavailable nothing happens rather than a
+ * property being deleted without the question C5 requires. The form it sits
+ * in is real, which is what lets the confirmed answer be an ordinary POST
+ * with the CSRF token and the method override already in it.
+ */
+function initConfirmDelete() {
+    const modal = document.querySelector('[data-confirm]');
+    const triggers = document.querySelectorAll('[data-confirm-trigger]');
 
-        if (event.key !== 'Tab') {
-            return;
-        }
+    if (!modal || triggers.length === 0) {
+        return;
+    }
 
-        // Read on every Tab rather than cached on open: the drawer holds a
-        // logout form, and a cached list would go stale the moment anything
-        // inside it changed.
-        const focusable = [...drawer.querySelectorAll(FOCUSABLE)];
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+    const subject = modal.querySelector('[data-confirm-subject]');
+    const accept = modal.querySelector('[data-confirm-accept]');
+    const cancel = modal.querySelector('[data-confirm-cancel]');
 
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+    // The form waiting on an answer, and the button that asked. The button is
+    // where focus goes back to on a cancel, because that is where the admin
+    // was: returning focus to the top of the table would lose their place in
+    // a list of twenty rows.
+    let pending = null;
+    let opener = null;
+
+    const close = () => {
+        modal.classList.add('hidden');
+        pending = null;
+        opener?.focus();
+        opener = null;
+    };
+
+    triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            const form = trigger.closest('form[data-confirm-delete]');
+
+            if (!form) {
+                return;
+            }
+
+            pending = form;
+            opener = trigger;
+            subject.textContent = form.dataset.subject ?? 'This property';
+
+            modal.classList.remove('hidden');
+
+            // Cancel takes focus, not the destructive button. A dialog that
+            // opens with Delete focused turns a stray Enter into a deletion.
+            cancel.focus();
+        });
     });
+
+    accept.addEventListener('click', () => pending?.submit());
+    cancel.addEventListener('click', close);
+    modal.querySelector('[data-confirm-scrim]')?.addEventListener('click', close);
+    modal.addEventListener('keydown', overlayKeydown(modal, close));
 }
 
 initRail();
 initDrawer();
+initConfirmDelete();

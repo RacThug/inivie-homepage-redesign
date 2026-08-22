@@ -213,8 +213,10 @@ Run on 22 August 2026:
 | Resolved stack | Laravel 13.26.1, PHP 8.5.9, MySQL 8.4.11 |
 | `artisan migrate` | All three framework migrations ran against MySQL |
 | `artisan migrate:fresh --seed` | Re-run 22 August 2026 with the `properties` migration and seeder. Schema matches DATA-MODEL ch. 2 column for column, including the `enum`, `char(3)`, `decimal(2,1)` and all three indexes |
-| `artisan test` | 70 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
-| `vendor/bin/pint --test` | Clean across 46 files |
+| `artisan test` | 138 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
+| `vendor/bin/pint --test` | Clean across 62 files |
+| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it joins the `composer setup` script rather than the README: an upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above |
+| Admin property CRUD end to end | Signed in, created a property with a real upload, saw the thumbnail render from `/storage/properties/`, edited it, and cancelled a delete from the confirm modal. Chromium at 1440px and 375px, no console errors |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
 | `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
 | `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` against MySQL, `Cache-Control: no-store` |
@@ -342,17 +344,26 @@ Enforced through `StorePropertyRequest` and `UpdatePropertyRequest`, never inlin
 | `sort_order` | required, integer, min 0 |
 | `is_published` | boolean |
 
-Validation failures return the user to the form with old input and per field error messages, satisfying capability C8 in PRD ch. 7.1.
+Validation failures return the user to the form with old input and per field error messages, satisfying capability C8 in PRD ch. 7.1. The one value a browser will not let a form repopulate is the file input, so a failure elsewhere costs the admin that field alone.
+
+`slug` is required here and optional on the form, which is not a contradiction: the request derives it from the title in `prepareForValidation` before the rules run. Deriving it there rather than leaving it to `PropertyObserver` is what turns a collision into a per field message instead of a unique constraint violation the admin reads as a 500. The observer stays as the guarantee for the paths that never touch a form, such as the seeder and Tinker. See D4 in DATA-MODEL ch. 3.
+
+The rules themselves live in an abstract `PropertyRequest`, with `StorePropertyRequest` and `UpdatePropertyRequest` supplying only the two that differ: whether an image is required, and whether the slug uniqueness check excludes the record being edited. Two copies of a twelve row table drift, and the copy that drifts is discovered as a card the API accepted and the homepage cannot render.
+
+An unchecked checkbox is not submitted at all, so `is_published` is normalised in the same hook. Without it an update would keep the old value, and an admin who unpublished a property would be told it worked while the property stayed on the homepage.
 
 ### 5.4 Image handling
 
 - Uploads go to the `properties/` prefix on the configured disk, under hashed filenames.
 - For this project the configured disk is `public`, served through the `php artisan storage:link` symlink.
-- On update with a new image, the old file is deleted only after the record saves successfully, inside the same transaction. If the save fails, the original file survives.
+- On update with a new image, the old file is deleted only once the record has saved and the surrounding transaction has committed, through `DB::afterCommit`. If the save fails or the transaction rolls back, the original file survives and the row still points at it. Deleting any earlier leaves a property pointing at a file that no longer exists, with nothing to restore it from.
+- An upload lands before the row that will point at it, on both the create and the update path, because `image_path` is not nullable. If that write then throws, the upload is removed on the way out. Otherwise the disk accumulates files no row has ever pointed at, and nothing will ever collect them.
 - Deleting a property is a soft delete, so its image is retained. Files are removed only on force delete.
 - No server side resizing. Size optimisation is handled by `next/image`. The 2 MB cap and minimum dimensions already protect quality and storage.
 
-`PropertyImageStore` owns all of this. Controllers never touch the filesystem directly.
+`PropertyImageStore` performs all of this, and decides none of it. Controllers never touch the filesystem directly.
+
+*When* a file should go is a fact about the record rather than about the disk, so it lives in `PropertyObserver` alongside D4 and D6: the replaced file goes on `updated`, the file of a deleted property goes on `forceDeleted`, and neither is something a caller has to remember. A cleanup written into the controller would hold for the edit form and quietly not hold for the reorder screen, a bulk import, or a Tinker session, and the failure would surface months later as a disk full of files nobody can account for.
 
 ### 5.5 The storage seam
 
@@ -363,7 +374,7 @@ Three rules make that true. Each is cheap now and expensive to retrofit.
 | Rule | Why it is the load-bearing one |
 | --- | --- |
 | **`image_path` stores a relative path, never a URL** | A stored URL bakes the host into every row. Changing storage would then need a data migration to rewrite them, and any row missed stays broken forever. A relative path is location independent, so the same rows work on any disk |
-| **The absolute URL is derived once, in `PropertyResource`, via `Storage::url()`** | Laravel's filesystem abstraction already knows how to build a URL for whichever disk is configured. One derivation point means one place to change, and consumers never learn where the bytes live |
+| **The absolute URL is derived once, in `Property::imageUrl()`, via `Storage::url()`** | Laravel's filesystem abstraction already knows how to build a URL for whichever disk is configured. One derivation point means one place to change, and consumers never learn where the bytes live. It sits on the model rather than in `PropertyResource` because the admin renders the same image in its index thumbnail and its edit preview, and a second derivation for the panel would be a second place to fix |
 | **`PropertyImageStore` is the only code that touches storage** | A controller that reaches for the filesystem directly is a second seam nobody remembers to move |
 
 **Configuration.** The disk name and the frontend's media host are environment values, never literals in code.
@@ -457,6 +468,7 @@ inivie-homepage-redesign/
 │   │   │   │   ├── Api/V1/PropertyController.php
 │   │   │   │   └── Api/V1/HealthController.php
 │   │   │   ├── Middleware/ApiResponseHeaders.php
+│   │   │   ├── Requests/PropertyRequest.php      the shared rules table
 │   │   │   ├── Requests/StorePropertyRequest.php
 │   │   │   ├── Requests/UpdatePropertyRequest.php
 │   │   │   ├── Requests/Api/V1/ListPropertiesRequest.php
@@ -469,9 +481,12 @@ inivie-homepage-redesign/
 │   │       └── FrontendRevalidator.php    calls the Next.js webhook
 │   ├── config/cors.php        one origin from FRONTEND_URL, never a wildcard
 │   ├── database/{migrations,factories,seeders}/
-│   ├── resources/views/{layouts,admin,auth}/
+│   ├── resources/views/{layouts,admin,auth,components}/
+│   │                          components/ holds the anonymous Blade
+│   │                          components reused across admin screens
+│   │                          (the form field, the status badge)
 │   ├── routes/{web.php,api.php}
-│   └── tests/{Feature,Unit}/
+│   └── tests/{Feature,Unit,Support}/
 └── web/                       Next.js application
     ├── .env.example
     ├── AGENTS.md              Next's own agent rules, regenerated by `next dev`

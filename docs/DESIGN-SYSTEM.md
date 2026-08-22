@@ -385,17 +385,23 @@ Each is specified once here and reused by the issues named, rather than reinvent
 
 **Data table.** Header row in label size `ink-muted` on `surface-alt`, with a 1px `border` beneath. Rows separated by 1px `border`, 12px vertical cell padding, and no zebra striping. Row hover fills `surface-alt`. The thumbnail column is a 56 by 42 image at the 8px control radius rather than the 12px card radius, because 12px on a 42px tall image reads as a squircle instead of a photograph. The actions column is right aligned and last.
 
+**Pager.** Below the data table, only when there is more than one page: the range and total on the left in label size `ink-muted`, then Previous and Next as secondary buttons on the right. A page that cannot be reached keeps its place as the disabled treatment rather than disappearing, so the pair does not shift sideways between the first page and the second. Laravel's own pagination view is not used, because it is written in another design system's classes and would arrive carrying shadows and a blue focus ring.
+
 **Status badge.** Published is an `ink` fill with `surface` text. Draft is a `surface` fill with a 1px `border` and `ink-muted` text. Both take the 8px control radius and label size.
 
 This pair introduces no new colour, and it stays unambiguous in greyscale and under any colour vision deficiency, because the difference is fill against outline rather than green against grey.
 
-**Form field.** Label in label size `ink` above the control. Control on `surface` with a 1px `border`, 8px control radius, 40px tall, 12px horizontal padding. Focus per ch. 6.3. The invalid state replaces the border with `danger` and places the message directly below in `danger` at label size. Optional help text sits below the control in `ink-muted`, and is replaced by the error rather than pushed down by it. Errors are per field with the submitted values preserved, which is C8.
+**Form field.** Label in label size `ink` above the control. Control on `surface` with a 1px `border`, 8px control radius, 40px tall, 12px horizontal padding. Focus per ch. 6.3. The invalid state replaces the border with `danger` and places the message directly below in `danger` at label size. Optional help text sits below the control in `ink-muted`, and is replaced by the error rather than pushed down by it. Optional fields are marked, required ones are not: on a form where most fields are required, marking the exceptions is the shorter and quieter of the two conventions. Errors are per field with the submitted values preserved, which is C8.
 
 **Flash message.** Full width of the page container, directly beneath the page header. A `surface` panel with a 3px left rule: `ink` for a completed action, `danger` for a failure. It persists until the next navigation and is never dismissed on a timer, because a message that removes itself is a message the admin can miss.
+
+The same panel carries the other two messages the panel sends: the rejected sign in above the login fields, and a single line at the top of a form that failed validation, counting the fields that need attention. The messages themselves stay at their fields, per C8; the line exists because a form long enough to scroll can fail below the fold and otherwise say nothing where the admin is looking.
 
 **Empty state.** Centred inside the panel with 48px of vertical padding: a line in `ink` naming what is missing, a supporting line in `ink-muted`, then the primary action that resolves it. A bare empty table is never shipped.
 
 **Confirm modal.** The only raised element in the panel. Centred, at most 420px wide, `surface`, card radius, raised elevation, over an `ink` scrim at 50%. A title, one sentence naming the exact record by its title, then Cancel as the secondary variant and the destructive action as the danger variant. Focus moves to Cancel on open and is trapped, and Escape closes, matching the drawer rules in RS3.
+
+The dialog is the only thing that submits a delete. The control in the row is a plain button, and the form around it is submitted by the dialog once the admin has answered, so the control that cannot ask the question is never the control that performs the action. C5 puts deletion behind an explicit confirmation, and with scripting unavailable the button therefore does nothing rather than deleting unasked. That is the same assumption the shell already makes: below 1024px the panel's own navigation is a scripted drawer.
 
 **Buttons.** The variants in ch. 6.3 apply unchanged, plus one addition: Danger is a `danger` fill with `surface` text and `danger-hover` on hover. Admin buttons are 36px tall on desktop and 44px on mobile, per RS2.
 

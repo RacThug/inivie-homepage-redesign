@@ -51,6 +51,11 @@ it('sends a signed out visitor to the login screen', function (string $uri) {
     $this->get($uri)->assertRedirect(route('login'));
 })->with([
     'the dashboard' => '/admin',
+    'the property index' => '/admin/properties',
+    'the create form' => '/admin/properties/create',
+    // Auth runs before route model binding, so this redirects rather than
+    // looking for a property that does not exist.
+    'an edit form' => '/admin/properties/1/edit',
 ]);
 
 it('lets a signed in admin reach the dashboard', function () {

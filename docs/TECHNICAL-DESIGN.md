@@ -79,7 +79,7 @@ Versions verified against the npm registry, Packagist, the Laravel support polic
 | Database | MySQL | 8.4 LTS | 8.4.11, and 9.7 LTS |
 | CMS auth | Minimal Laravel session auth (Breeze style) | - | - |
 | Admin UI | Blade + Tailwind CSS | - | - |
-| Image storage | Laravel filesystem, `public` disk | - | - |
+| Image storage | Laravel filesystem, configured disk. `public` for this project, see ch. 5.5 | - | - |
 | Backend tests | Pest | - | - |
 | Frontend tests | Vitest + Testing Library, Playwright | - | - |
 | PHP formatting | Laravel Pint | - | - |

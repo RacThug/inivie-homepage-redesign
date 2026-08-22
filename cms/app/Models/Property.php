@@ -79,6 +79,22 @@ class Property extends Model
     }
 
     /**
+     * The complement of `published`, for the admin dashboard counts.
+     *
+     * Stated as its own scope rather than negated at the call site so the
+     * pair reads as the partition it is. Soft deleted rows fall outside both,
+     * which is correct: a deleted property is neither published nor waiting
+     * to be.
+     *
+     * @param  Builder<Property>  $query
+     * @return Builder<Property>
+     */
+    public function scopeDraft(Builder $query): Builder
+    {
+        return $query->where('is_published', false);
+    }
+
+    /**
      * The optional `category` filter of the public endpoint. A null
      * category is the absence of the parameter, not a category, so it
      * narrows nothing and the caller needs no conditional.

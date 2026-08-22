@@ -336,7 +336,7 @@ Each is specified once here and reused by the issues named, rather than reinvent
 
 **Stat tile.** A panel holding a label in label size `ink-muted`, then the figure in stat scale `ink`. The dashboard is two tiles, published and draft, side by side from 640px and stacked below it. A count of zero renders as `0`. An empty state is for a list with no rows, not for a counter that legitimately reads zero.
 
-**Data table.** Header row in label size `ink-muted` on `surface-alt`, with a 1px `border` beneath. Rows separated by 1px `border`, 12px vertical cell padding, and no zebra striping. Row hover fills `surface-alt`. The thumbnail column is a 56 by 42 image at card radius. The actions column is right aligned and last.
+**Data table.** Header row in label size `ink-muted` on `surface-alt`, with a 1px `border` beneath. Rows separated by 1px `border`, 12px vertical cell padding, and no zebra striping. Row hover fills `surface-alt`. The thumbnail column is a 56 by 42 image at the 8px control radius rather than the 12px card radius, because 12px on a 42px tall image reads as a squircle instead of a photograph. The actions column is right aligned and last.
 
 **Status badge.** Published is an `ink` fill with `surface` text. Draft is a `surface` fill with a 1px `border` and `ink-muted` text. Both take the 8px control radius and label size.
 
@@ -351,6 +351,8 @@ This pair introduces no new colour, and it stays unambiguous in greyscale and un
 **Confirm modal.** The only raised element in the panel. Centred, at most 420px wide, `surface`, card radius, raised elevation, over an `ink` scrim at 50%. A title, one sentence naming the exact record by its title, then Cancel as the secondary variant and the destructive action as the danger variant. Focus moves to Cancel on open and is trapped, and Escape closes, matching the drawer rules in RS3.
 
 **Buttons.** The variants in ch. 6.3 apply unchanged, plus one addition: Danger is a `danger` fill with `surface` text and `danger-hover` on hover. Admin buttons are 36px tall on desktop and 44px on mobile, per RS2.
+
+A row level delete is the ghost variant in `danger` text, not the danger fill. A table of six rows carrying six filled red buttons reads as an alarm rather than as a list, and the fill is reserved for the confirm modal, where the destructive action genuinely is the subject of the screen.
 
 ### 8.6 Login screen
 

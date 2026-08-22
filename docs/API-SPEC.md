@@ -24,7 +24,7 @@ Related: [DATA-MODEL.md](./DATA-MODEL.md) for the underlying schema, [TECHNICAL-
 | P3 | Responses are always wrapped in an object, never a bare array | Adding `meta` later is then not a breaking change |
 | P4 | Return only fields the consumer actually renders | Direct countermeasure to the production defect in PRD ch. 2.3, where a 37 KB payload was fetched to fill a card needing three fields |
 | P5 | No hypermedia envelope, no embedded relations | Same reason as P4. `_links` and `_embedded` cost bytes and, as production shows, can fail silently |
-| P6 | Absolute URLs for media | The frontend never assembles paths, so a storage move cannot break rendering |
+| P6 | Absolute URLs for media | The frontend never assembles paths, and never learns where the bytes live. Moving from local disk to object storage or a CDN changes `image_url` and nothing else. See TECHNICAL-DESIGN ch. 5.5 |
 | P7 | Timestamps in ISO 8601, UTC | Unambiguous across timezones |
 | P8 | Every documented field is always present | A field is either always populated or explicitly nullable. Never conditionally absent |
 

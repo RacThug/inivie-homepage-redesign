@@ -93,7 +93,7 @@ Decoupling also allows each side to be optimised independently: the frontend for
 | Session auth for the admin, public read-only API with no auth | Sanctum with a separate admin SPA | **Verified to match production behaviour** (PRD ch. 2.2): `wp/v2/posts` is open to anonymous callers, `wp/v2/users` returns 401, and `/wp-admin` uses a session cookie. Beyond that, adding a whole SPA for one CRUD resource is over-engineering, and homepage data is public so read endpoints need no token |
 | Two applications in one repository | Two separate repositories | The brief asks for one GitHub link. The reviewer clones once |
 | ISR with on-demand revalidation | Full SSR on every request | The homepage changes rarely and is image heavy. ISR delivers static-like time to first byte while keeping data fresh |
-| Images on the Laravel `public` disk | Base64 in a database column, or S3 | Base64 wrecks query performance and caching. S3 adds a credential dependency that makes the project harder for a reviewer to run |
+| Images on a local filesystem disk **for this test**, behind a swappable seam | Base64 in a database column, or object storage from day one | Base64 wrecks query performance and caching, so it is rejected outright. Object storage is rejected only for now: it needs credentials the reviewer does not have, which puts acceptance criterion A15 at risk. Production inivie.com does serve media through a CDN (PRD ch. 2.2), so the move is a real one, just not this week. Ch. 5.5 keeps it a configuration change rather than a rewrite |
 | Typed static content modules for non-dynamic sections | Hardcoded markup in components | Keeps every section one step away from becoming dynamic, and keeps copy edits out of layout code |
 
 ---
@@ -145,7 +145,11 @@ Every static section reads from a typed module in `content/`. For example `conte
 
 ### 4.3 Images
 
-`next/image` everywhere, with per breakpoint `sizes` so mobile never downloads desktop assets. The hero image carries `priority`; every other image is lazy. The CMS host is allowlisted in `next.config.ts` under `images.remotePatterns`.
+`next/image` everywhere, with per breakpoint `sizes` so mobile never downloads desktop assets. The hero image carries `priority`; every other image is lazy.
+
+The media host is allowlisted in `next.config.ts` under `images.remotePatterns`, built from `NEXT_PUBLIC_MEDIA_HOST` rather than written as a literal. This keeps the frontend half of the storage seam in ch. 5.5 honest: `next/image` refuses to load a host that is not allowlisted, so a hardcoded pattern would turn a one-line storage change into every property image silently failing to render.
+
+`next/image` also does the work a transformation CDN would otherwise be bought for, converting to modern formats and emitting per breakpoint sizes on demand. That is why the local disk choice costs the homepage nothing in image quality or weight.
 
 ---
 
@@ -196,15 +200,40 @@ Validation failures return the user to the form with old input and per field err
 
 ### 5.4 Image handling
 
-- Uploads are stored in `storage/app/public/properties` under hashed filenames.
-- Files are served publicly through the `php artisan storage:link` symlink.
+- Uploads go to the `properties/` prefix on the configured disk, under hashed filenames.
+- For this project the configured disk is `public`, served through the `php artisan storage:link` symlink.
 - On update with a new image, the old file is deleted only after the record saves successfully, inside the same transaction. If the save fails, the original file survives.
 - Deleting a property is a soft delete, so its image is retained. Files are removed only on force delete.
 - No server side resizing. Size optimisation is handled by `next/image`. The 2 MB cap and minimum dimensions already protect quality and storage.
 
 `PropertyImageStore` owns all of this. Controllers never touch the filesystem directly.
 
-### 5.5 Reordering
+### 5.5 The storage seam
+
+Local disk is the right choice for this test, not the right choice forever. Production inivie.com already serves media through a CDN (PRD ch. 2.2). So the storage location is treated as a configuration value from the start, and moving to object storage later must be a config change rather than a rewrite.
+
+Three rules make that true. Each is cheap now and expensive to retrofit.
+
+| Rule | Why it is the load-bearing one |
+| --- | --- |
+| **`image_path` stores a relative path, never a URL** | A stored URL bakes the host into every row. Changing storage would then need a data migration to rewrite them, and any row missed stays broken forever. A relative path is location independent, so the same rows work on any disk |
+| **The absolute URL is derived once, in `PropertyResource`, via `Storage::url()`** | Laravel's filesystem abstraction already knows how to build a URL for whichever disk is configured. One derivation point means one place to change, and consumers never learn where the bytes live |
+| **`PropertyImageStore` is the only code that touches storage** | A controller that reaches for the filesystem directly is a second seam nobody remembers to move |
+
+**Configuration.** The disk name and the frontend's media host are environment values, never literals in code.
+
+| Variable | App | This project | After a move to object storage |
+| --- | --- | --- | --- |
+| `FILESYSTEM_DISK` | `cms/` | `public` | `s3` |
+| `APP_URL` | `cms/` | `http://localhost:8000` | unchanged |
+| `NEXT_PUBLIC_MEDIA_HOST` | `web/` | `localhost:8000` | the CDN or bucket host |
+
+`next.config.ts` builds `images.remotePatterns` from `NEXT_PUBLIC_MEDIA_HOST` rather than hardcoding a host. A hardcoded pattern is the failure that turns a one-line storage change into every image on the homepage silently failing to render, because `next/image` refuses hosts that are not allowlisted.
+
+**What the move would then cost:** set `FILESYSTEM_DISK=s3`, add the bucket credentials, point `NEXT_PUBLIC_MEDIA_HOST` at the CDN. No migration, no code change, no touched rows.
+
+### 5.6 Reordering
+
 
 The index page allows editing the order column inline. Submission sends the full ordered list of ids and is applied inside a database transaction, so a partial failure cannot leave a half reordered list.
 

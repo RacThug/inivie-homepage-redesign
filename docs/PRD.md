@@ -381,10 +381,11 @@ Out of scope for the test, but the architecture is already prepared for it:
 
 1. Promoting other static sections to dynamic using the same pattern, starting with Special Offers.
 2. A property detail page, using the slug already stored.
-3. Centralised media management and responsive image variants.
-4. Roles and permissions, a draft and review flow, and scheduled publishing.
-5. Indonesian and English localisation.
-6. Migrating content from the existing WordPress instance.
+3. Moving media to object storage behind a CDN, matching what production already does. TECHNICAL-DESIGN ch. 5.5 keeps this a configuration change.
+4. Centralised media management and responsive image variants.
+5. Roles and permissions, a draft and review flow, and scheduled publishing.
+6. Indonesian and English localisation.
+7. Migrating content from the existing WordPress instance.
 
 ---
 

@@ -357,7 +357,7 @@ An unchecked checkbox is not submitted at all, so `is_published` is normalised i
 - Uploads go to the `properties/` prefix on the configured disk, under hashed filenames.
 - For this project the configured disk is `public`, served through the `php artisan storage:link` symlink.
 - On update with a new image, the old file is deleted only once the record has saved and the surrounding transaction has committed, through `DB::afterCommit`. If the save fails or the transaction rolls back, the original file survives and the row still points at it. Deleting any earlier leaves a property pointing at a file that no longer exists, with nothing to restore it from.
-- An upload that lands and is then stranded by a failed write is removed on the way out, on both the create and the update path. Otherwise the disk accumulates files no row has ever pointed at, and nothing will ever collect them.
+- An upload lands before the row that will point at it, on both the create and the update path, because `image_path` is not nullable. If that write then throws, the upload is removed on the way out. Otherwise the disk accumulates files no row has ever pointed at, and nothing will ever collect them.
 - Deleting a property is a soft delete, so its image is retained. Files are removed only on force delete.
 - No server side resizing. Size optimisation is handled by `next/image`. The 2 MB cap and minimum dimensions already protect quality and storage.
 

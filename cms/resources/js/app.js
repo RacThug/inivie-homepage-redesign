@@ -120,19 +120,17 @@ function initDrawer() {
 /**
  * The delete confirmation of ch. 8.5.
  *
- * The markup it enhances is a real form, so a delete still works with
- * scripting unavailable: it simply happens without the extra question. This
- * intercepts the submit, names the property in the dialog, and replays the
- * submit once the admin confirms.
- *
- * `form.submit()` deliberately does not fire the submit event, so the replay
- * cannot loop back into the handler that opened the dialog.
+ * The dialog is the only thing that submits a delete. Its trigger is a plain
+ * button, so with scripting unavailable nothing happens rather than a
+ * property being deleted without the question C5 requires. The form it sits
+ * in is real, which is what lets the confirmed answer be an ordinary POST
+ * with the CSRF token and the method override already in it.
  */
 function initConfirmDelete() {
     const modal = document.querySelector('[data-confirm]');
-    const forms = document.querySelectorAll('form[data-confirm-delete]');
+    const triggers = document.querySelectorAll('[data-confirm-trigger]');
 
-    if (!modal || forms.length === 0) {
+    if (!modal || triggers.length === 0) {
         return;
     }
 
@@ -154,12 +152,16 @@ function initConfirmDelete() {
         opener = null;
     };
 
-    forms.forEach((form) => {
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
+    triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            const form = trigger.closest('form[data-confirm-delete]');
+
+            if (!form) {
+                return;
+            }
 
             pending = form;
-            opener = form.querySelector('button[type="submit"]');
+            opener = trigger;
             subject.textContent = form.dataset.subject ?? 'This property';
 
             modal.classList.remove('hidden');

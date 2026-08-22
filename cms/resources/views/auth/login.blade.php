@@ -12,9 +12,9 @@
         `email` key.
     --}}
     @error('email')
-        <div class="mb-5 rounded-control border border-border border-l-[3px] border-l-danger bg-surface px-4 py-3 text-sm text-danger" role="alert">
-            {{ $message }}
-        </div>
+        <x-notice variant="failure" class="mb-5">
+            <span class="font-medium text-danger">{{ $message }}</span>
+        </x-notice>
     @enderror
 
     <form method="POST" action="{{ route('login') }}" novalidate>

@@ -24,13 +24,14 @@
 
     {{-- One line, not a list of every message: the messages themselves are
          at their fields, per C8. This exists so a failure below the fold is
-         still announced at the top of the form. --}}
+         still announced at the top of the form, and it takes the `<x-notice>`
+         treatment rather than a fourth one of its own. See ch. 8.5. --}}
     @if ($errors->any())
-        <div class="mb-4 rounded-control border border-border border-l-[3px] border-l-danger bg-surface px-4 py-3 text-sm" role="alert">
+        <x-notice variant="failure" class="mb-4">
             <span class="font-medium text-danger">
                 {{ $errors->count() === 1 ? 'One field needs fixing before this can be saved.' : "{$errors->count()} fields need fixing before this can be saved." }}
             </span>
-        </div>
+        </x-notice>
     @endif
 
     <div class="panel">
@@ -54,24 +55,15 @@
                 maxlength="140"
             />
 
-            <x-field name="category" label="Category" required>
-                <select
-                    id="category"
-                    name="category"
-                    required
-                    aria-invalid="{{ $errors->has('category') ? 'true' : 'false' }}"
-                    @if ($errors->has('category')) aria-describedby="category-error" @endif
-                    class="field-control"
-                >
-                    <option value="">Choose a category</option>
-                    @foreach ($categories as $category)
-                        <option
-                            value="{{ $category->value }}"
-                            @selected(old('category', $property->category?->value) === $category->value)
-                        >{{ $category->label() }}</option>
-                    @endforeach
-                </select>
-            </x-field>
+            <x-field
+                name="category"
+                label="Category"
+                type="select"
+                :value="old('category', $property->category?->value)"
+                :options="$categories"
+                prompt="Choose a category"
+                required
+            />
 
             <x-field
                 name="location"
@@ -85,20 +77,13 @@
             <x-field
                 name="excerpt"
                 label="Excerpt"
+                type="textarea"
+                :value="old('excerpt', $property->excerpt)"
                 required
+                rows="3"
+                maxlength="240"
                 help="One or two sentences. This is the card copy on the homepage."
-            >
-                <textarea
-                    id="excerpt"
-                    name="excerpt"
-                    rows="3"
-                    required
-                    maxlength="240"
-                    aria-invalid="{{ $errors->has('excerpt') ? 'true' : 'false' }}"
-                    aria-describedby="{{ $errors->has('excerpt') ? 'excerpt-error' : 'excerpt-help' }}"
-                    class="field-control"
-                >{{ old('excerpt', $property->excerpt) }}</textarea>
-            </x-field>
+            />
         </div>
     </div>
 
@@ -124,27 +109,14 @@
                 </div>
             @endif
 
-            {{-- A browser will not let a file input be repopulated, so a
-                 validation failure elsewhere on the form costs the admin
-                 this one field. It is the single exception to the preserved
-                 values in C8, and there is no way around it. --}}
             <x-field
                 name="image"
                 label="Image file"
+                type="file"
                 :required="! $property->exists"
+                accept="image/jpeg,image/png,image/webp"
                 help="JPG, PNG or WebP, at least 800 by 600 pixels and no larger than 2 MB."
-            >
-                <input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    @required(! $property->exists)
-                    aria-invalid="{{ $errors->has('image') ? 'true' : 'false' }}"
-                    aria-describedby="{{ $errors->has('image') ? 'image-error' : 'image-help' }}"
-                    class="field-control h-auto py-2 file:mr-3 file:rounded-control file:border-0 file:bg-surface-alt file:px-3 file:py-1 file:text-sm file:font-medium file:text-ink"
-                >
-            </x-field>
+            />
 
             <x-field
                 name="image_alt"

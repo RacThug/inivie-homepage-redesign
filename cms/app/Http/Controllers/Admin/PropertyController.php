@@ -8,6 +8,7 @@ use App\Http\Requests\StorePropertyRequest;
 use App\Http\Requests\UpdatePropertyRequest;
 use App\Models\Property;
 use App\Services\PropertyImageStore;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Throwable;
@@ -19,9 +20,9 @@ use Throwable;
  * The controller does four things and delegates the rest. Validation is in
  * `StorePropertyRequest` and `UpdatePropertyRequest`, never inline (ch. 5.3).
  * Files are in `PropertyImageStore`, which is the only code that touches
- * storage (ch. 5.5). The slug and the publish stamp are in
- * `PropertyObserver`, because they are true of every save, not only of the
- * ones a form makes.
+ * storage (ch. 5.5). The slug, the publish stamp, and the removal of a
+ * replaced image are in `PropertyObserver`, because they are true of every
+ * save, not only of the ones a form makes.
  *
  * Every action that completes ends in a redirect carrying a flash message
  * that names the property, which is the second half of C8. A form that
@@ -56,7 +57,7 @@ class PropertyController extends Controller
             // partial can read `$property->title` on both screens instead of
             // branching on which one it is rendering.
             'property' => new Property,
-            'categories' => PropertyCategory::cases(),
+            'categories' => $this->categories(),
         ]);
     }
 
@@ -66,18 +67,13 @@ class PropertyController extends Controller
 
         // The upload lands before the row exists, because `image_path` is
         // not nullable and there is nothing to write without it.
-        $attributes['image_path'] = $this->images->store($request->file('image'));
+        $uploaded = $this->images->store($request->file('image'));
+        $attributes['image_path'] = $uploaded;
 
-        try {
-            $property = Property::create($attributes);
-        } catch (Throwable $failure) {
-            // A row that was never written must not leave a file behind.
-            // Without this the disk accumulates uploads that nothing points
-            // at, and nothing will ever clean them up.
-            $this->images->remove($attributes['image_path']);
-
-            throw $failure;
-        }
+        $property = $this->writeOrDiscardUpload(
+            $uploaded,
+            fn () => Property::create($attributes),
+        );
 
         return redirect()
             ->route('admin.properties.index')
@@ -88,7 +84,7 @@ class PropertyController extends Controller
     {
         return view('admin.properties.edit', [
             'property' => $property,
-            'categories' => PropertyCategory::cases(),
+            'categories' => $this->categories(),
         ]);
     }
 
@@ -111,17 +107,7 @@ class PropertyController extends Controller
             $attributes['image_path'] = $uploaded;
         }
 
-        try {
-            $property->update($attributes);
-        } catch (Throwable $failure) {
-            // The mirror of the create path: an upload that no row ended up
-            // pointing at must not survive the failure that stranded it.
-            if ($uploaded !== null) {
-                $this->images->remove($uploaded);
-            }
-
-            throw $failure;
-        }
+        $this->writeOrDiscardUpload($uploaded, fn () => $property->update($attributes));
 
         return redirect()
             ->route('admin.properties.index')
@@ -140,5 +126,44 @@ class PropertyController extends Controller
         return redirect()
             ->route('admin.properties.index')
             ->with('status', "\"{$property->title}\" has been deleted.");
+    }
+
+    /**
+     * Perform a write that a fresh upload depends on, taking the upload back
+     * down with it if the write throws.
+     *
+     * Both paths upload before the row that will point at the file, because
+     * `image_path` is not nullable. A write that then fails would otherwise
+     * leave the file on the disk with nothing referring to it and nothing
+     * that will ever collect it. ch. 5.4.
+     *
+     * @param  Closure(): mixed  $write
+     */
+    private function writeOrDiscardUpload(?string $uploaded, Closure $write): mixed
+    {
+        try {
+            return $write();
+        } catch (Throwable $failure) {
+            if ($uploaded !== null) {
+                $this->images->remove($uploaded);
+            }
+
+            throw $failure;
+        }
+    }
+
+    /**
+     * The category select's options, as value to label.
+     *
+     * Shaped here rather than in the view, so the form partial states which
+     * field it renders and nothing about how an enum becomes a list.
+     *
+     * @return array<string, string>
+     */
+    private function categories(): array
+    {
+        return collect(PropertyCategory::cases())
+            ->mapWithKeys(fn (PropertyCategory $category) => [$category->value => $category->label()])
+            ->all();
     }
 }

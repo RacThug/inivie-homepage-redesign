@@ -127,6 +127,24 @@
         @apply hidden;
     }
 
+    /**
+     * The group label of ch. 8.3: 11px on 16, uppercase `muted`, 0.08em
+     * tracking.
+     *
+     * In the rail it becomes the 1px `surface` rule at 12% the same chapter
+     * specifies, because the grouping still exists even when its names are
+     * not shown. One element, switched by CSS: the heading is clipped by the
+     * 1px height rather than removed, so it stays in the accessibility tree
+     * and the rail is still something the browser can produce on its own.
+     */
+    .side-group {
+        @apply mt-4 mb-1 block px-5 text-[11px] leading-4 font-medium tracking-[0.08em] text-muted uppercase;
+    }
+
+    [data-rail='true'] .side-group {
+        @apply mx-auto my-3 h-px w-8 overflow-hidden bg-surface/12 p-0 text-transparent;
+    }
+
     .side-foot {
         @apply mt-auto flex flex-col gap-1.5 border-t border-surface/15 px-5 pt-3;
     }
@@ -224,16 +242,18 @@
      * login screen, the page header action, and the confirm modal cannot
      * each grow their own version of the same button.
      *
-     * 44px tall on mobile and 36px from the small breakpoint up, per RS2: a
-     * touch target does not get to be 36px because the same control happens
-     * to be a mouse target on a desktop.
+     * 44px tall on mobile and 36px from the small breakpoint up, per RS2, and
+     * never narrower than 44px either: RS2 is both axes, and a short label
+     * like "Edit" is under 44 wide on padding alone. A touch target does not
+     * get to shrink because the same control happens to be a mouse target on
+     * a desktop.
      *
      * The focus ring is `ink` on every variant, including the danger one.
      * ch. 6.3 chose `ink` so the ring stays legible against a fill, and a
      * per variant ring would be four rings to keep in agreement.
      */
     .btn {
-        @apply inline-flex h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-medium sm:h-9;
+        @apply inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-medium sm:h-9;
         @apply focus-ink transition-colors;
     }
 

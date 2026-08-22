@@ -15,10 +15,11 @@
         <div class="flex items-center gap-2">
             {{-- A disabled control keeps its place in the layout rather than
                  disappearing, so the pair does not shift sideways between
-                 the first page and the second. ch. 6.3: the disabled
-                 treatment replaces the variant instead of layering over it. --}}
+                 the first page and the second. ch. 6.3 in full: `muted` text
+                 on `border`, no pointer events, and the treatment replaces
+                 the variant rather than layering over it. --}}
             @if ($properties->onFirstPage())
-                <span class="btn cursor-default bg-border text-muted" aria-disabled="true">Previous</span>
+                <span class="btn pointer-events-none bg-border text-muted" aria-disabled="true">Previous</span>
             @else
                 <a href="{{ $properties->previousPageUrl() }}" rel="prev" class="btn btn-secondary">Previous</a>
             @endif
@@ -26,7 +27,7 @@
             @if ($properties->hasMorePages())
                 <a href="{{ $properties->nextPageUrl() }}" rel="next" class="btn btn-secondary">Next</a>
             @else
-                <span class="btn cursor-default bg-border text-muted" aria-disabled="true">Next</span>
+                <span class="btn pointer-events-none bg-border text-muted" aria-disabled="true">Next</span>
             @endif
         </div>
     </nav>

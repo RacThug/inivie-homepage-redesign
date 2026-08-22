@@ -21,18 +21,6 @@ beforeEach(function () {
     Storage::fake(config('filesystems.default'));
 });
 
-/**
- * A property whose image really exists on the fake disk, created the way an
- * admin creates one, so a cleanup assertion is about a file rather than
- * about a string.
- */
-function propertyWithRealImage(): Property
-{
-    test()->post(route('admin.properties.store'), propertyForm());
-
-    return Property::sole();
-}
-
 it('removes the file a new upload replaced', function () {
     $property = propertyWithRealImage();
     $replaced = $property->image_path;

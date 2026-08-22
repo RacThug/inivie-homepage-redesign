@@ -1,22 +1,21 @@
 {{--
-    docs/DESIGN-SYSTEM.md ch. 8.5. A surface panel with a 3px left rule: ink
-    for a completed action, danger for a failure.
+    The flash message of docs/DESIGN-SYSTEM.md ch. 8.5, full width of the page
+    container and directly beneath the page header.
 
-    It persists until the next navigation and is never dismissed on a timer,
-    because a message that removes itself is a message the admin can miss.
+    Every completed action in the panel writes one, which is the second half
+    of C8: a form that silently returns to a list leaves the admin guessing
+    whether it worked. `PropertyController` sets `status` on create, update
+    and delete, and `LoginController` on sign out.
 
-    Nothing sets these yet. The partial ships with the shell rather than with
-    the first screen that flashes, so the property CRUD gets one treatment to
-    reuse instead of inventing its own.
+    The treatment itself belongs to `<x-notice>`, so this partial decides only
+    where the message goes and which session key it reads.
 --}}
 @if (session('status'))
-    <div class="mb-4 rounded-control border border-border border-l-[3px] border-l-ink bg-surface px-4 py-3 text-sm" role="status">
-        {{ session('status') }}
-    </div>
+    <x-notice class="mb-4">{{ session('status') }}</x-notice>
 @endif
 
 @if (session('error'))
-    <div class="mb-4 rounded-control border border-border border-l-[3px] border-l-danger bg-surface px-4 py-3 text-sm" role="alert">
+    <x-notice variant="failure" class="mb-4">
         <span class="font-medium text-danger">{{ session('error') }}</span>
-    </div>
+    </x-notice>
 @endif

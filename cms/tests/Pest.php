@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Property;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FakeImage;
 use Tests\TestCase;
@@ -71,4 +72,16 @@ function propertyForm(array $overrides = []): array
         'sort_order' => 3,
         'is_published' => '1',
     ], $overrides);
+}
+
+/**
+ * A property whose image really exists on the faked disk, created the way an
+ * admin creates one, so a cleanup assertion is about a file rather than about
+ * a string. The caller is expected to have faked the disk already.
+ */
+function propertyWithRealImage(): Property
+{
+    test()->post(route('admin.properties.store'), propertyForm());
+
+    return Property::sole();
 }

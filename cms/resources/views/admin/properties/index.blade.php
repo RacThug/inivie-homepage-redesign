@@ -49,18 +49,7 @@
                     @foreach ($properties as $property)
                         <tr class="border-b border-border transition-colors last:border-b-0 hover:bg-surface-alt">
                             <td class="py-3 pr-3 pl-4">
-                                {{-- 56 by 42 at the 8px control radius, not the
-                                     12px card radius: 12px on a 42px tall image
-                                     reads as a squircle instead of a
-                                     photograph. --}}
-                                <img
-                                    src="{{ $property->imageUrl() }}"
-                                    alt="{{ $property->image_alt }}"
-                                    width="56"
-                                    height="42"
-                                    loading="lazy"
-                                    class="h-[42px] w-14 rounded-control border border-border object-cover"
-                                >
+                                <x-property-thumb :property="$property" />
                             </td>
                             <td class="px-3 py-3">
                                 <div class="font-medium">{{ $property->title }}</div>
@@ -90,14 +79,7 @@
                 @foreach ($properties as $property)
                     <li class="border-b border-border p-4 last:border-b-0">
                         <div class="flex items-start gap-3">
-                            <img
-                                src="{{ $property->imageUrl() }}"
-                                alt="{{ $property->image_alt }}"
-                                width="56"
-                                height="42"
-                                loading="lazy"
-                                class="h-[42px] w-14 shrink-0 rounded-control border border-border object-cover"
-                            >
+                            <x-property-thumb :property="$property" class="shrink-0" />
                             <div class="min-w-0 flex-1">
                                 <div class="truncate text-sm font-medium">{{ $property->title }}</div>
                                 <div class="text-[13px] leading-[18px] text-ink-muted">

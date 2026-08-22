@@ -3,9 +3,11 @@
     two can never disagree about what the panel contains.
 
     The `Content` group heading of docs/DESIGN-SYSTEM.md ch. 8.3 arrives here
-    with Properties, the first item that belongs under it. It is hidden in
-    the rail rather than truncated: a heading abbreviated to 64px says
-    nothing, and the icons below it already carry the grouping.
+    with Properties, the first item that belongs under it. In the rail it
+    becomes a divider rule rather than disappearing, because the grouping
+    still exists even when its names are not shown. That swap is CSS on one
+    element, per the rule in ch. 8.3 that nothing about the rail may be
+    decided in the template.
 
     Every item carries a `title` and an `aria-label` because the rail hides
     the label text. They are set here rather than only in the rail markup, so
@@ -30,9 +32,7 @@
         <span class="side-label">Dashboard</span>
     </a>
 
-    <span class="side-label mt-4 mb-1 px-5 text-[11px] font-medium tracking-[0.06em] text-surface/40 uppercase">
-        Content
-    </span>
+    <span class="side-group">Content</span>
 
     <a
         href="{{ route('admin.properties.index') }}"

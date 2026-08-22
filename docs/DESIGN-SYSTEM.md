@@ -395,9 +395,13 @@ This pair introduces no new colour, and it stays unambiguous in greyscale and un
 
 **Flash message.** Full width of the page container, directly beneath the page header. A `surface` panel with a 3px left rule: `ink` for a completed action, `danger` for a failure. It persists until the next navigation and is never dismissed on a timer, because a message that removes itself is a message the admin can miss.
 
+The same panel carries the other two messages the panel sends: the rejected sign in above the login fields, and a single line at the top of a form that failed validation, counting the fields that need attention. The messages themselves stay at their fields, per C8; the line exists because a form long enough to scroll can fail below the fold and otherwise say nothing where the admin is looking.
+
 **Empty state.** Centred inside the panel with 48px of vertical padding: a line in `ink` naming what is missing, a supporting line in `ink-muted`, then the primary action that resolves it. A bare empty table is never shipped.
 
 **Confirm modal.** The only raised element in the panel. Centred, at most 420px wide, `surface`, card radius, raised elevation, over an `ink` scrim at 50%. A title, one sentence naming the exact record by its title, then Cancel as the secondary variant and the destructive action as the danger variant. Focus moves to Cancel on open and is trapped, and Escape closes, matching the drawer rules in RS3.
+
+The dialog is the only thing that submits a delete. The control in the row is a plain button, and the form around it is submitted by the dialog once the admin has answered, so the control that cannot ask the question is never the control that performs the action. C5 puts deletion behind an explicit confirmation, and with scripting unavailable the button therefore does nothing rather than deleting unasked. That is the same assumption the shell already makes: below 1024px the panel's own navigation is a scripted drawer.
 
 **Buttons.** The variants in ch. 6.3 apply unchanged, plus one addition: Danger is a `danger` fill with `surface` text and `danger-hover` on hover. Admin buttons are 36px tall on desktop and 44px on mobile, per RS2.
 

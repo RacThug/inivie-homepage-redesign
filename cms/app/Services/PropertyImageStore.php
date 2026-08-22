@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
  * move to object storage that ch. 5.5 costs at three environment values
  * would quietly cost a rewrite instead.
  *
- * What it hands back is a relative path, never a URL. `PropertyResource`
+ * What it hands back is a relative path, never a URL. `Property::imageUrl()`
  * derives the absolute URL once, from the configured disk. Storing a URL
  * would bake the host into every row.
  *

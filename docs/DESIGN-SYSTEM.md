@@ -58,7 +58,7 @@ Every text and background pairing must meet WCAG AA, at least 4.5 to 1 for body 
 | `muted` on `surface` | **Decorative and disabled states only.** Must never carry meaning |
 | `surface` on `accent` | **Must be measured before use.** White on a mid orange is the most likely failure in this palette. If it does not reach 4.5 to 1, accented buttons use `ink` text instead |
 
-The last row is a known risk, not an oversight. It is resolved by measurement during D3, not by assumption.
+The last row is a known risk, not an oversight. It is resolved by measurement while the design system foundation is built, not by assumption.
 
 ### 2.3 Accent discipline
 

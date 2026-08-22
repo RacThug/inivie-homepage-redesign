@@ -4,8 +4,8 @@
 | --- | --- |
 | Document type | Product Requirements Document |
 | Project | Technical Test - Homepage Redesign for inivie.com |
-| Version | 2.0 |
-| Date | 21 August 2026 |
+| Version | 2.1 |
+| Date | 22 August 2026 |
 | Submission deadline | 27 August 2026 (GitHub link sent to the HR team) |
 | Tech stack | Option 2: Next.js + Tailwind CSS + Laravel (CMS & API) + MySQL |
 | Dynamic section chosen | **Featured Properties** ("Featured property for you") |
@@ -14,7 +14,7 @@
 
 | Document | Owns |
 | --- | --- |
-| **PRD.md** (this file) | Problem, goals, scope, the dynamic section decision, functional requirements, acceptance criteria, plan, risks |
+| **PRD.md** (this file) | Problem, goals, scope, the dynamic section decision, functional requirements, acceptance criteria, delivery sequence, risks |
 | [TECHNICAL-DESIGN.md](./TECHNICAL-DESIGN.md) | Architecture, stack decisions, CMS implementation, repository structure, security, testing strategy |
 | [DATA-MODEL.md](./DATA-MODEL.md) | Database schema, indexes, domain rules, seed data |
 | [API-SPEC.md](./API-SPEC.md) | Endpoint contract, payloads, caching, revalidation, failure behaviour |
@@ -344,21 +344,55 @@ Every line must be verifiable by a reviewer without further explanation.
 
 ---
 
-## 10. Delivery Plan
+## 10. Delivery Sequence
 
-Six working days are available, 21 to 27 August 2026, with the final day reserved as buffer.
+**One date is fixed: submission on 27 August 2026**, set by the brief. Nothing else here is a date.
 
-| Day | Focus | Output |
-| --- | --- | --- |
-| D1, 21 Aug | Foundation | Repository, both applications running, migrations and model, seeder, public endpoint live |
-| D2, 22 Aug | CMS | Auth, full CRUD, image upload, reorder, publish toggle, backend tests |
-| D3, 23 Aug | Frontend foundation | Design tokens, shared components, header, footer, hero, container, typography |
-| D4, 24 Aug | Dynamic and static sections | Featured Properties wired to the API with skeleton and fallback, plus all static sections |
-| D5, 25 Aug | Responsive polish | Three breakpoint testing, accessibility, performance, revalidation, end to end tests |
-| D6, 26 Aug | Documentation and buffer | README, screenshots, final cleanup, self review |
-| 27 Aug | Submit | Send the GitHub link to the HR team in the morning |
+Work is ordered by dependency rather than allocated to days. What constrains this project is which things must exist before which others, not how many hours somebody can sit at a desk, and a day-by-day plan hides that by forcing genuinely independent work into a queue. An earlier draft of this chapter did exactly that, and it also collided with the domain rule ids `D1` to `D7` in [DATA-MODEL.md](./DATA-MODEL.md), which is its own argument against the labels.
 
-Buffer rule: if the schedule slips, what gets cut is end to end test coverage and animation, never the quality of the dynamic section or responsive correctness.
+Each unit below is one issue and one pull request. Issues live in the repository and carry the dependency edges; this table is the shape, not the tracker.
+
+### 10.1 Two independent tracks
+
+Neither of these waits on the other to start.
+
+| CMS track | Unblocked by |
+| --- | --- |
+| `properties` table, model, factory, seeder | nothing |
+| Public properties API and health endpoint | the table |
+| Admin authentication and dashboard | the table |
+| Property CRUD | the table, admin auth |
+| Image upload and cleanup | CRUD |
+| Publish toggle and reordering | CRUD |
+| Backend test coverage | API, CRUD, images, publish |
+
+| Frontend track | Unblocked by |
+| --- | --- |
+| Next.js scaffold and design system foundation | nothing |
+| Layout shell: header, drawer, footer | the scaffold |
+
+### 10.2 Convergence
+
+The tracks meet at the section the brief is actually testing.
+
+| Unit | Unblocked by |
+| --- | --- |
+| **Featured Properties wired to the API** | public API, scaffold, layout shell |
+| Static homepage sections | scaffold, layout shell |
+| On-demand revalidation | public API, Featured Properties |
+| Responsive, accessibility, performance pass | Featured Properties, static sections |
+| End to end coverage | Featured Properties, static sections |
+| README with a verified setup | everything |
+
+### 10.3 What gets cut first
+
+If scope has to shrink, it shrinks in this order, and never past the line:
+
+1. Scroll animation and motion polish
+2. End to end test coverage
+3. Static section fidelity
+
+**Never cut:** the quality of the dynamic section, responsive correctness, or the verified setup in the README. Those three are what the brief is grading.
 
 ---
 
@@ -367,10 +401,10 @@ Buffer rule: if the schedule slips, what gets cut is end to end test coverage an
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Time drained chasing visual similarity with the existing site | High | This is a redesign, not a clone. Lock design tokens first, then build each component once and reuse it |
-| No quality image assets available | Medium | Prepare a set of freely licensed WebP placeholders on D1 and commit them to the repository |
-| Cross application configuration eats time | Medium | Settle it on D1 with a correct `.env.example` and a health check endpoint |
+| No quality image assets available | Medium | Prepare a set of freely licensed WebP placeholders alongside the seeder and commit them to the repository |
+| Cross application configuration eats time | Medium | Settle it before any section work, with a correct `.env.example` and a health check endpoint |
 | Scope creeping into making other sections dynamic | Medium | The brief asks for one section. Others use typed static content that is easy to promote later |
-| The reviewer cannot run the project | High | Test the README from a fresh clone on D6. Include demo credentials and the seed command |
+| The reviewer cannot run the project | High | Execute the README from a genuinely fresh clone before submission. Include demo credentials and the seed command |
 | Heavy images drag down the performance score | Medium | Cap upload size, ship WebP, size images per breakpoint, and prioritise only the hero |
 
 ---

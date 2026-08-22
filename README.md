@@ -59,7 +59,32 @@ The original brief PDF is deliberately not committed. It is the client's documen
 
 ## Setup
 
-Setup instructions will be added here as each application lands. They will be verified from a fresh clone before submission, which is acceptance criterion A15 in the PRD.
+Full setup instructions will be verified from a fresh clone before submission, which is acceptance criterion A15 in the PRD. What is already runnable:
+
+```bash
+cd cms
+docker compose up -d --build      # PHP 8.5 and MySQL 8.4
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+
+npm install && npm run build      # on your machine, not in the container
+```
+
+**That last pair is not optional, and skipping it fails quietly.** Laravel compiles its own CSS and JS with Vite, `cms/public/build/` is gitignored, and the container carries PHP but no Node. Without it the API still answers correctly and `/admin` still returns 200, serving unstyled HTML. The reasoning is in [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4.
+
+Using your own PHP and MySQL instead of Docker? Change `DB_HOST` in `cms/.env` from `mysql` to `127.0.0.1`. That is the only line that differs between the two paths.
+
+### Admin access
+
+The panel is at **http://localhost:8000/admin**.
+
+| Field | Value |
+| --- | --- |
+| Email | `admin@inivie.com` |
+| Password | `password` |
+
+A demo account on a local database, seeded by `AdminUserSeeder` and published here on purpose: a reviewer who cannot sign in cannot review the CMS. `php artisan db:seed` resets it to these values.
 
 ---
 

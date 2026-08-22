@@ -273,6 +273,8 @@ Three departures need a reason on the record.
 
 **No webfont.** Poppins and Inter carry the brand voice on a page a guest reads. The admin is read by one person who is working. The CMS has no `next/font`, so a webfont there means a runtime Google Fonts request from Blade, which is exactly what ch. 3.1 removed from the frontend, paid again for a screen no guest sees. The stack is `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. Continuity is carried by colour, spacing, and radius instead, which is enough for the panel to read as the same product.
 
+This contradicts the scaffold, so the scaffold has to give way. A fresh Laravel install wires up Instrument Sans in two places: a `bunny('Instrument Sans')` entry in `cms/vite.config.js`, and a `--font-sans` override in `cms/resources/css/app.css`. Both are removed when the admin layout is built. Left in place they would keep downloading a typeface no screen renders, and the specification here would be false from its first commit.
+
 **No gold.** Gold is a luxury marker aimed at guests. In a data table it is noise.
 
 **One elevation.** Homepage cards lift on hover because they are clickable objects. Admin panels are containers, so they take a 1px `border` and no shadow at all. The confirm modal is the single raised element in the panel.

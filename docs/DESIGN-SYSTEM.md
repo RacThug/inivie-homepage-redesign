@@ -301,20 +301,51 @@ Both tokens are declared in `cms/resources/css/app.css` only. They are deliberat
 
 ### 8.3 Shell
 
-A topbar, and no sidebar. A single resource does not justify a second axis of navigation, and a topbar leaves the full width to a table that has to carry a thumbnail, four columns, and a row of actions.
+A left sidebar, in three states across two breakpoints.
+
+| State | Width | When |
+| --- | --- | --- |
+| Expanded | 240px | 1024px and up, the default |
+| Rail | 64px | 1024px and up, once the admin collapses it |
+| Drawer | 264px, overlaid | Below 1024px, closed by default |
+
+The first draft of this chapter specified a topbar, on two arguments that did not survive being drawn. The width argument was **false**: the table needs about 860px and a 240px sidebar leaves it 1040px. The drawer argument was **temporary**: a topbar avoids a drawer only while the nav has two items, and PRD ch. 12 already schedules the growth that ends it, starting with promoting Special Offers to a dynamic section. What the sidebar buys that a topbar cannot is grouping, and grouping is information: `Settings` is not a peer of `Properties`, and only a sidebar can say so.
+
+#### Regions
 
 | Region | Treatment |
 | --- | --- |
 | Page background | `surface-alt`, so white panels read as panels |
-| Topbar | `ink` background, 56px tall, sticky at the top, contents aligned to the page container |
-| Brand mark | "iNi ViE" in `surface` at 15px medium, linking to `/admin` |
-| Nav item | `surface` at 70% opacity, full `surface` when active, with a 2px `accent` rule beneath the active item |
-| Session | The signed in email in `muted`, then a logout button as a ghost variant in `surface` |
-| Page container | The 1280px `container-page` from ch. 4.1, 20px side padding on mobile and 40px on desktop |
+| Sidebar | `ink` background, full viewport height, fixed, its own scroll when the nav outgrows the screen |
+| Brand mark | "iNi ViE" in `surface` at 15px medium in a 56px header, linking to `/admin` |
+| Group label | 11px / 16 uppercase in `muted`, 0.08em tracking, above each group. Replaced by a 1px `surface` rule at 12% opacity in the rail |
+| Nav item | 36px tall, an icon then a label, `surface` at 70% opacity |
+| Active nav item | Full `surface` label, a `surface` fill at 8% opacity, and a 2px `accent` rule on its leading edge |
+| Session | Pinned to the bottom above a 1px `surface` rule at 12% opacity: the signed in email in `muted`, then a logout button as a ghost variant in `surface` |
+| Collapse toggle | The last item in the sidebar footer, a chevron that mirrors on state |
+| Content column | Fills the remaining width, with the 1280px `container-page` from ch. 4.1 applied inside it |
 | Page header | Title on the left, at most one primary action on the right. Stacks below 640px |
 | Vertical rhythm | 24px above the page header, 24px from header to content, 16px between stacked panels |
 
-The active nav item is marked with an accent rule while its label stays `surface`, for the same reason ch. 2.3 gives: `accent` is a fill colour, never a text colour.
+The active item is marked with an accent rule while its label stays `surface`, for the reason ch. 2.3 gives: `accent` is a fill colour, never a text colour.
+
+#### The rail
+
+Collapsing hides the labels and the group headings, leaving a 64px column of centred icons. Every item keeps an `aria-label` and a `title`, so the label is still reachable by pointer and by screen reader, and the active item keeps its accent rule. Group headings become a divider rule, because the grouping still exists even when its names are not shown.
+
+This is the one place the admin needs icons, and it is why ch. 8.8 permits a small inline SVG set: **a rail without icons is a column of nothing**. One icon per nav item, single stroke, 20px, 1.5px stroke width, `currentColor`, from one set and never mixed.
+
+#### Where the collapsed state is stored
+
+In a cookie, read by Blade when the page renders. Not in `localStorage`.
+
+The difference is visible, not academic. Blade emits the whole document before any script runs, so a state held in `localStorage` can only be applied after first paint: the sidebar renders expanded, then jumps to the rail. That flash appears on **every navigation**, because a Blade admin is full page loads rather than client side routing, so it is not a one-off cost at boot the way it would be in a single page app. A cookie is sent with the request, so the server renders the correct width the first time and there is nothing to correct.
+
+#### Below 1024px
+
+The sidebar becomes a drawer, closed by default, opened by a toggle in a slim `ink` bar that also carries the brand mark. The rail does not exist at this breakpoint: the two desktop states collapse into open and closed, because a 64px icon rail on a 375px screen spends 17% of the width on navigation the admin is not currently using.
+
+The drawer follows RS3 exactly, which is deliberate. The public site already has to implement a focus trap, Escape to close, and focus restoration for its own mobile navigation, so the admin adopts the same behaviour rather than inventing a second set of rules for it.
 
 ### 8.4 Type scale
 
@@ -331,6 +362,10 @@ One step smaller than ch. 3.2 across the board, because a tool shows more per sc
 ### 8.5 Components
 
 Each is specified once here and reused by the issues named, rather than reinvented per screen.
+
+**Sidebar drawer.** Below 1024px only. A 264px `ink` panel over an `ink` scrim at 50%, holding the same nav as the expanded sidebar. Focus moves into the drawer on open and is trapped, Escape closes it, and focus returns to the toggle that opened it. Same rules as RS3, same implementation shape as the public drawer.
+
+**Nav icon.** One per nav item, 20px, single stroke at 1.5px, `currentColor`, from one set. Icons exist for the rail in ch. 8.3, not for decoration: an item that cannot be drawn as a clear icon is a sign the nav is carrying something that is not a section.
 
 **Panel.** `surface` background, 1px `border`, 12px card radius, no shadow, 20px padding. An optional title row separated by a 1px `border` rule.
 
@@ -368,12 +403,12 @@ RS1 and RS2 apply to the admin unchanged. PRD ch. 7.2 sets 768px as the width th
 | --- | --- |
 | Below 640px | The data table becomes a stacked list, one panel per property, with the actions on their own row. Six columns cannot be made to work at 375px, and a horizontally scrolling table hides the actions column exactly where it is hardest to discover |
 | Forms | A single column at every width. Never two columns |
-| Topbar | Nav items stay inline at every width. Two items fit at 375px, and a drawer for two links is machinery without a purpose |
+| Navigation | Expanded sidebar at 1024px and up, collapsible to a 64px rail. A drawer below that, per ch. 8.3. The rail is a desktop state only |
 | Page header | The primary action drops below the title below 640px, at full width |
 
 ### 8.8 Deliberately absent
 
-Dark mode, charts or sparklines on the dashboard, an icon library beyond inline SVG from one set, toast notifications, saved filters, and bulk actions. Each is a feature the brief did not ask for, and PRD ch. 7.2 defines simple as small in scope. Adding them would trade the thing actually being graded, which is care in what exists, for surface area.
+Dark mode, charts or sparklines on the dashboard, toast notifications, saved filters, and bulk actions. Icons are the one exclusion the first draft got wrong: the rail in ch. 8.3 needs them, so a small inline SVG set is in scope. A packaged icon library still is not, because a set of eight hand copied paths costs less than a dependency. Each is a feature the brief did not ask for, and PRD ch. 7.2 defines simple as small in scope. Adding them would trade the thing actually being graded, which is care in what exists, for surface area.
 
 ---
 
@@ -391,4 +426,6 @@ For the admin panel:
 5. Contrast check the two rows in ch. 8.2 against the values actually declared in `cms/resources/css/app.css`.
 6. Confirm the admin declares no token that ch. 8.1 and ch. 8.2 do not name, so the duplicated subset has not quietly grown.
 7. Visual pass at 375px and 768px on the login screen, the dashboard, the property table, and the property form.
-8. Keyboard pass on the confirm modal: focus lands on Cancel, stays trapped, and Escape closes.
+8. Keyboard pass on the confirm modal and on the mobile drawer: focus lands inside, stays trapped, Escape closes, and focus returns to the control that opened it.
+9. Collapse the sidebar, then navigate. The rail must render collapsed on the very first paint of the next page, with no expanded frame in between. A flash here means the state went to `localStorage` instead of a cookie.
+10. Screen reader pass over the rail: every item still announces its label.

@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | Document type | Technical Design Document |
-| Version | 1.0 |
-| Date | 21 August 2026 |
+| Version | 1.1 |
+| Date | 22 August 2026 |
 | Status | Living document. Expected to change during implementation |
 
 **Scope of this document.** How the product described in [PRD.md](./PRD.md) is built. It owns architecture, stack decisions, CMS implementation, rendering strategy, repository structure, non-functional implementation, security, and testing.
@@ -29,7 +29,7 @@ It deliberately does not own: the database schema ([DATA-MODEL.md](./DATA-MODEL.
                                 │ /api/v1/properties
                                 ▼
                     ┌──────────────────────────────┐
-   CMS admin  ────► │  Laravel 12                  │
+   CMS admin  ────► │  Laravel 13                  │
    (browser)        │  Port 8000                   │
                     │  - /admin  (Blade, session)  │
                     │  - /api/v1 (JSON, public)    │
@@ -38,7 +38,7 @@ It deliberately does not own: the database schema ([DATA-MODEL.md](./DATA-MODEL.
                                 │ Eloquent
                                 ▼
                     ┌──────────────────────────────┐
-                    │  MySQL 8                     │
+                    │  MySQL 8.4 LTS               │
                     └──────────────────────────────┘
 
    After an admin saves a change, Laravel calls
@@ -65,19 +65,40 @@ This is the direct countermeasure to the production defect recorded in PRD ch. 2
 
 ### 2.1 Selection
 
-| Layer | Technology | Target version |
-| --- | --- | --- |
-| Frontend | Next.js App Router + TypeScript | Next 15.x, React 19 |
-| Styling | Tailwind CSS | 4.x |
-| Backend and CMS | Laravel | 12.x, PHP 8.3+ |
-| Database | MySQL | 8.0 |
-| CMS auth | Minimal Laravel session auth (Breeze style) | - |
-| Admin UI | Blade + Tailwind CSS | - |
-| Image storage | Laravel filesystem, `public` disk | - |
-| Backend tests | Pest | - |
-| Frontend tests | Vitest + Testing Library, Playwright | - |
-| PHP formatting | Laravel Pint | - |
-| JS formatting and linting | ESLint + Prettier | - |
+Versions verified against the npm registry, Packagist, the Laravel support policy, and endoflife.date on **22 August 2026**.
+
+| Layer | Technology | Target version | Latest stable at verification |
+| --- | --- | --- | --- |
+| Frontend | Next.js App Router | 16.x | 16.3.2 |
+| UI runtime | React | 19.x | 19.2.8 |
+| Language | TypeScript | whatever `create-next-app` scaffolds | 7.0.2 |
+| Styling | Tailwind CSS | 4.x | 4.3.3 |
+| Node runtime | Node.js | 24 LTS | 26 released, LTS from 28 Oct 2026 |
+| Backend and CMS | Laravel | 13.x | 13.26.1 |
+| PHP runtime | PHP | 8.5.x | 8.5.9 |
+| Database | MySQL | 8.4 LTS | 8.4.11, and 9.7 LTS |
+| CMS auth | Minimal Laravel session auth (Breeze style) | - | - |
+| Admin UI | Blade + Tailwind CSS | - | - |
+| Image storage | Laravel filesystem, `public` disk | - | - |
+| Backend tests | Pest | - | - |
+| Frontend tests | Vitest + Testing Library, Playwright | - | - |
+| PHP formatting | Laravel Pint | - | - |
+| JS formatting and linting | ESLint + Prettier | - | - |
+
+### 2.1.1 Version policy and why these numbers
+
+The rule is: take the current stable major of each dependency, and never start a new project on a version that has already left support.
+
+| Choice | Reasoning |
+| --- | --- |
+| **Laravel 13**, not 12 | Laravel 12's bug fix window closed on **13 August 2026**, nine days before this project started. Beginning a greenfield build on a release that no longer receives bug fixes is indefensible in review. Laravel 13 shipped 17 March 2026, so it has five months of patch releases behind it and is not bleeding edge |
+| **PHP 8.5**, not 8.3 | Laravel 13 supports 8.3 to 8.5. PHP 8.3 left active support on 31 December 2025 and is security-only. PHP 8.4 leaves active support on 31 December 2026, inside this project's plausible lifetime. 8.5 is the only option in Laravel's supported window with active support running to the end of 2027 |
+| **Next.js 16**, not 15 | Next 16 shipped 22 October 2025 and is ten months mature at 16.3.2. Next 15 still receives patches but is the previous major |
+| **Node 24 LTS**, not 26 | Next 16 only requires Node 20.9 or newer, so this is a free choice. Node 26 exists but does not enter long term support until 28 October 2026. 24 is the current LTS |
+| **MySQL 8.4 LTS**, not 8.0 | MySQL 8.0 reached end of life on **30 April 2026**. 8.4 is LTS with support to 2032 and is what most local development stacks ship by default, which matters for acceptance criterion A15. MySQL 9.7 LTS also works if the reviewer already runs it |
+| **TypeScript unpinned** | The TypeScript major line moved quickly this year, with 6.0.3 in April 2026 and 7.0.2 current. Rather than hardcode a major that may shift again before submission, take whatever `create-next-app` scaffolds, which is the version the framework itself is tested against |
+
+Two of the versions originally drafted for this document, Laravel 12 and MySQL 8.0, were already out of support when checked. That is the reason this table records a verification date and a latest-stable column rather than a bare version number: a spec that states versions without saying when they were true silently rots.
 
 ### 2.2 Rationale
 

@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Property;
 use App\Models\User;
 use Illuminate\Routing\Route as RouteDefinition;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 | Requirement S1: the admin panel is unreachable without authentication.
@@ -68,4 +70,30 @@ it('points the site root at the panel', function () {
     // The CMS has no public web surface, so a reviewer opening
     // localhost:8000 should arrive somewhere real. Acceptance criterion A5.
     $this->get('/')->assertRedirect('/admin');
+});
+
+it('leaves the content untouched when a signed out write is turned away', function () {
+    // S1's promise is not the redirect, it is that nothing behind it moved.
+    // The route table case above proves `auth` is attached to every admin
+    // route; this one proves what being attached is worth, by sending the
+    // four writes a guest could try and then reading the content back.
+    //
+    // Each submission is one that would succeed if it got through. A payload
+    // the form would reject anyway asserts nothing here, because it leaves
+    // the content untouched whether the guard is there or not.
+    Storage::fake(config('filesystems.default'));
+
+    $property = Property::factory()->published()->create(['sort_order' => 1]);
+
+    $this->post(route('admin.properties.store'), propertyForm());
+    $this->delete(route('admin.properties.destroy', $property));
+    $this->patch(route('admin.properties.publish', $property), ['publish' => '0']);
+    $this->post(route('admin.properties.reorder'), ['order' => [$property->id => 9]]);
+
+    $fresh = $property->fresh();
+
+    expect(Property::count())->toBe(1)
+        ->and($fresh->is_published)->toBeTrue()
+        ->and($fresh->sort_order)->toBe(1)
+        ->and(Storage::disk(config('filesystems.default'))->allFiles())->toBeEmpty();
 });

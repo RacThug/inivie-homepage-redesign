@@ -43,6 +43,29 @@ it('writes nothing at all when validation fails', function () {
         ->and(Storage::disk(config('filesystems.default'))->allFiles())->toBeEmpty();
 });
 
+it('leaves the property and the disk untouched when an edit is rejected', function () {
+    // C8, update half. The same "writes nothing at all" rule as above,
+    // and it has one thing to
+    // lose the create path does not: a property that is already live. A
+    // rejected edit that half applied would change the homepage on the
+    // strength of a form the admin was told had failed.
+    $property = propertyWithRealImage();
+    $before = $property->only(['title', 'excerpt', 'image_path']);
+
+    $this->put(route('admin.properties.update', $property), propertyForm([
+        'slug' => $property->slug,
+        'title' => '',
+        'excerpt' => 'Rewritten copy that must not land.',
+        'image' => FakeImage::png('replacement.png', 1200, 900),
+    ]))->assertSessionHasErrors('title');
+
+    expect($property->fresh()->only(['title', 'excerpt', 'image_path']))->toBe($before)
+        // The rejected upload never reached the disk either, so the edit
+        // form cannot be used to fill storage with files no row points at.
+        ->and(Storage::disk(config('filesystems.default'))->allFiles())
+        ->toBe([$before['image_path']]);
+});
+
 it('returns the submitted values to the form', function () {
     // The second half of C8. The admin fixes the one field that was wrong
     // rather than retyping the eleven that were right.

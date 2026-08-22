@@ -53,6 +53,8 @@ Returns published properties, ordered for display.
 
 The upper bound of 12 exists so a crafted request cannot turn a public endpoint into a full table dump.
 
+Both parameters are optional, and omitting one is the only way to get its default. A parameter that is present is validated: `limit=`, `limit=1.5` and `category=` are all rejected rather than quietly read as absent, because a client that sends an empty value is doing something it did not mean to and should hear about it. Validation lives in `ListPropertiesRequest`, not in the controller.
+
 ### 3.2 Success response
 
 `200 OK`
@@ -126,7 +128,7 @@ Zero published properties is a valid state, not an error. The frontend hides the
 | Status | When | Body |
 | --- | --- | --- |
 | `422` | Invalid `limit` or `category` | Laravel's default validation error format |
-| `429` | Rate limit exceeded | Laravel's default throttle response |
+| `429` | More than 60 requests a minute from one IP | Laravel's default throttle response |
 | `500` | Unhandled server error | Generic message. No stack trace outside local debug mode |
 
 `422` example:
@@ -138,6 +140,8 @@ Zero published properties is a valid state, not an error. The frontend hides the
 }
 ```
 
+The limit of 60 a minute per IP comes from [TECHNICAL-DESIGN.md](./TECHNICAL-DESIGN.md) ch. 6. Every response carries `X-RateLimit-Limit` and `X-RateLimit-Remaining` so a consumer can see where it stands before being refused.
+
 ---
 
 ## 4. `GET /api/v1/health`
@@ -148,7 +152,17 @@ Zero published properties is a valid state, not an error. The frontend hides the
 { "status": "ok", "database": "connected" }
 ```
 
-Returns `503` with `"database": "unreachable"` if the connection check fails. This exists purely so a reviewer diagnosing a blank section can tell in one request whether the CMS or the connection between apps is at fault.
+`503 Service Unavailable`
+
+```json
+{ "status": "error", "database": "unreachable" }
+```
+
+The check is a `select 1` round trip rather than a look at the connection object, because an already opened connection reports itself as fine after the server behind it has gone away.
+
+This endpoint exists purely so a reviewer diagnosing a blank section can tell in one request whether the CMS or the connection between apps is at fault.
+
+**It is the one endpoint that is never cached.** It answers `Cache-Control: no-store` instead of the `max-age=60` of ch. 5.1. A health check served from a minute old cache reports the past, which is worse than not answering at all.
 
 ---
 
@@ -156,11 +170,20 @@ Returns `503` with `"database": "unreachable"` if the connection check fails. Th
 
 ### 5.1 Response headers
 
-| Header | Value | Reason |
-| --- | --- | --- |
-| `Cache-Control` | `public, max-age=60` | Content changes rarely. 60 seconds bounds staleness without a request storm |
-| `X-Robots-Tag` | `noindex` | API responses must not appear in search results. Matches production behaviour |
-| `Access-Control-Allow-Origin` | the frontend origin from `.env` | Never a wildcard. Matches production, which pins `https://inivie.com` |
+| Header | Value | Applies to | Reason |
+| --- | --- | --- | --- |
+| `Cache-Control` | `max-age=60, public` | successful reads, health excepted | Content changes rarely. 60 seconds bounds staleness without a request storm |
+| `X-Robots-Tag` | `noindex` | every response, errors included | API responses must not appear in search results. Matches production behaviour |
+| `Access-Control-Allow-Origin` | `FRONTEND_URL` from `cms/.env` | every response | Never a wildcard. Matches production, which pins `https://inivie.com` |
+
+Two details of the `Cache-Control` row are worth stating rather than discovering:
+
+- **The directive order is `max-age=60, public`.** Symfony re-serialises the header with its directives sorted, so the value on the wire is not the order written here or anywhere else.
+- **Only a successful read carries it.** A `422` or a `503` held in a shared cache for a minute would outlive the condition that produced it and go on answering somebody else's valid request.
+
+`ApiResponseHeaders`, prepended to the `api` middleware group, sets both headers. Being prepended is what lets it reach the responses rendered from exceptions thrown further in, so a `422` from validation and a `429` from the rate limiter are covered by the `X-Robots-Tag` rule too.
+
+CORS is the framework's `HandleCors` middleware reading `cms/config/cors.php`, which is narrowed from the framework defaults: `api/*` only, the read verbs only, and one origin taken from `FRONTEND_URL`. With a single allowed origin the header is echoed unconditionally, which is what makes the refusal work: a browser compares the value with its own origin and blocks the read when they differ.
 
 ### 5.2 On-demand revalidation
 
@@ -186,7 +209,7 @@ Content-Type: application/json
 
 ## 6. Type Mirroring
 
-The response shape is declared once as a Laravel API Resource and mirrored as a TypeScript type:
+The response shape is declared once as a Laravel API Resource, `cms/app/Http/Resources/PropertyResource.php`, and mirrored as a TypeScript type in `web/src/types/property.ts`:
 
 ```ts
 export type PropertyCategory = 'resort' | 'villa' | 'hotel'
@@ -213,9 +236,16 @@ export interface PropertyListResponse {
 }
 ```
 
-**Rule.** Any change to the resource and this type ships in the same commit. A feature test asserts the exact key set of the response, so adding or renaming a field on the backend fails the build rather than silently reaching production as `undefined`.
+**Rule.** Any change to the resource and this type ships in the same commit. This is the specific defence against the production defect in PRD ch. 2.3, where the frontend consumed a field the API never returned and nothing detected it.
 
-This is the specific defence against the production defect in PRD ch. 2.3, where the frontend consumed a field the API never returned and nothing detected it.
+The rule is enforced from both ends, against the key list in ch. 3.3 written out by hand in each place:
+
+| Where | What it catches |
+| --- | --- |
+| `cms/tests/Feature/Api/V1/PropertyIndexTest.php` | The resource returning a different key set from the documented one, asserted against a real response |
+| `web/src/types/property.test.ts` | The TypeScript interface drifting from the same list. `tsc` locks its fixtures to the interface, and the assertions lock the fixtures to the list |
+
+Neither test asks the code under test what its fields are. A test that does cannot notice the code returning the wrong thing.
 
 ---
 

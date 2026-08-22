@@ -79,6 +79,22 @@ class Property extends Model
     }
 
     /**
+     * The optional `category` filter of the public endpoint. A null
+     * category is the absence of the parameter, not a category, so it
+     * narrows nothing and the caller needs no conditional.
+     *
+     * @param  Builder<Property>  $query
+     * @return Builder<Property>
+     */
+    public function scopeInCategory(Builder $query, ?PropertyCategory $category): Builder
+    {
+        return $query->when(
+            $category,
+            fn (Builder $query, PropertyCategory $category) => $query->where('category', $category),
+        );
+    }
+
+    /**
      * Domain rule D2.
      *
      * @param  Builder<Property>  $query

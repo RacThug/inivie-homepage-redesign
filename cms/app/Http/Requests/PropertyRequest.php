@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\PropertyCategory;
+use App\Models\Property;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -50,7 +51,7 @@ abstract class PropertyRequest extends FormRequest
             'price_from' => ['nullable', 'integer', 'min:0'],
             'rating' => ['nullable', 'numeric', 'between:0,5'],
             'cta_url' => ['nullable', 'url', 'max:255'],
-            'sort_order' => ['required', 'integer', 'min:0'],
+            'sort_order' => ['required', 'integer', 'min:0', 'max:'.Property::MAX_SORT_ORDER],
             'is_published' => ['boolean'],
         ];
     }

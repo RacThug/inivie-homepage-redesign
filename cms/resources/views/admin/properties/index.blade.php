@@ -12,6 +12,31 @@
 @endsection
 
 @section('content')
+    {{-- The failure summary of ch. 8.5, in the shape the property form
+         already uses: one line, because the messages themselves belong at
+         their controls.
+
+         Two of the failures this screen can produce have no control to
+         belong to. A batch refused whole is about the list, and a publish
+         action that arrived without its state is about a form that has gone
+         wrong, so each is stated here in full. Everything else is a position,
+         and every position is already announced at its own input, so the
+         line counts them rather than picking one out and leaving the admin
+         to guess which row it came from. --}}
+    @if ($errors->any())
+        @php
+            $summary = $errors->first('order')
+                ?: ($errors->first('publish')
+                    ?: ($errors->count() === 1
+                        ? 'One position needs fixing before the order can be saved.'
+                        : "{$errors->count()} positions need fixing before the order can be saved."));
+        @endphp
+
+        <x-notice variant="failure" class="mb-4">
+            <span class="font-medium text-danger">{{ $summary }}</span>
+        </x-notice>
+    @endif
+
     @if ($properties->isEmpty())
         {{-- ch. 8.5. A bare empty table is never shipped: the screen says
              what is missing and offers the action that resolves it. --}}
@@ -30,10 +55,19 @@
              rule. Everything else about the container is the same. --}}
         <div class="overflow-hidden rounded-card border border-border bg-surface">
             {{-- ch. 8.5. No zebra striping, 12px vertical cell padding, and
-                 the actions column right aligned and last. --}}
-            <table class="hidden w-full text-sm sm:table">
+                 the actions column right aligned and last.
+
+                 ch. 8.7 turns this into a stacked list below 640px, and it
+                 does so by relaying the same cells rather than by rendering
+                 the rows a second time. Two renderings would mean two copies
+                 of every position input in the document, submitting the same
+                 name twice, and the hidden one would win: an admin who
+                 retyped a number on a desktop would have their edit
+                 overwritten by the value the invisible mobile copy still
+                 held. One row, laid out twice. --}}
+            <table class="w-full text-sm max-sm:block">
                 <caption class="sr-only">Properties, in the order the homepage renders them</caption>
-                <thead>
+                <thead class="max-sm:hidden">
                     <tr class="border-b border-border bg-surface-alt text-left text-[13px] leading-[18px] font-medium text-ink-muted">
                         <th scope="col" class="w-20 py-3 pr-3 pl-4">
                             <span class="sr-only">Image</span>
@@ -41,26 +75,35 @@
                         <th scope="col" class="px-3 py-3">Title</th>
                         <th scope="col" class="px-3 py-3">Category</th>
                         <th scope="col" class="px-3 py-3">Status</th>
-                        <th scope="col" class="px-3 py-3">Order</th>
+                        <th scope="col" class="w-28 px-3 py-3">Order</th>
                         <th scope="col" class="py-3 pr-4 pl-3 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="max-sm:block">
                     @foreach ($properties as $property)
-                        <tr class="border-b border-border transition-colors last:border-b-0 hover:bg-surface-alt">
-                            <td class="py-3 pr-3 pl-4">
+                        <tr class="border-b border-border transition-colors last:border-b-0 hover:bg-surface-alt max-sm:grid max-sm:grid-cols-[3.5rem_1fr_auto] max-sm:items-start max-sm:gap-x-3 max-sm:gap-y-3 max-sm:p-4">
+                            <td class="py-3 pr-3 pl-4 max-sm:col-start-1 max-sm:row-start-1 max-sm:p-0">
                                 <x-property-thumb :property="$property" />
                             </td>
-                            <td class="px-3 py-3">
-                                <div class="font-medium">{{ $property->title }}</div>
-                                <div class="text-[13px] leading-[18px] text-ink-muted">{{ $property->location }}</div>
+                            <td class="px-3 py-3 max-sm:col-start-2 max-sm:row-start-1 max-sm:min-w-0 max-sm:p-0">
+                                <div class="font-medium max-sm:truncate">{{ $property->title }}</div>
+                                <div class="text-[13px] leading-[18px] text-ink-muted">
+                                    {{-- The category has no column of its own below 640px, so it
+                                         joins the location on the line underneath the title. --}}
+                                    <span class="sm:hidden">{{ $property->category->label() }} &middot; </span>{{ $property->location }}
+                                </div>
                             </td>
-                            <td class="px-3 py-3">{{ $property->category->label() }}</td>
-                            <td class="px-3 py-3">
+                            <td class="px-3 py-3 max-sm:hidden">{{ $property->category->label() }}</td>
+                            <td class="px-3 py-3 max-sm:col-start-3 max-sm:row-start-1 max-sm:p-0">
                                 <x-status-badge :published="$property->is_published" />
                             </td>
-                            <td class="px-3 py-3 tabular-nums">{{ $property->sort_order }}</td>
-                            <td class="py-3 pr-4 pl-3">
+                            <td class="px-3 py-3 max-sm:col-span-3 max-sm:col-start-1 max-sm:row-start-2 max-sm:p-0">
+                                @include('admin.properties.partials.order-input')
+                            </td>
+                            {{-- ch. 8.7 puts the actions on their own row in the stacked
+                                 list, which is also the only way three of them fit at
+                                 375px beside anything else. --}}
+                            <td class="py-3 pr-4 pl-3 max-sm:col-span-3 max-sm:col-start-1 max-sm:row-start-3 max-sm:p-0">
                                 <div class="flex items-center justify-end gap-1">
                                     @include('admin.properties.partials.row-actions')
                                 </div>
@@ -70,36 +113,7 @@
                 </tbody>
             </table>
 
-            {{-- ch. 8.7: below 640px the table becomes a stacked list, one
-                 block per property, with the actions on their own row. Six
-                 columns cannot be made to work at 375px, and a horizontally
-                 scrolling table hides the actions column exactly where it is
-                 hardest to discover. --}}
-            <ul class="sm:hidden">
-                @foreach ($properties as $property)
-                    <li class="border-b border-border p-4 last:border-b-0">
-                        <div class="flex items-start gap-3">
-                            <x-property-thumb :property="$property" class="shrink-0" />
-                            <div class="min-w-0 flex-1">
-                                <div class="truncate text-sm font-medium">{{ $property->title }}</div>
-                                <div class="text-[13px] leading-[18px] text-ink-muted">
-                                    {{ $property->category->label() }} &middot; {{ $property->location }}
-                                </div>
-                            </div>
-                            <x-status-badge :published="$property->is_published" />
-                        </div>
-
-                        <div class="mt-3 flex items-center justify-between">
-                            <span class="text-[13px] leading-[18px] text-ink-muted tabular-nums">
-                                Order {{ $property->sort_order }}
-                            </span>
-                            <div class="flex items-center gap-1">
-                                @include('admin.properties.partials.row-actions')
-                            </div>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
+            @include('admin.properties.partials.reorder-bar')
         </div>
 
         @include('admin.properties.partials.pager')

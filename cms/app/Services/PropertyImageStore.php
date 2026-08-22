@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 /**
  * The only code in the application that touches stored image files.
@@ -18,8 +19,9 @@ use Illuminate\Support\Facades\Storage;
  * derives the absolute URL once, from the configured disk. Storing a URL
  * would bake the host into every row.
  *
- * It stores and it removes, and it decides nothing. *When* a file should go
- * is a fact about the record rather than about the disk, so it lives in
+ * It stores, imports and removes, and it decides nothing. *When* a file
+ * should go is a fact about the record rather than about the disk, so it
+ * lives in
  * `PropertyObserver`: the replaced file goes once the save commits, and the
  * file of a deleted property goes only on a force delete, never on the soft
  * delete D5 makes reversible.
@@ -42,6 +44,35 @@ class PropertyImageStore
     public function store(UploadedFile $image): string
     {
         return $image->store(self::PREFIX, ['disk' => $this->disk()]);
+    }
+
+    /**
+     * Copy a file that ships with the repository onto the disk.
+     *
+     * The seed images of docs/DATA-MODEL.md ch. 4 are committed under
+     * `database/seeders/images/` and belong on the disk, which is two
+     * different places for the same reason `storage/` is not in version
+     * control: the disk is state the application writes, and a force delete
+     * or a replaced upload is entitled to remove anything on it. Committing
+     * the originals somewhere the application never writes is what keeps a
+     * fresh clone reproducible after an editor has been through the panel.
+     *
+     * It overwrites, because seeding is a reset to a known state. Leaving a
+     * replaced file in place would put the row and the disk out of step: the
+     * seeder rewrites `image_path` back to the canonical path either way.
+     *
+     * The whole file is read into memory rather than streamed. These are six
+     * known files of a few tens of kilobytes, and the guard that a stream
+     * would need is the interesting part: without it a missing source is an
+     * empty file on the disk, which is #27 again with an extra step.
+     */
+    public function import(string $source, string $path): void
+    {
+        if (! is_file($source)) {
+            throw new InvalidArgumentException("There is no file to import at [{$source}].");
+        }
+
+        Storage::disk($this->disk())->put($path, file_get_contents($source));
     }
 
     /**

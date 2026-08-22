@@ -215,7 +215,7 @@ Run on 22 August 2026:
 | `artisan migrate:fresh --seed` | Re-run 22 August 2026 with the `properties` migration and seeder. Schema matches DATA-MODEL ch. 2 column for column, including the `enum`, `char(3)`, `decimal(2,1)` and all three indexes |
 | `artisan test` | 138 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
 | `vendor/bin/pint --test` | Clean across 62 files |
-| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it joins the `composer setup` script rather than the README: an upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above |
+| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it is in both the `composer setup` script and the README setup block. It was in `composer setup` alone until #27, which is a gap rather than a division of labour: the README's Docker path runs `composer install` and then artisan commands directly, so it never invokes `composer setup`, and a reviewer following it got a populated database and a 403 on every picture. An upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above |
 | Admin property CRUD end to end | Signed in, created a property with a real upload, saw the thumbnail render from `/storage/properties/`, edited it, and cancelled a delete from the confirm modal. Chromium at 1440px and 375px, no console errors |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
 | `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
@@ -362,6 +362,7 @@ The ceiling on `sort_order` is the column's, not a preference: DATA-MODEL ch. 1 
 - An upload lands before the row that will point at it, on both the create and the update path, because `image_path` is not nullable. If that write then throws, the upload is removed on the way out. Otherwise the disk accumulates files no row has ever pointed at, and nothing will ever collect them.
 - Deleting a property is a soft delete, so its image is retained. Files are removed only on force delete.
 - No server side resizing. Size optimisation is handled by `next/image`. The 2 MB cap and minimum dimensions already protect quality and storage.
+- The seed images of DATA-MODEL ch. 4 are committed under `cms/database/seeders/images/` and copied onto the disk by the seeder, overwriting whatever is at the destination. Seeding is a reset to a known state: the seeder rewrites `image_path` back to the canonical path either way, so leaving a replaced file in place would only put the row and the disk out of step. They are not committed under `storage/` because that is state the application writes and a force delete is entitled to empty.
 
 `PropertyImageStore` performs all of this, and decides none of it. Controllers never touch the filesystem directly.
 
@@ -377,7 +378,7 @@ Three rules make that true. Each is cheap now and expensive to retrofit.
 | --- | --- |
 | **`image_path` stores a relative path, never a URL** | A stored URL bakes the host into every row. Changing storage would then need a data migration to rewrite them, and any row missed stays broken forever. A relative path is location independent, so the same rows work on any disk |
 | **The absolute URL is derived once, in `Property::imageUrl()`, via `Storage::url()`** | Laravel's filesystem abstraction already knows how to build a URL for whichever disk is configured. One derivation point means one place to change, and consumers never learn where the bytes live. It sits on the model rather than in `PropertyResource` because the admin renders the same image in its index thumbnail and its edit preview, and a second derivation for the panel would be a second place to fix |
-| **`PropertyImageStore` is the only code that touches storage** | A controller that reaches for the filesystem directly is a second seam nobody remembers to move |
+| **`PropertyImageStore` is the only code that touches storage** | A controller that reaches for the filesystem directly is a second seam nobody remembers to move. This covers the seeder too: it reaches the disk through `import()` rather than copying files itself, so a move to object storage does not leave `migrate --seed` writing to a directory nothing serves any more |
 
 **Configuration.** The disk name and the frontend's media host are environment values, never literals in code.
 
@@ -490,10 +491,14 @@ inivie-homepage-redesign/
 │   │   ├── Models/Property.php
 │   │   ├── Observers/PropertyObserver.php
 │   │   └── Services/
-│   │       ├── PropertyImageStore.php     stores and removes files
+│   │       ├── PropertyImageStore.php     stores, imports and removes files
 │   │       └── FrontendRevalidator.php    calls the Next.js webhook
 │   ├── config/cors.php        one origin from FRONTEND_URL, never a wildcard
 │   ├── database/{migrations,factories,seeders}/
+│   │   └── seeders/images/    the 6 seed pictures of DATA-MODEL ch. 4, and
+│   │                          generate.py, the tool that drew them. Committed
+│   │                          here rather than under storage/, which is state
+│   │                          the application writes: see ch. 5.4
 │   ├── resources/views/{layouts,admin,auth,components}/
 │   │                          components/ holds the anonymous Blade
 │   │                          components reused across admin screens

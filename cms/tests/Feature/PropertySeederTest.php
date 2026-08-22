@@ -1,13 +1,18 @@
 <?php
 
 use App\Models\Property;
+use App\Models\User;
 use Database\Seeders\PropertySeeder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 /*
 | Seed data, docs/DATA-MODEL.md ch. 4.
 */
 
 beforeEach(function () {
+    Storage::fake(config('filesystems.default'));
+
     $this->seed(PropertySeeder::class);
 });
 
@@ -32,6 +37,52 @@ it('gives every seeded property alternative text and an image', function () {
         expect($property->image_alt)->not->toBeEmpty()
             ->and($property->image_path)->not->toBeEmpty();
     });
+});
+
+it('puts the picture of every seeded property on the configured disk', function () {
+    // ch. 4 promises that `migrate --seed` alone produces a populated
+    // homepage. A row whose image_path points at nothing keeps that promise
+    // in the database and breaks it on every screen that renders a card.
+    $disk = Storage::disk(config('filesystems.default'));
+
+    Property::each(fn (Property $property) => $disk->assertExists($property->image_path));
+});
+
+it('seeds pictures the upload form itself would accept', function () {
+    // TECHNICAL-DESIGN ch. 5.3 governs what an admin may upload, and seed
+    // data held to a lower bar looks fine until the first reviewer
+    // re-uploads one of these files and is told it is too small.
+    //
+    // Restating the mime list, the 2 MB cap and the 800 by 600 floor here
+    // would be the second copy of a rules table ch. 5.3 warns drifts, and
+    // the copy that drifts is the one nobody reads. So this submits each
+    // seed picture through the create form and requires it to be taken.
+    $this->actingAs(User::factory()->create());
+
+    Property::pluck('image_path')->each(function (string $path) {
+        $name = basename($path);
+
+        // Uploaded through a copy, never the committed file itself. Laravel
+        // streams rather than moves, but a test that can empty the
+        // repository if that ever changes is not worth the risk.
+        $upload = tempnam(sys_get_temp_dir(), 'seed');
+        copy(database_path('seeders/images/'.$name), $upload);
+
+        $this->post(route('admin.properties.store'), propertyForm([
+            'slug' => 'upload-check-'.basename($name, '.webp'),
+            'image' => new UploadedFile($upload, $name, 'image/webp', null, true),
+        ]))->assertSessionHasNoErrors();
+    });
+});
+
+it('puts a seed picture back when the disk has lost it', function () {
+    $property = Property::where('slug', 'ajowa-resort')->firstOrFail();
+    $disk = Storage::disk(config('filesystems.default'));
+    $disk->delete($property->image_path);
+
+    $this->seed(PropertySeeder::class);
+
+    $disk->assertExists($property->image_path);
 });
 
 it('gives every published property a published_at', function () {

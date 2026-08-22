@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\PropertyCategory;
 use App\Models\Property;
+use App\Services\PropertyImageStore;
 use Illuminate\Database\Seeder;
 
 /**
@@ -11,6 +12,17 @@ use Illuminate\Database\Seeder;
  */
 class PropertySeeder extends Seeder
 {
+    /**
+     * Where the committed originals live, relative to `database/`.
+     *
+     * Beside the seeder that names them rather than under `storage/`, which
+     * is ignored by git precisely because the application writes there. See
+     * `PropertyImageStore::import()`.
+     */
+    private const IMAGE_SOURCE = 'seeders/images';
+
+    public function __construct(private readonly PropertyImageStore $images) {}
+
     /**
      * Everything ch. 4 pins down. Anything absent here is supplied by the
      * factory, so seed data and test data cannot drift apart.
@@ -116,12 +128,31 @@ class PropertySeeder extends Seeder
      * A soft deleted row is refreshed in place and left deleted. Reviving
      * it would overrule an editor's deletion, which is the one thing D5
      * exists to make safe.
+     *
+     * The picture lands before the row that points at it, matching the rule
+     * TECHNICAL-DESIGN ch. 5.4 sets for the upload paths: `image_path` is
+     * not nullable, so a row is never written ahead of its file. A soft
+     * deleted row still gets its file, because D5 makes that deletion
+     * reversible and a restore with no picture is half a property.
+     *
+     * What ch. 5.4 also asks of the upload paths, and what is deliberately
+     * absent here, is removing the file when the write that follows it
+     * throws. There it prevents an orphan: an upload has a hashed name no
+     * later row will ever name again, so nothing would collect it. These
+     * six have fixed names that this seeder writes on every run, so a
+     * failed write leaves the next run's file, not litter. Unwinding it
+     * would only delete something correct.
      */
     public function run(): void
     {
         foreach (self::PROPERTIES as $row) {
             $state = $row['published'] ? 'published' : 'draft';
             unset($row['published']);
+
+            $this->images->import(
+                database_path(self::IMAGE_SOURCE.'/'.basename($row['image_path'])),
+                $row['image_path'],
+            );
 
             $property = Property::withTrashed()->firstOrNew(['slug' => $row['slug']]);
             $property->fill(Property::factory()->{$state}()->raw($row));

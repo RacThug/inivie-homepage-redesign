@@ -401,7 +401,7 @@ If scope has to shrink, it shrinks in this order, and never past the line:
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Time drained chasing visual similarity with the existing site | High | This is a redesign, not a clone. Lock design tokens first, then build each component once and reuse it |
-| No quality image assets available | Medium | Prepare a set of freely licensed WebP placeholders alongside the seeder and commit them to the repository |
+| No quality image assets available | Medium | **Settled in #27.** Six drawn WebP placeholders are committed alongside the seeder, which places them on the configured disk, so `migrate --seed` alone populates the homepage. Freely licensed photographs were the first plan and were dropped: this repository is public, the live site's own photography is licensed stock that may not be redistributed, and a hand sourced set is reproducible only from whoever sourced it. See DATA-MODEL ch. 4 |
 | Cross application configuration eats time | Medium | Settle it before any section work, with a correct `.env.example` and a health check endpoint |
 | Scope creeping into making other sections dynamic | Medium | The brief asks for one section. Others use typed static content that is easy to promote later |
 | The reviewer cannot run the project | High | Execute the README from a genuinely fresh clone before submission. Include demo credentials and the seed command |

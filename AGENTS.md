@@ -59,3 +59,17 @@ Quality gates run once per application. Both must be green before the final comm
 - **Plain dash `-`, never an em dash.**
 - **Version numbers carry a verification date.** `docs/TECHNICAL-DESIGN.md` ch. 2.1 records when each version was last checked against primary sources. Bumping a version means re-checking against the npm registry, Packagist, and endoflife.date, then updating that date. Two versions in the first draft were already out of support because they were written from memory.
 - **The brief PDF stays local.** `docs/*.pdf` is gitignored deliberately: it is the client's document, not project output.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `RacThug/inivie-homepage-redesign`, driven by the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, each label string equal to its name, sitting alongside the `cms` / `web` / `full-stack` area labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and one `docs/adr/` at the repo root, above the five specification documents. See `docs/agents/domain.md`.

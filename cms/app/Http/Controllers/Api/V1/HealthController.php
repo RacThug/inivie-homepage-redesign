@@ -17,15 +17,21 @@ use Throwable;
  */
 class HealthController extends Controller
 {
+    /** @var array{int, array<string, string>} */
+    private const HEALTHY = [200, ['status' => 'ok', 'database' => 'connected']];
+
+    /** @var array{int, array<string, string>} */
+    private const UNHEALTHY = [503, ['status' => 'error', 'database' => 'unreachable']];
+
     public function __invoke(): JsonResponse
     {
-        $connected = $this->databaseIsReachable();
+        // The two answers are written out whole rather than assembled
+        // from three separate branches on the same boolean, so the
+        // status code and the body it describes cannot disagree.
+        [$status, $body] = $this->databaseIsReachable() ? self::HEALTHY : self::UNHEALTHY;
 
         return response()
-            ->json([
-                'status' => $connected ? 'ok' : 'error',
-                'database' => $connected ? 'connected' : 'unreachable',
-            ], $connected ? 200 : 503)
+            ->json($body, $status)
             // A health check served from a minute old cache reports the
             // past. The Cache-Control of ch. 5.1 is for the read
             // endpoints; ApiResponseHeaders leaves this one alone.

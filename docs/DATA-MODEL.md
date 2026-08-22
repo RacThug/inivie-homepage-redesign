@@ -101,13 +101,24 @@ The composite index order matters: `is_published` is the equality predicate and 
 | --- | --- | --- |
 | D1 | The homepage only shows properties where `is_published = true` and `deleted_at is null` | Model scope, covered by a feature test |
 | D2 | Display order is `sort_order` ascending, then `created_at` descending as a tiebreaker | Model scope |
-| D3 | The homepage shows at most 6 cards. The default is 3 | API query parameter validation, see API-SPEC ch. 3 |
+| D3 | The homepage shows at most 6 cards, and 3 unless it asks for more | The `limit` the frontend sends, see ch. 3.1 |
 | D4 | `slug` is unique across all properties including soft deleted rows, to prevent collisions on restore | Database unique constraint plus a validation rule |
 | D5 | Deleting a property is a soft delete. Image files are removed only on force delete | `PropertyImageStore` |
 | D6 | `published_at` is set automatically when `is_published` transitions from false to true, and is never reset on unpublish | Model observer, covered by a unit test |
 | D7 | When `price_from` is null the card omits the price row entirely rather than rendering a zero | Frontend component, covered by a component test |
 
-### 3.1 Note on D6
+### 3.1 Note on D3
+
+Two different ceilings, previously conflated. This rule used to name API query parameter validation as its enforcement, which said that the endpoint refuses a `limit` above 6. It does not, and should not.
+
+| Ceiling | Value | Whose | Why that number |
+| --- | --- | --- | --- |
+| What the homepage displays | 6 | The frontend, through the `limit` it sends | A design decision about the grid. Nothing stops a later page from wanting a different count |
+| What the endpoint permits | 12 | `ListPropertiesRequest`, see [API-SPEC.md](./API-SPEC.md) ch. 3.1 | An abuse bound, so a crafted request cannot turn a public read endpoint into a full table dump |
+
+Collapsing them into one number would tie a public safety limit to a layout choice, so changing the grid would mean changing what the API accepts from everyone.
+
+### 3.2 Note on D6
 
 `published_at` records when a property first went live, so it is a historical fact, not a mirror of current state. Resetting it on unpublish would destroy that fact and make "how long has this been featured" unanswerable. Current visibility is what `is_published` is for. Keeping the two separate is the reason both columns exist.
 

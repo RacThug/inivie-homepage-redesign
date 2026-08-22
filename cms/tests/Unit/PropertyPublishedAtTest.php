@@ -4,7 +4,7 @@ use App\Models\Property;
 use Illuminate\Support\Carbon;
 
 /*
-| Domain rule D6. See docs/DATA-MODEL.md ch. 3 and ch. 3.1.
+| Domain rule D6. See docs/DATA-MODEL.md ch. 3 and ch. 3.2.
 */
 
 it('leaves published_at null while a property is a draft', function () {

@@ -46,14 +46,20 @@ it('allows the frontend origin', function () {
         ->assertHeader('Access-Control-Allow-Origin', config('cors.allowed_origins')[0]);
 });
 
-it('refuses any other origin', function () {
-    // A single configured origin is echoed back unconditionally, which is
-    // what makes the refusal work: the browser compares the header with
-    // its own origin and blocks the read when they differ. What matters
-    // is that the requesting origin is never the one reflected.
-    $this->withHeader('Origin', 'https://not-the-frontend.example')
+it('never reflects back an origin it was not configured with', function () {
+    $foreign = 'https://not-the-frontend.example';
+
+    $allowed = $this->withHeader('Origin', $foreign)
         ->getJson('/api/v1/properties')
-        ->assertHeader('Access-Control-Allow-Origin', config('cors.allowed_origins')[0]);
+        ->baseResponse->headers->get('Access-Control-Allow-Origin');
+
+    // A single configured origin is echoed unconditionally, so the
+    // refusal happens in the browser: it compares this value against its
+    // own origin and blocks the read when they differ. The condition that
+    // has to hold server side is the first of these two, that the
+    // requesting origin is never the one sent back.
+    expect($allowed)->not->toBe($foreign)
+        ->and($allowed)->toBe(config('cors.allowed_origins')[0]);
 });
 
 it('never allows a wildcard origin', function () {

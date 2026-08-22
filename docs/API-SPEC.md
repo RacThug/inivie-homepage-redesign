@@ -162,7 +162,7 @@ The check is a `select 1` round trip rather than a look at the connection object
 
 This endpoint exists purely so a reviewer diagnosing a blank section can tell in one request whether the CMS or the connection between apps is at fault.
 
-**It is the one endpoint that is never cached.** It answers `Cache-Control: no-store` instead of the `max-age=60` of ch. 5.1. A health check served from a minute old cache reports the past, which is worse than not answering at all.
+**It is the one endpoint that is never cached.** It answers `Cache-Control: no-store, private` instead of the `max-age=60` of ch. 5.1, `private` being Symfony's own addition to a response nothing declared public. A health check served from a minute old cache reports the past, which is worse than not answering at all.
 
 ---
 

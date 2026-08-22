@@ -193,9 +193,11 @@ Run on 22 August 2026:
 | Resolved stack | Laravel 13.26.1, PHP 8.5.9, MySQL 8.4.11 |
 | `artisan migrate` | All three framework migrations ran against MySQL |
 | `artisan migrate:fresh --seed` | Re-run 22 August 2026 with the `properties` migration and seeder. Schema matches DATA-MODEL ch. 2 column for column, including the `enum`, `char(3)`, `decimal(2,1)` and all three indexes |
-| `artisan test` | 25 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
-| `vendor/bin/pint --test` | Clean across 35 files |
+| `artisan test` | 70 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
+| `vendor/bin/pint --test` | Clean across 46 files |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
+| `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
+| `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` against MySQL, `Cache-Control: no-store` |
 | Native path | **Not verified.** This machine has no PHP or MySQL |
 
 The warm figure is the useful one. At ~50ms through a Windows bind mount, the earlier claim that `artisan serve` is barely affected by bind mount latency holds, and no volume tuning is warranted.
@@ -210,7 +212,7 @@ Run on 22 August 2026, natively on Node 24.13.0:
 | `npm run lint` | Clean |
 | `npm run typecheck` | Clean |
 | `npm run format:check` | Clean |
-| `npm test` | 69 Vitest tests green |
+| `npm test` | 81 Vitest tests green |
 | `npm run build` | Compiled in 5.4s, homepage prerendered as static |
 | `npm start`, then `GET localhost:3000` | `200`. Tokens, both fonts, and the reduced motion block all present in the served CSS |
 
@@ -368,8 +370,8 @@ Implements requirements S1 to S5 in PRD ch. 8.5.
 | Admin auth | Laravel sessions, bcrypt password hashing, login rate limiting |
 | CSRF | Enabled on every admin form, including the delete and publish toggle actions |
 | Uploads | Mime and size validation, hashed filenames, stored under `storage/` rather than in the code directory |
-| Public API | Read only. Mutation routes are never registered under `/api/v1`. Rate limited to 60 requests per minute per IP |
-| CORS | Only the frontend origin is allowed, configured through an environment variable, never a wildcard. Mirrors production, which sends `Access-Control-Allow-Origin: https://inivie.com` |
+| Public API | Read only. Mutation routes are never registered under `/api/v1`, asserted against the route table by a feature test rather than by probing one URL. Rate limited to 60 requests per minute per IP through the `api` limiter defined in `AppServiceProvider` |
+| CORS | Only the frontend origin is allowed, taken from `FRONTEND_URL` in `cms/.env`, never a wildcard. `config/cors.php` also narrows the paths to `api/*` and the methods to `GET, HEAD, OPTIONS`. Mirrors production, which sends `Access-Control-Allow-Origin: https://inivie.com` |
 | Indexing | API responses send `X-Robots-Tag: noindex`, matching production |
 | Secrets | All through `.env`, with a committed `.env.example` and `.env` in gitignore |
 | Revalidation endpoint | Requires a shared secret, rejects with 401 on mismatch |
@@ -428,9 +430,12 @@ inivie-homepage-redesign/
 │   │   │   │   ├── Admin/PropertyOrderController.php
 │   │   │   │   ├── Admin/PropertyPublishController.php
 │   │   │   │   ├── Auth/LoginController.php
-│   │   │   │   └── Api/V1/PropertyController.php
+│   │   │   │   ├── Api/V1/PropertyController.php
+│   │   │   │   └── Api/V1/HealthController.php
+│   │   │   ├── Middleware/ApiResponseHeaders.php
 │   │   │   ├── Requests/StorePropertyRequest.php
 │   │   │   ├── Requests/UpdatePropertyRequest.php
+│   │   │   ├── Requests/Api/V1/ListPropertiesRequest.php
 │   │   │   └── Resources/PropertyResource.php
 │   │   ├── Enums/PropertyCategory.php
 │   │   ├── Models/Property.php
@@ -438,6 +443,7 @@ inivie-homepage-redesign/
 │   │   └── Services/
 │   │       ├── PropertyImageStore.php     stores and removes files
 │   │       └── FrontendRevalidator.php    calls the Next.js webhook
+│   ├── config/cors.php        one origin from FRONTEND_URL, never a wildcard
 │   ├── database/{migrations,factories,seeders}/
 │   ├── resources/views/{layouts,admin,auth}/
 │   ├── routes/{web.php,api.php}
@@ -473,6 +479,8 @@ setup instructions tell a reviewer to copy.
 ```
 
 Naming principles: components in PascalCase, folders in kebab-case, one component per file, and no `utils.ts` dumping ground.
+
+`Api/V1/` nests, in requests as well as controllers, while the admin form requests stay flat. The version is part of the public contract (P1), so everything the contract is made of moves together when `/api/v2` arrives. An admin form request has no version to move with.
 
 ---
 

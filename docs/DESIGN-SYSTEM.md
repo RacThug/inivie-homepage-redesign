@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | Document type | Design System Specification |
-| Version | 1.0 |
-| Date | 21 August 2026 |
+| Version | 1.1 |
+| Date | 22 August 2026 |
 | Status | Living document. Expected to change during implementation |
 
 **Scope of this document.** Visual tokens and their application: colour, typography, spacing, radius, elevation, motion, breakpoints, and the visual specification of shared components.
@@ -36,33 +36,57 @@ Five principles govern every decision here. They are stated in PRD ch. 6.3 and r
 | `ink` | `#1C2434` | Primary text, dark surfaces, footer |
 | `ink-muted` | `#4A5468` | Secondary text |
 | `accent` | `#FF8737` | Primary buttons, active links, markers |
-| `accent-hover` | `#E45826` | Hover and pressed states |
-| `gold` | `#C9A779` | Luxury accent, dividers, eyebrow labels |
+| `accent-hover` | `#F46100` | Hover and pressed states |
+| `gold` | `#C9A779` | Luxury accent, dividers, and markers. Never text on a light surface |
+| `gold-dark` | `#8E6A39` | Eyebrow labels, and any gold text on a light surface |
 | `surface` | `#FFFFFF` | Card backgrounds |
 | `surface-alt` | `#F7F7F5` | Alternating section backgrounds |
 | `border` | `#E4E6EA` | Borders and separators |
 | `muted` | `#AAB1BB` | Placeholder and disabled text |
+| `on-accent` | `#1C2434` | Text and icons on an accent fill. A decision, not a new colour: it resolves to `ink`, for the reason in ch. 2.2 |
 
 `ink`, `accent`, and `gold` are taken directly from production. `ink-muted`, `surface-alt`, and `border` are additions, because production has no consistent secondary text or surface token and the page reads flatter for it.
+
+`accent-hover` and `gold-dark` are set by measurement rather than by eye. Both are explained in ch. 2.2.
 
 ### 2.2 Contrast requirements
 
 Every text and background pairing must meet WCAG AA, at least 4.5 to 1 for body text and 3 to 1 for large text.
 
-| Pairing | Status |
-| --- | --- |
-| `ink` on `surface` | Passes comfortably |
-| `ink-muted` on `surface` | Passes |
-| `ink` on `surface-alt` | Passes |
-| `surface` on `ink` | Passes |
-| `muted` on `surface` | **Decorative and disabled states only.** Must never carry meaning |
-| `surface` on `accent` | **Must be measured before use.** White on a mid orange is the most likely failure in this palette. If it does not reach 4.5 to 1, accented buttons use `ink` text instead |
+Measured on 22 August 2026 against the tokens in `web/src/app/globals.css`. The measurement is not a one-off exercise: `web/src/design/palette.test.ts` parses that stylesheet and re-checks every row below on each test run, so a token edited to an inaccessible value fails the suite rather than reaching a reviewer.
 
-The last row is a known risk, not an oversight. It is resolved by measurement while the design system foundation is built, not by assumption.
+| Pairing | Ratio | Status |
+| --- | --- | --- |
+| `ink` on `surface` | 15.54 | Passes |
+| `surface` on `ink` | 15.54 | Passes |
+| `ink` on `surface-alt` | 14.49 | Passes |
+| `ink-muted` on `surface` | 7.61 | Passes |
+| `ink-muted` on `surface-alt` | 7.10 | Passes |
+| `gold` on `ink` | 6.87 | Passes. Gold carries text only on a dark panel |
+| `on-accent` on `accent` | 6.49 | Passes |
+| `gold-dark` on `surface` | 4.92 | Passes |
+| `on-accent` on `accent-hover` | 4.85 | Passes |
+| `gold-dark` on `surface-alt` | 4.58 | Passes |
+| `surface` on `accent`, and `accent` on `surface` | 2.39 | **Fails.** See below |
+| `gold` on `surface` | 2.26 | Fails. Decorative use only |
+| `muted` on `surface` | 2.16 | Fails. Decorative and disabled states only. Must never carry meaning |
+| `border` on `surface` | 1.25 | Fails. Separators only, never text |
+
+#### The white on accent decision
+
+This was flagged in the first draft as the pairing most likely to fail, to be resolved by measurement rather than assumption. It measures **2.39 to 1**, far below the 4.5 required, so the fallback named there applies: accented controls carry `ink` text at 6.49 to 1. The decision is stored as the `on-accent` token so no component has to remember it, and the value is a reference to `ink` rather than a second copy of the hex.
+
+#### Two failures the first draft did not anticipate
+
+**The hover fill.** `accent-hover` was drafted as `#E45826`. Ink text on it reaches only 4.23 to 1, so the primary button would have sat below AA for as long as a pointer rested on it, and white is worse again at 3.67. No text colour clears AA on that fill, so the fill had to change. `#F46100` is the darkest orange on the same hue that still carries ink text at AA, which keeps the hover state clearly darker than the resting state without giving up contrast.
+
+**Gold as text.** ch. 2.1 assigned `gold` to eyebrow labels, which are text. It reaches 2.26 to 1 on `surface` and 2.11 on `surface-alt`, so a gold eyebrow on a light section would have failed AA everywhere it appeared. Production's gold is kept untouched for dividers and markers, and `gold-dark` carries the same hue and saturation at a lightness that clears AA on both light surfaces, so eyebrow labels still read as gold.
 
 ### 2.3 Accent discipline
 
 `accent` appears on: the primary button, the active navigation item, and small markers such as a rating star. It does not appear as a section background, a large fill, or a decorative shape. When a section needs emphasis it uses `ink` as a dark panel, not orange.
+
+`accent` is a fill colour, never text on a light surface, because it reaches only 2.39 to 1 there. The active navigation item is therefore marked with an accent rule or underline while its label stays `ink`.
 
 ---
 
@@ -74,7 +98,7 @@ The last row is a known risk, not an oversight. It is resolved by measurement wh
 | --- | --- | --- |
 | Poppins | Headings | `next/font/google`, latin subset, `display: swap` |
 | Inter | Body, labels, UI | `next/font/google`, latin subset, `display: swap` |
-| Great Vibes | Optional decorative accent | Loaded only if actually used |
+| Great Vibes | Optional decorative accent | Loaded only if actually used. Nothing renders it yet, so it is not loaded |
 
 Self hosting through `next/font` removes both layout shift and any runtime third party request, which directly serves the performance targets in PRD ch. 8.2.
 

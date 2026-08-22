@@ -3,7 +3,139 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/**
+ * Admin panel tokens, from docs/DESIGN-SYSTEM.md ch. 8.
+ *
+ * A deliberately duplicated subset of web/src/app/globals.css rather than a
+ * shared package: this repository holds two applications and no workspace.
+ * Keeping the subset small is what keeps the duplication cheap to check by
+ * eye, so nothing is declared here that the admin does not render.
+ *
+ * Absent on purpose: `gold` and `gold-dark`, which are luxury markers aimed at
+ * guests and read as noise in a data table (ch. 8.1).
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Colour - ch. 2.1, minus the gold pair */
+    --color-ink: #1c2434;
+    --color-ink-muted: #4a5468;
+    --color-accent: #ff8737;
+    --color-accent-hover: #f46100;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f7f7f5;
+    --color-border: #e4e6ea;
+    --color-muted: #aab1bb;
+
+    /**
+     * Destructive actions and validation errors - ch. 8.2. The homepage
+     * palette has no red because the homepage has nothing destructive on it
+     * and no forms to fail, so this pair lives here and nowhere else.
+     *
+     * Measured, not chosen by eye: `danger` reaches 6.57 on `surface` and
+     * 6.13 on `surface-alt`. Unlike `accent`, it is legible as text on a
+     * light surface, which is what makes per field error messages possible.
+     */
+    --color-danger: #b42318;
+    --color-danger-hover: #8e1b12;
+
+    /**
+     * ch. 8.1: no webfont. Poppins and Inter carry the brand voice on a page
+     * a guest reads; the admin is read by one person who is working, and the
+     * CMS has no `next/font`, so loading one would mean a runtime request for
+     * a screen no guest sees.
+     */
+    --font-sans:
+        system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    /* Radius - ch. 4.2 */
+    --radius-card: 0.75rem; /* 12px */
+    --radius-control: 0.5rem; /* 8px */
+
+    /**
+     * Elevation - ch. 8.1. One level, not the two the homepage uses. Admin
+     * panels are containers rather than clickable objects, so only the
+     * confirm modal is raised.
+     */
+    --shadow-raised:
+        0 2px 4px rgb(28 36 52 / 0.06), 0 8px 20px rgb(28 36 52 / 0.1);
+
+    /* Motion - ch. 5, hover and focus only. No scroll entrance in the admin. */
+    --default-transition-duration: 200ms;
+    --default-transition-timing-function: var(--ease-out);
+}
+
+/**
+ * The three sidebar states of docs/DESIGN-SYSTEM.md ch. 8.3, expressed once
+ * here rather than as a repeated string of variant utilities in Blade.
+ *
+ * The rail is driven by `data-rail` on the sidebar, which the server writes
+ * from the cookie while rendering. That is the whole point of storing the
+ * state in a cookie: the correct width is in the first paint, so there is no
+ * frame of expanded sidebar to correct afterwards.
+ */
+@layer components {
+    .side-item {
+        @apply flex h-9 items-center gap-3 border-l-2 border-transparent px-5 text-sm text-surface/70 transition-colors;
+        @apply hover:bg-surface/5 hover:text-surface;
+        @apply focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-surface;
+    }
+
+    /* ch. 2.3: accent is a fill, never a text colour. The rule marks the
+       item; the label stays `surface`. */
+    .side-item-active {
+        @apply border-accent bg-surface/10 text-surface;
+    }
+
+    [data-rail='true'] .side-label {
+        @apply hidden;
+    }
+
+    [data-rail='true'] .side-item {
+        @apply justify-center gap-0 px-0;
+    }
+
+    /**
+     * The width is a consequence of `data-rail`, not a separate class the
+     * server and the browser both have to remember to set. Toggling
+     * `lg:w-16` from JavaScript would work, but it puts one fact in two
+     * places and leaves the utility alive only for as long as its literal
+     * survives in a file Tailwind scans.
+     *
+     * Below this breakpoint the sidebar is not rendered at all: navigation
+     * is the drawer, so there is no width to state.
+     */
+    @media (width >= 64rem) {
+        #admin-sidebar {
+            width: calc(var(--spacing) * 60); /* 240px */
+        }
+
+        #admin-sidebar[data-rail='true'] {
+            width: calc(var(--spacing) * 16); /* 64px */
+        }
+    }
+
+    /* ch. 6.3. One focus treatment, applied on focus-visible only, so
+       keyboard users get a ring and pointer users do not. */
+    .focus-ink {
+        @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink;
+    }
+}
+
+@layer base {
+    body {
+        background-color: var(--color-surface-alt);
+        color: var(--color-ink);
+        font-family: var(--font-sans);
+    }
+
+    /* DESIGN-SYSTEM ch. 5. A hard requirement, not a nicety. */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 }

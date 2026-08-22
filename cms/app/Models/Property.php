@@ -63,19 +63,30 @@ class Property extends Model
     }
 
     /**
-     * Domain rules D1 and D2: the homepage shows published, undeleted rows
-     * in `sort_order` ascending, newest first within a tie.
+     * Domain rule D1. Soft deleted rows are excluded by the SoftDeletes
+     * global scope, so this only has to state the publishing half.
      *
-     * Soft deleted rows are excluded by the SoftDeletes global scope, so
-     * this scope only has to state the publishing half of D1.
+     * Filtering and ordering are separate scopes because a caller that
+     * only counts published rows should not pay for a sort it never
+     * reads. The homepage query composes both.
      *
      * @param  Builder<Property>  $query
      * @return Builder<Property>
      */
     public function scopePublished(Builder $query): Builder
     {
+        return $query->where('is_published', true);
+    }
+
+    /**
+     * Domain rule D2.
+     *
+     * @param  Builder<Property>  $query
+     * @return Builder<Property>
+     */
+    public function scopeInDisplayOrder(Builder $query): Builder
+    {
         return $query
-            ->where('is_published', true)
             ->orderBy('sort_order')
             ->orderByDesc('created_at');
     }

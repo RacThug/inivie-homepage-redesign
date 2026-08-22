@@ -5,8 +5,8 @@ namespace App\Enums;
 /**
  * The allowed values of `properties.category`.
  *
- * Defined here once and referenced by the migration, the model cast, and
- * validation, so the allowed set cannot drift between the schema and the
+ * Defined here once and referenced by both the migration and the model
+ * cast, so the allowed set cannot drift between the schema and the
  * application. See docs/DATA-MODEL.md ch. 5.
  */
 enum PropertyCategory: string

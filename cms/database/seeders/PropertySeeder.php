@@ -8,19 +8,16 @@ use Illuminate\Database\Seeder;
 
 /**
  * The 6 properties of docs/DATA-MODEL.md ch. 4: 4 published, 2 draft.
- *
- * The two drafts are not padding. They are the evidence that D1 works,
- * because a reviewer sees 6 rows in the CMS and exactly 4 on the homepage,
- * which proves the publish filter is real rather than assumed.
- *
- * Names are properties genuinely associated with the group, so the
- * homepage looks credible rather than filled with lorem ipsum.
  */
 class PropertySeeder extends Seeder
 {
     /**
-     * Attributes that differ per row. Everything else comes from the
+     * Everything ch. 4 pins down. Anything absent here is supplied by the
      * factory, so seed data and test data cannot drift apart.
+     *
+     * Derived columns are written out rather than computed, because the
+     * factory derives them from a generated slug and would otherwise
+     * disagree with the slug named here.
      *
      * @var list<array<string, mixed>>
      */
@@ -28,6 +25,8 @@ class PropertySeeder extends Seeder
         [
             'title' => 'Leedon Villa Seminyak',
             'slug' => 'leedon-villa-seminyak',
+            'image_path' => 'properties/leedon-villa-seminyak.webp',
+            'cta_url' => 'https://inivie.com/properties/leedon-villa-seminyak',
             'category' => PropertyCategory::Villa,
             'location' => 'Seminyak, Bali',
             'excerpt' => 'A walled garden villa two streets back from Petitenget beach, with a private pool and a full kitchen.',
@@ -40,6 +39,8 @@ class PropertySeeder extends Seeder
         [
             'title' => 'Ajowa Resort',
             'slug' => 'ajowa-resort',
+            'image_path' => 'properties/ajowa-resort.webp',
+            'cta_url' => 'https://inivie.com/properties/ajowa-resort',
             'category' => PropertyCategory::Resort,
             'location' => 'Nusa Dua, Bali',
             'excerpt' => 'Sixty rooms around a central lagoon pool, a short walk from the calm water of the southern reef.',
@@ -52,6 +53,8 @@ class PropertySeeder extends Seeder
         [
             'title' => 'La Mewali Resort',
             'slug' => 'la-mewali-resort',
+            'image_path' => 'properties/la-mewali-resort.webp',
+            'cta_url' => 'https://inivie.com/properties/la-mewali-resort',
             'category' => PropertyCategory::Resort,
             'location' => 'Uluwatu, Bali',
             'excerpt' => 'Cliffside suites above the break at Bingin, with an open air restaurant facing the sunset.',
@@ -64,6 +67,8 @@ class PropertySeeder extends Seeder
         [
             'title' => 'Astera Canggu',
             'slug' => 'astera-canggu',
+            'image_path' => 'properties/astera-canggu.webp',
+            'cta_url' => 'https://inivie.com/properties/astera-canggu',
             'category' => PropertyCategory::Hotel,
             'location' => 'Canggu, Bali',
             'excerpt' => 'A compact design hotel on Batu Bolong, built around a courtyard cafe and a rooftop pool.',
@@ -76,6 +81,8 @@ class PropertySeeder extends Seeder
         [
             'title' => 'Seascape Sanur',
             'slug' => 'seascape-sanur',
+            'image_path' => 'properties/seascape-sanur.webp',
+            'cta_url' => 'https://inivie.com/properties/seascape-sanur',
             'category' => PropertyCategory::Resort,
             'location' => 'Sanur, Bali',
             'excerpt' => 'Low rise pavilions opening straight onto the Sanur boardwalk, with a sunrise facing beach club.',
@@ -88,6 +95,8 @@ class PropertySeeder extends Seeder
         [
             'title' => 'Svaha Retreat Ubud',
             'slug' => 'svaha-retreat-ubud',
+            'image_path' => 'properties/svaha-retreat-ubud.webp',
+            'cta_url' => 'https://inivie.com/properties/svaha-retreat-ubud',
             'category' => PropertyCategory::Villa,
             'location' => 'Ubud, Bali',
             'excerpt' => 'Eight villas terraced into the Petanu river valley, each with an outdoor bath over the gorge.',
@@ -100,28 +109,22 @@ class PropertySeeder extends Seeder
     ];
 
     /**
-     * Keyed on `slug` so re-seeding updates the 6 rows rather than
-     * duplicating them, and so a soft deleted row is revived rather than
+     * Keyed on `slug` so re-seeding refreshes the 6 rows rather than
+     * duplicating them, and so a soft deleted row is matched rather than
      * colliding with the unique constraint of D4.
+     *
+     * A soft deleted row is refreshed in place and left deleted. Reviving
+     * it would overrule an editor's deletion, which is the one thing D5
+     * exists to make safe.
      */
     public function run(): void
     {
         foreach (self::PROPERTIES as $row) {
-            $published = $row['published'];
+            $state = $row['published'] ? 'published' : 'draft';
             unset($row['published']);
 
-            $row['cta_url'] = "https://inivie.com/properties/{$row['slug']}";
-            $row['image_path'] = "properties/{$row['slug']}.webp";
-
-            $attributes = Property::factory()
-                ->{$published ? 'published' : 'draft'}()
-                ->raw($row);
-
             $property = Property::withTrashed()->firstOrNew(['slug' => $row['slug']]);
-            $property->fill($attributes);
-            // Assigned directly rather than through fill(), because
-            // deleted_at is deliberately absent from $fillable.
-            $property->deleted_at = null;
+            $property->fill(Property::factory()->{$state}()->raw($row));
             $property->save();
         }
     }

@@ -4,9 +4,7 @@ use App\Models\Property;
 use Database\Seeders\PropertySeeder;
 
 /*
-| Seed data, docs/DATA-MODEL.md ch. 4. The two drafts are not padding:
-| they are the evidence that D1 works, since a reviewer sees 6 rows in
-| the CMS and exactly 4 on the homepage.
+| Seed data, docs/DATA-MODEL.md ch. 4.
 */
 
 beforeEach(function () {
@@ -52,4 +50,14 @@ it('is idempotent, so re-seeding does not duplicate rows', function () {
     $this->seed(PropertySeeder::class);
 
     expect(Property::count())->toBe(6);
+});
+
+it('leaves a soft deleted property deleted when the seeder runs again', function () {
+    $property = Property::where('slug', 'ajowa-resort')->firstOrFail();
+    $property->delete();
+
+    $this->seed(PropertySeeder::class);
+
+    expect(Property::where('slug', 'ajowa-resort')->exists())->toBeFalse()
+        ->and(Property::withTrashed()->where('slug', 'ajowa-resort')->exists())->toBeTrue();
 });

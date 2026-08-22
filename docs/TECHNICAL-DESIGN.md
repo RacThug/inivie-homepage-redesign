@@ -80,7 +80,7 @@ Versions verified against the npm registry, Packagist, the Laravel support polic
 | CMS auth | Minimal Laravel session auth (Breeze style) | - | - |
 | Admin UI | Blade + Tailwind CSS | - | - |
 | Image storage | Laravel filesystem, configured disk. `public` for this project, see ch. 5.5 | - | - |
-| Backend tests | Pest | - | - |
+| Backend tests | Pest | 4.x | 4.7.8 |
 | Frontend tests | Vitest + Testing Library, Playwright | - | - |
 | PHP formatting | Laravel Pint | - | - |
 | JS formatting and linting | ESLint + Prettier | - | - |
@@ -167,14 +167,15 @@ Two services, `app` and `mysql`, in a file short enough to read in full. Laravel
 
 `php:8.5-cli` cannot be used as-is. Inspected on 22 August 2026, the image resolves to PHP 8.5.9 and already carries every extension Laravel requires (`ctype`, `curl`, `dom`, `fileinfo`, `filter`, `hash`, `mbstring`, `openssl`, `pcre`, `PDO`, `session`, `tokenizer`, `xml`), but it ships **`pdo_sqlite` and no `pdo_mysql`**. Pointing the compose file straight at the image would start cleanly and then fail on the first query.
 
-So the `app` service builds from a Dockerfile that does two things:
+So the `app` service builds from a Dockerfile that does three things:
 
 | Step | Reason |
 | --- | --- |
-| `docker-php-ext-install pdo_mysql` | The one genuinely missing extension. Everything else Laravel needs is already in the base image, so nothing more is added |
+| `docker-php-ext-install pdo_mysql` | The one genuinely missing PHP extension. Everything else Laravel needs is already in the base image, so nothing more is added |
+| `apt-get install unzip` | Composer unpacks dist archives with the `zip` extension or, failing that, the `unzip` binary. The base image has neither, so `composer require` aborts with `The zip extension and unzip/7z commands are both missing`. `unzip` is the smaller of the two fixes: one apt package against a PHP extension that would also pull in `libzip-dev` |
 | Copy `composer` in from the `composer:2` image | Keeps Composer at a pinned version and avoids an install script, so no Composer is needed on the host either |
 
-The Dockerfile stays deliberately thin. Every line added to it is a line a reviewer has to read to trust the environment, so extensions are installed because a dependency needs them, never speculatively.
+The Dockerfile stays deliberately thin. Every line added to it is a line a reviewer has to read to trust the environment, so extensions are installed because a dependency needs them, never speculatively. `unzip` earned its line on 22 August 2026, when installing Pest was the first command to need it.
 
 #### Verification status
 
@@ -187,6 +188,9 @@ Run on 22 August 2026:
 | `docker compose up -d --build` | Both services up, `mysql` reports healthy before `app` starts |
 | Resolved stack | Laravel 13.26.1, PHP 8.5.9, MySQL 8.4.11 |
 | `artisan migrate` | All three framework migrations ran against MySQL |
+| `artisan migrate:fresh --seed` | Re-run 22 August 2026 with the `properties` migration and seeder. Schema matches DATA-MODEL ch. 2 column for column, including the `enum`, `char(3)`, `decimal(2,1)` and all three indexes |
+| `artisan test` | 25 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
+| `vendor/bin/pint --test` | Clean across 35 files |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
 | Native path | **Not verified.** This machine has no PHP or MySQL |
 
@@ -395,7 +399,7 @@ inivie-homepage-redesign/
 │                              rather than project output
 ├── cms/                       Laravel application
 │   ├── docker-compose.yml     app + mysql, the only Docker in the repo
-│   ├── Dockerfile             php:8.5-cli + pdo_mysql + composer
+│   ├── Dockerfile             php:8.5-cli + pdo_mysql + unzip + composer
 │   ├── .env.example           defaults to the native path; Compose overrides
 │   ├── app/
 │   │   ├── Http/
@@ -408,7 +412,9 @@ inivie-homepage-redesign/
 │   │   │   ├── Requests/StorePropertyRequest.php
 │   │   │   ├── Requests/UpdatePropertyRequest.php
 │   │   │   └── Resources/PropertyResource.php
+│   │   ├── Enums/PropertyCategory.php
 │   │   ├── Models/Property.php
+│   │   ├── Observers/PropertyObserver.php
 │   │   └── Services/
 │   │       ├── PropertyImageStore.php     stores and removes files
 │   │       └── FrontendRevalidator.php    calls the Next.js webhook

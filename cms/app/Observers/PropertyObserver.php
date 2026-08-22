@@ -15,9 +15,9 @@ use Illuminate\Support\Str;
  *
  * The file rules live here rather than in `PropertyController` because they
  * are facts about the record, not steps in one screen's flow. A bulk import,
- * a Tinker session, or the reordering screen that arrives with #10 would each
- * otherwise have to remember them, and the one that forgets leaves either an
- * orphaned file or a row pointing at nothing.
+ * a Tinker session, or the reordering screen would each otherwise have to
+ * remember them, and the one that forgets leaves either an orphaned file or
+ * a row pointing at nothing.
  */
 class PropertyObserver
 {

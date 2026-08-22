@@ -305,7 +305,10 @@ Semantic landmarks (`header`, `nav`, `main`, `section`, `footer`). Alternative t
 ```
 inivie-homepage-redesign/
 ├── README.md                  setup steps, technical decisions, screenshots
+├── AGENTS.md                  conventions for agents working in this repo
+├── CLAUDE.md                  one-line pointer to AGENTS.md
 ├── .gitignore
+├── .gitattributes
 ├── docs/
 │   ├── PRD.md
 │   ├── TECHNICAL-DESIGN.md

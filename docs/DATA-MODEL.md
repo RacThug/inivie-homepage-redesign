@@ -56,7 +56,7 @@ There is intentionally no relation between `users` and `properties`. Attributing
 | `category` | `enum` | not null, default `villa` | `resort`, `villa`, `hotel` |
 | `location` | `varchar(120)` | not null | e.g. "Seminyak, Bali" |
 | `excerpt` | `varchar(240)` | not null | Short description shown on the card |
-| `image_path` | `varchar(255)` | not null | Relative path on the `public` disk |
+| `image_path` | `varchar(255)` | not null | Relative path on the configured filesystem disk, never a full URL |
 | `image_alt` | `varchar(160)` | **not null** | Required, not nullable, so alternative text can never be missing |
 | `price_from` | `int unsigned` | nullable | Starting nightly rate in whole currency units |
 | `currency` | `char(3)` | not null, default `IDR` | ISO 4217 code |
@@ -80,6 +80,7 @@ There is intentionally no relation between `users` and `properties`. Attributing
 | `sort_order` | `smallint unsigned` | An explicit ordering column, because insertion order is not an editorial decision |
 | `slug` | Present despite there being no detail page | Costs nothing now, and is the prerequisite for the property detail page in PRD ch. 12. Also gives every row a stable human readable identifier |
 | `deleted_at` | Soft delete | An accidental deletion in a CMS should be recoverable. Also lets image cleanup be deferred safely |
+| `image_path` | Relative path, never a full URL | A stored URL bakes the host into every row, so changing where media lives would need a data migration to rewrite them, and any row missed stays broken forever. The absolute URL is derived at the API layer instead. See TECHNICAL-DESIGN ch. 5.5 |
 
 ### 2.2 Indexes
 

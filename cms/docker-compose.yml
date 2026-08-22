@@ -1,0 +1,46 @@
+# Local development environment for the CMS.
+#
+# This file is environment, not architecture. Deleting it must leave a
+# working Laravel application, because a reviewer who already has PHP and
+# MySQL installed skips Docker entirely. See docs/TECHNICAL-DESIGN.md ch. 2.4.
+#
+#   docker compose up -d
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    # No DB_HOST override here on purpose. `artisan serve` passes only an
+    # allowlist of variables to the server subprocess (ServeCommand::
+    # $passthroughVariables) and DB_HOST is not on it, so a container
+    # variable would apply to artisan commands but silently not to
+    # requests. .env is the single source instead.
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE:-inivie}"
+      MYSQL_USER: "${DB_USERNAME:-inivie}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-secret}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"
+    ports:
+      # Shift this if 3306 is already taken on the host.
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      # app waits for this, so the first `up` does not race the migration.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD:-secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  dbdata:

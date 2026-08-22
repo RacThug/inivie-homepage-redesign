@@ -136,9 +136,26 @@ Three rules keep both paths working:
 
 | Rule | Mechanism |
 | --- | --- |
-| One `.env.example` serves both paths | Laravel does not overwrite environment variables already set at the system level. `.env.example` ships `DB_HOST=127.0.0.1` for the native path, and Compose sets `DB_HOST=mysql` in the container, which wins. Neither reviewer edits anything |
+| `.env` is the single source for the database host | `.env.example` ships `DB_HOST=mysql`, the Compose service name, because Docker is the verified path. A reviewer using their own MySQL changes that one line to `127.0.0.1`. Nothing else differs between the two paths |
 | A busy port does not block the Docker path | The published MySQL port is `${FORWARD_DB_PORT:-3306}:3306`, so a reviewer already running MySQL on 3306 sets one variable instead of debugging a bind failure |
 | Application code stays Docker-unaware | The compose file is environment, not architecture. Deleting it must leave a working Laravel application |
+
+##### Why not set `DB_HOST` in the compose file
+
+The obvious design is to keep `.env.example` pointing at `127.0.0.1` for the native path and let Compose export `DB_HOST=mysql`, so neither reviewer edits anything. That was the original plan here, and **it does not work**.
+
+`artisan serve` does not hand its environment to the server it starts. `Illuminate\Foundation\Console\ServeCommand::$passthroughVariables` is an explicit allowlist of fourteen variables, and `DB_HOST` is not among them, so it is stripped from the subprocess. The subprocess then reads `.env`.
+
+The failure mode is worse than a plain error, because it is inconsistent:
+
+| Path | Host used | Result |
+| --- | --- | --- |
+| `artisan migrate`, `artisan tinker` | the container variable, `mysql` | works |
+| An actual HTTP request | `.env`, `127.0.0.1` | connection refused |
+
+Migrations succeed, the console reports a healthy database, and only real traffic fails. That is a bad afternoon to debug.
+
+Two details make this worth recording rather than quietly fixing. `LARAVEL_SAIL` **is** on that allowlist, which is the tell: Sail does not rely on environment override either, it writes `DB_HOST=mysql` into `.env` during install. And the same stripping cost real time here in a second way, since the refused connection waited out a TCP timeout on every request, which first looked like Windows bind mount latency rather than a configuration fault.
 
 #### Compose scope
 
@@ -162,6 +179,18 @@ The Dockerfile stays deliberately thin. Every line added to it is a line a revie
 #### Verification status
 
 Both paths are documented, but only what has actually been run can be claimed as working. The README marks each path as verified or unverified, and A15 is only satisfied by a path that has genuinely been executed from a fresh clone.
+
+Run on 22 August 2026:
+
+| Check | Result |
+| --- | --- |
+| `docker compose up -d --build` | Both services up, `mysql` reports healthy before `app` starts |
+| Resolved stack | Laravel 13.26.1, PHP 8.5.9, MySQL 8.4.11 |
+| `artisan migrate` | All three framework migrations ran against MySQL |
+| `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
+| Native path | **Not verified.** This machine has no PHP or MySQL |
+
+The warm figure is the useful one. At ~50ms through a Windows bind mount, the earlier claim that `artisan serve` is barely affected by bind mount latency holds, and no volume tuning is warranted.
 
 ---
 

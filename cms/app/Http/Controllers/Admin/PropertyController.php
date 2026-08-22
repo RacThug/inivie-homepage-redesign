@@ -100,15 +100,28 @@ class PropertyController extends Controller
         // existing `image_path` is left alone rather than overwritten with
         // a null the column would reject.
         //
-        // The file it replaces is deliberately not removed here. Deleting
-        // the old one only after the save succeeds, inside the transaction
-        // ch. 5.4 describes, is issue #9 together with the force delete
-        // cleanup. Doing half of it now would mean writing the delete twice.
+        // Removing the file this one replaces is not done here. It belongs
+        // to `PropertyObserver`, which runs it once the save has committed:
+        // the rule is true of the record, not of this screen, so a second
+        // writer cannot forget it. See ch. 5.4.
+        $uploaded = null;
+
         if ($request->hasFile('image')) {
-            $attributes['image_path'] = $this->images->store($request->file('image'));
+            $uploaded = $this->images->store($request->file('image'));
+            $attributes['image_path'] = $uploaded;
         }
 
-        $property->update($attributes);
+        try {
+            $property->update($attributes);
+        } catch (Throwable $failure) {
+            // The mirror of the create path: an upload that no row ended up
+            // pointing at must not survive the failure that stranded it.
+            if ($uploaded !== null) {
+                $this->images->remove($uploaded);
+            }
+
+            throw $failure;
+        }
 
         return redirect()
             ->route('admin.properties.index')

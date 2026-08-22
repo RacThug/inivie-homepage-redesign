@@ -18,10 +18,11 @@ use Illuminate\Support\Facades\Storage;
  * derives the absolute URL once, from the configured disk. Storing a URL
  * would bake the host into every row.
  *
- * Replacement and force delete cleanup belong to issue #9. This class
- * arrives with the CRUD that first needs it rather than after it, because
- * `properties.image_path` is not nullable: a create form without an upload
- * cannot write a row at all.
+ * It stores and it removes, and it decides nothing. *When* a file should go
+ * is a fact about the record rather than about the disk, so it lives in
+ * `PropertyObserver`: the replaced file goes once the save commits, and the
+ * file of a deleted property goes only on a force delete, never on the soft
+ * delete D5 makes reversible.
  */
 class PropertyImageStore
 {
@@ -46,10 +47,12 @@ class PropertyImageStore
     /**
      * Remove a stored file, if it is still there.
      *
-     * Only two callers are legitimate: a create whose database write failed
-     * after the upload landed, and the replacement path in issue #9. A
-     * delete never reaches here, because D5 makes deletion soft and keeps
-     * the file for a restore.
+     * Three callers are legitimate, and they are the three moments a file
+     * stops having a row behind it: a write that failed after its upload had
+     * already landed, a replacement whose save has committed, and a force
+     * delete. Missing paths are not an error here, because the disk is
+     * allowed to be behind: a row seeded with a path to a file nobody ever
+     * uploaded must not turn an edit into an exception.
      */
     public function remove(string $path): void
     {

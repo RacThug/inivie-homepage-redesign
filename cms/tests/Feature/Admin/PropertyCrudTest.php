@@ -183,9 +183,9 @@ describe('edit', function () {
 
         $path = $property->fresh()->image_path;
 
-        // Removing the file the new one replaced is issue #9, together with
-        // the transaction ch. 5.4 puts it inside. What #8 owes is that the
-        // column now points at the new file.
+        // What this case owes is that the column points at the new file.
+        // What happens to the file it replaced is the subject of
+        // PropertyImageCleanupTest.
         expect($path)->not->toBe('properties/original.webp')
             ->and($path)->toStartWith('properties/');
 

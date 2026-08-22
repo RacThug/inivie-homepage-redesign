@@ -117,6 +117,52 @@ Decoupling also allows each side to be optimised independently: the frontend for
 | Images on a local filesystem disk **for this test**, behind a swappable seam | Base64 in a database column, or object storage from day one | Base64 wrecks query performance and caching, so it is rejected outright. Object storage is rejected only for now: it needs credentials the reviewer does not have, which puts acceptance criterion A15 at risk. Production inivie.com does serve media through a CDN (PRD ch. 2.2), so the move is a real one, just not this week. Ch. 5.5 keeps it a configuration change rather than a rewrite |
 | Typed static content modules for non-dynamic sections | Hardcoded markup in components | Keeps every section one step away from becoming dynamic, and keeps copy edits out of layout code |
 
+### 2.4 Local development environment
+
+**PHP and MySQL run in Docker. Node runs natively.**
+
+| Part | How it runs | Why |
+| --- | --- | --- |
+| `cms/` and MySQL | Docker Compose | Pins PHP 8.5 and MySQL 8.4 exactly, with no PHP installation on the developer's machine. Installing PHP on Windows means enabling extensions by hand, and MySQL installers routinely leave conflicting services behind |
+| `web/` | Native `npm run dev` | Next watches thousands of files. Through a Windows bind mount that is slow and hot reload misfires. Running it natively costs nothing, because Node is already the exact target version |
+
+Splitting the two is not a compromise. The Laravel container only runs `artisan serve`, so bind mount latency barely touches it, while a Next dev server is precisely the workload it punishes.
+
+#### Two setup paths, both supported
+
+A reviewer with PHP and MySQL already installed must be able to ignore Docker entirely. That property does not come for free, and it is not a property of the tooling choice: Sail could be skipped just as easily. What makes it true is that **no Docker knowledge leaks into application code**. No container hostnames in `config/`, no environment-specific helpers, storage paths left standard.
+
+Three rules keep both paths working:
+
+| Rule | Mechanism |
+| --- | --- |
+| One `.env.example` serves both paths | Laravel does not overwrite environment variables already set at the system level. `.env.example` ships `DB_HOST=127.0.0.1` for the native path, and Compose sets `DB_HOST=mysql` in the container, which wins. Neither reviewer edits anything |
+| A busy port does not block the Docker path | The published MySQL port is `${FORWARD_DB_PORT:-3306}:3306`, so a reviewer already running MySQL on 3306 sets one variable instead of debugging a bind failure |
+| Application code stays Docker-unaware | The compose file is environment, not architecture. Deleting it must leave a working Laravel application |
+
+#### Compose scope
+
+Two services, `app` and `mysql`, in a file short enough to read in full. Laravel Sail was considered and set aside: it is the ecosystem convention and instantly recognisable, but it generates configuration rather than expressing a decision, and its defaults carry services this project has no use for. In a test that grades code quality, a short file that a reviewer can read end to end is the better artefact.
+
+`php artisan serve` is used rather than nginx with php-fpm. A reverse proxy would add a container and a config file to serve a single local application, buying nothing that matters before production.
+
+#### Why the app service needs a Dockerfile
+
+`php:8.5-cli` cannot be used as-is. Inspected on 22 August 2026, the image resolves to PHP 8.5.9 and already carries every extension Laravel requires (`ctype`, `curl`, `dom`, `fileinfo`, `filter`, `hash`, `mbstring`, `openssl`, `pcre`, `PDO`, `session`, `tokenizer`, `xml`), but it ships **`pdo_sqlite` and no `pdo_mysql`**. Pointing the compose file straight at the image would start cleanly and then fail on the first query.
+
+So the `app` service builds from a Dockerfile that does two things:
+
+| Step | Reason |
+| --- | --- |
+| `docker-php-ext-install pdo_mysql` | The one genuinely missing extension. Everything else Laravel needs is already in the base image, so nothing more is added |
+| Copy `composer` in from the `composer:2` image | Keeps Composer at a pinned version and avoids an install script, so no Composer is needed on the host either |
+
+The Dockerfile stays deliberately thin. Every line added to it is a line a reviewer has to read to trust the environment, so extensions are installed because a dependency needs them, never speculatively.
+
+#### Verification status
+
+Both paths are documented, but only what has actually been run can be claimed as working. The README marks each path as verified or unverified, and A15 is only satisfied by a path that has genuinely been executed from a fresh clone.
+
 ---
 
 ## 3. Rendering and Caching Strategy
@@ -319,6 +365,9 @@ inivie-homepage-redesign/
 │                              gitignored, since it is the client's document
 │                              rather than project output
 ├── cms/                       Laravel application
+│   ├── docker-compose.yml     app + mysql, the only Docker in the repo
+│   ├── Dockerfile             php:8.5-cli + pdo_mysql + composer
+│   ├── .env.example           defaults to the native path; Compose overrides
 │   ├── app/
 │   │   ├── Http/
 │   │   │   ├── Controllers/
@@ -339,6 +388,7 @@ inivie-homepage-redesign/
 │   ├── routes/{web.php,api.php}
 │   └── tests/{Feature,Unit}/
 └── web/                       Next.js application
+    ├── .env.example
     ├── src/
     │   ├── app/
     │   │   ├── layout.tsx

@@ -3,11 +3,11 @@
 | Field | Value |
 | --- | --- |
 | Document type | Design System Specification |
-| Version | 1.1 |
+| Version | 1.2 |
 | Date | 22 August 2026 |
 | Status | Living document. Expected to change during implementation |
 
-**Scope of this document.** Visual tokens and their application: colour, typography, spacing, radius, elevation, motion, breakpoints, and the visual specification of shared components.
+**Scope of this document.** Visual tokens and their application: colour, typography, spacing, radius, elevation, motion, breakpoints, and the visual specification of shared components. Chapters 1 to 7 specify the public homepage. Chapter 8 specifies the admin panel, which reuses most of the same tokens and departs from a few of them deliberately.
 
 Related: [PRD.md](./PRD.md) ch. 6 for what each section must communicate, [TECHNICAL-DESIGN.md](./TECHNICAL-DESIGN.md) ch. 4 for how components are composed.
 
@@ -253,7 +253,129 @@ Design mobile first. Every rule is written as a minimum width, never a maximum.
 
 ---
 
-## 8. Verification
+## 8. Admin Panel
+
+The admin panel is a tool, not a marketing surface. Its quality bar is set in PRD ch. 7.2: the CMS is "simple" in scope, not unfinished. This chapter exists because C1 to C8 are built across four separate issues, and without a shared specification they arrive looking like four applications.
+
+TECHNICAL-DESIGN ch. 5 owns the routes, validation, and controllers. This chapter owns only how they look.
+
+### 8.1 What the admin inherits, and what it departs from
+
+| Inherits | Departs |
+| --- | --- |
+| The colour tokens in ch. 2.1, minus `gold` and `gold-dark` | Typography. The admin uses the system UI stack and loads no webfont |
+| The 4px spacing scale in ch. 4.1 | Rhythm. Admin padding is denser, and the type scale is one step smaller |
+| The radii in ch. 4.2 | Elevation. One level, not two |
+| The motion budget in ch. 5, on hover and focus | Scroll entrance. There is none |
+| The focus treatment in ch. 6.3, unchanged | |
+
+Three departures need a reason on the record.
+
+**No webfont.** Poppins and Inter carry the brand voice on a page a guest reads. The admin is read by one person who is working. The CMS has no `next/font`, so a webfont there means a runtime Google Fonts request from Blade, which is exactly what ch. 3.1 removed from the frontend, paid again for a screen no guest sees. The stack is `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. Continuity is carried by colour, spacing, and radius instead, which is enough for the panel to read as the same product.
+
+**No gold.** Gold is a luxury marker aimed at guests. In a data table it is noise.
+
+**One elevation.** Homepage cards lift on hover because they are clickable objects. Admin panels are containers, so they take a 1px `border` and no shadow at all. The confirm modal is the single raised element in the panel.
+
+### 8.2 One admin-only token
+
+Destructive actions and validation errors need a colour the homepage palette does not have, because the homepage has nothing destructive on it and no forms to fail.
+
+| Token | Hex | Usage |
+| --- | --- | --- |
+| `danger` | `#B42318` | Delete controls, and per field validation error text |
+| `danger-hover` | `#8E1B12` | Hover and pressed state on a danger fill |
+
+Measured on 22 August 2026, same method as ch. 2.2.
+
+| Pairing | Ratio | Status |
+| --- | --- | --- |
+| `surface` on `danger` | 6.57 | Passes |
+| `danger` on `surface` | 6.57 | Passes |
+| `danger` on `surface-alt` | 6.13 | Passes |
+| `surface` on `danger-hover` | 9.07 | Passes |
+
+Unlike `accent`, `danger` **is** legible as text on a light surface. That is what makes it usable for per field error messages, and it is the one place where the accent discipline in ch. 2.3 does not transfer.
+
+Both tokens are declared in `cms/resources/css/app.css` only. They are deliberately absent from `web/src/app/globals.css`, whose token set is asserted exactly by `web/src/design/palette.test.ts`. The admin's colours are a duplicated subset of that file rather than a shared package, because this repository holds two applications and no workspace. Keeping the subset small is what keeps the duplication cheap to check by eye.
+
+### 8.3 Shell
+
+A topbar, and no sidebar. A single resource does not justify a second axis of navigation, and a topbar leaves the full width to a table that has to carry a thumbnail, four columns, and a row of actions.
+
+| Region | Treatment |
+| --- | --- |
+| Page background | `surface-alt`, so white panels read as panels |
+| Topbar | `ink` background, 56px tall, sticky at the top, contents aligned to the page container |
+| Brand mark | "iNi ViE" in `surface` at 15px medium, linking to `/admin` |
+| Nav item | `surface` at 70% opacity, full `surface` when active, with a 2px `accent` rule beneath the active item |
+| Session | The signed in email in `muted`, then a logout button as a ghost variant in `surface` |
+| Page container | The 1280px `container-page` from ch. 4.1, 20px side padding on mobile and 40px on desktop |
+| Page header | Title on the left, at most one primary action on the right. Stacks below 640px |
+| Vertical rhythm | 24px above the page header, 24px from header to content, 16px between stacked panels |
+
+The active nav item is marked with an accent rule while its label stays `surface`, for the same reason ch. 2.3 gives: `accent` is a fill colour, never a text colour.
+
+### 8.4 Type scale
+
+One step smaller than ch. 3.2 across the board, because a tool shows more per screen than a landing page does.
+
+| Role | Weight | Size |
+| --- | --- | --- |
+| Page title | 600 | 20px / 28 |
+| Panel title | 600 | 15px / 22 |
+| Body and table cells | 400 | 14px / 20 |
+| Labels, badges, help text | 500 | 13px / 18 |
+| Stat figure | 600 | 32px / 40 |
+
+### 8.5 Components
+
+Each is specified once here and reused by the issues named, rather than reinvented per screen.
+
+**Panel.** `surface` background, 1px `border`, 12px card radius, no shadow, 20px padding. An optional title row separated by a 1px `border` rule.
+
+**Stat tile.** A panel holding a label in label size `ink-muted`, then the figure in stat scale `ink`. The dashboard is two tiles, published and draft, side by side from 640px and stacked below it. A count of zero renders as `0`. An empty state is for a list with no rows, not for a counter that legitimately reads zero.
+
+**Data table.** Header row in label size `ink-muted` on `surface-alt`, with a 1px `border` beneath. Rows separated by 1px `border`, 12px vertical cell padding, and no zebra striping. Row hover fills `surface-alt`. The thumbnail column is a 56 by 42 image at card radius. The actions column is right aligned and last.
+
+**Status badge.** Published is an `ink` fill with `surface` text. Draft is a `surface` fill with a 1px `border` and `ink-muted` text. Both take the 8px control radius and label size.
+
+This pair introduces no new colour, and it stays unambiguous in greyscale and under any colour vision deficiency, because the difference is fill against outline rather than green against grey.
+
+**Form field.** Label in label size `ink` above the control. Control on `surface` with a 1px `border`, 8px control radius, 40px tall, 12px horizontal padding. Focus per ch. 6.3. The invalid state replaces the border with `danger` and places the message directly below in `danger` at label size. Optional help text sits below the control in `ink-muted`, and is replaced by the error rather than pushed down by it. Errors are per field with the submitted values preserved, which is C8.
+
+**Flash message.** Full width of the page container, directly beneath the page header. A `surface` panel with a 3px left rule: `ink` for a completed action, `danger` for a failure. It persists until the next navigation and is never dismissed on a timer, because a message that removes itself is a message the admin can miss.
+
+**Empty state.** Centred inside the panel with 48px of vertical padding: a line in `ink` naming what is missing, a supporting line in `ink-muted`, then the primary action that resolves it. A bare empty table is never shipped.
+
+**Confirm modal.** The only raised element in the panel. Centred, at most 420px wide, `surface`, card radius, raised elevation, over an `ink` scrim at 50%. A title, one sentence naming the exact record by its title, then Cancel as the secondary variant and the destructive action as the danger variant. Focus moves to Cancel on open and is trapped, and Escape closes, matching the drawer rules in RS3.
+
+**Buttons.** The variants in ch. 6.3 apply unchanged, plus one addition: Danger is a `danger` fill with `surface` text and `danger-hover` on hover. Admin buttons are 36px tall on desktop and 44px on mobile, per RS2.
+
+### 8.6 Login screen
+
+The one admin screen with no shell. A `surface-alt` page holding a single centred `surface` panel, at most 380px wide, card radius, 1px `border`, 32px padding: brand mark, heading, email and password fields, then a full width primary button.
+
+A rejected attempt renders one message above the fields, worded identically whether the email exists or not, so the form is not an account enumeration oracle. Once the rate limiter in TECHNICAL-DESIGN ch. 5.1 trips, its throttle message replaces that one.
+
+### 8.7 Responsive
+
+RS1 and RS2 apply to the admin unchanged. PRD ch. 7.2 sets 768px as the width the panel must stay usable at, so these rules are written to hold from 375px upward rather than at that single width.
+
+| Rule | Behaviour |
+| --- | --- |
+| Below 640px | The data table becomes a stacked list, one panel per property, with the actions on their own row. Six columns cannot be made to work at 375px, and a horizontally scrolling table hides the actions column exactly where it is hardest to discover |
+| Forms | A single column at every width. Never two columns |
+| Topbar | Nav items stay inline at every width. Two items fit at 375px, and a drawer for two links is machinery without a purpose |
+| Page header | The primary action drops below the title below 640px, at full width |
+
+### 8.8 Deliberately absent
+
+Dark mode, charts or sparklines on the dashboard, an icon library beyond inline SVG from one set, toast notifications, saved filters, and bulk actions. Each is a feature the brief did not ask for, and PRD ch. 7.2 defines simple as small in scope. Adding them would trade the thing actually being graded, which is care in what exists, for surface area.
+
+---
+
+## 9. Verification
 
 Before submission:
 
@@ -261,3 +383,10 @@ Before submission:
 2. axe DevTools with zero serious violations.
 3. Visual pass at 375px, 768px, and 1440px, with screenshots kept for the README.
 4. A reduced motion pass with the operating system setting enabled.
+
+For the admin panel:
+
+5. Contrast check the two rows in ch. 8.2 against the values actually declared in `cms/resources/css/app.css`.
+6. Confirm the admin declares no token that ch. 8.1 and ch. 8.2 do not name, so the duplicated subset has not quietly grown.
+7. Visual pass at 375px and 768px on the login screen, the dashboard, the property table, and the property form.
+8. Keyboard pass on the confirm modal: focus lands on Cancel, stays trapped, and Escape closes.

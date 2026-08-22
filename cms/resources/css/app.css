@@ -85,8 +85,56 @@
         @apply border-accent bg-surface/10 text-surface;
     }
 
-    [data-rail='true'] .side-label {
+    /**
+     * The sidebar header: brand on the left, collapse toggle on the right.
+     *
+     * The toggle lives here rather than in the footer because collapsing is a
+     * layout control and the footer holds the session. Collapsed, the brand
+     * gives way and the toggle takes the whole 64px as a hamburger, which is
+     * the clearest affordance at that width and the only thing that fits: an
+     * abbreviated wordmark either truncates or says nothing.
+     */
+    .side-head {
+        @apply flex h-14 items-center justify-between px-5;
+    }
+
+    .side-brand {
+        @apply text-[15px] font-medium tracking-[-0.01em] whitespace-nowrap text-surface;
+    }
+
+    .side-toggle {
+        @apply -mr-1.5 flex size-9 shrink-0 items-center justify-center rounded-control text-surface/70;
+        @apply hover:bg-surface/10 hover:text-surface;
+    }
+
+    .side-icon-expand {
         @apply hidden;
+    }
+
+    .side-foot {
+        @apply mt-auto flex flex-col gap-1.5 border-t border-surface/15 px-5 pt-3;
+    }
+
+    [data-rail='true'] .side-label,
+    [data-rail='true'] .side-brand,
+    [data-rail='true'] .side-icon-collapse {
+        @apply hidden;
+    }
+
+    [data-rail='true'] .side-icon-expand {
+        @apply block;
+    }
+
+    [data-rail='true'] .side-head {
+        @apply justify-center px-0;
+    }
+
+    [data-rail='true'] .side-toggle {
+        @apply mr-0;
+    }
+
+    [data-rail='true'] .side-foot {
+        @apply items-center px-0;
     }
 
     [data-rail='true'] .side-item {

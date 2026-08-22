@@ -49,16 +49,43 @@
             data-rail="{{ $rail ? 'true' : 'false' }}"
             class="hidden shrink-0 flex-col bg-ink pb-3.5 lg:sticky lg:top-0 lg:flex lg:h-screen"
         >
-            <a
-                href="{{ route('admin.dashboard') }}"
-                class="flex h-14 items-center px-5 text-[15px] font-medium tracking-[-0.01em] whitespace-nowrap text-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-surface {{ $rail ? 'justify-center px-0' : '' }}"
-            >
-                {{ $rail ? 'iV' : 'iNi ViE' }}
-            </a>
+            {{-- The toggle sits with the brand rather than in the footer:
+                 collapsing is a layout control, not a session control, and the
+                 footer holds the session. Collapsed, the brand gives way and
+                 the toggle becomes the hamburger, which is both the clearest
+                 affordance at 64px and the only thing that fits. --}}
+            <div class="side-head">
+                <a
+                    href="{{ route('admin.dashboard') }}"
+                    class="side-brand focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-surface"
+                >
+                    iNi ViE
+                </a>
+
+                <button
+                    type="button"
+                    data-rail-toggle
+                    aria-controls="admin-sidebar"
+                    aria-expanded="{{ $rail ? 'false' : 'true' }}"
+                    title="{{ $rail ? 'Expand' : 'Collapse' }}"
+                    aria-label="{{ $rail ? 'Expand sidebar' : 'Collapse sidebar' }}"
+                    class="side-toggle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
+                >
+                    {{-- Both icons ship, and CSS chooses between them. A `d`
+                         attribute picked in PHP would still be pointing the
+                         wrong way after a collapse the browser performed. --}}
+                    <svg class="side-icon-collapse size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M15 6l-6 6 6 6" />
+                    </svg>
+                    <svg class="side-icon-expand size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+            </div>
 
             @include('layouts.partials.nav')
 
-            <div class="mt-auto flex flex-col gap-1.5 border-t border-surface/15 px-5 pt-3 {{ $rail ? 'items-center px-0' : '' }}">
+            <div class="side-foot">
                 <span class="side-label truncate text-[13px] leading-[18px] text-muted">
                     {{ auth()->user()->email }}
                 </span>
@@ -83,20 +110,6 @@
                     </button>
                 </form>
 
-                <button
-                    type="button"
-                    data-rail-toggle
-                    aria-controls="admin-sidebar"
-                    aria-expanded="{{ $rail ? 'false' : 'true' }}"
-                    title="{{ $rail ? 'Expand' : 'Collapse' }}"
-                    aria-label="{{ $rail ? 'Expand sidebar' : 'Collapse sidebar' }}"
-                    class="flex items-center gap-2.5 pt-1.5 text-[13px] leading-[18px] text-surface/70 hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface {{ $rail ? 'justify-center' : '' }}"
-                >
-                    <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="{{ $rail ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6' }}" />
-                    </svg>
-                    <span class="side-label">Collapse</span>
-                </button>
             </div>
         </aside>
 

@@ -21,6 +21,12 @@
 
     <p class="text-[13px] leading-[18px] text-ink-muted">
         Lower numbers come first. Properties sharing a number fall back to the newest.
+        {{-- Said only when there is a second page to be confused with. On a
+             single page list the sentence would be answering a question the
+             admin has no way to ask. --}}
+        @if ($properties->hasPages())
+            Saving affects this page only.
+        @endif
     </p>
 
     {{-- Secondary rather than primary: the primary action of this screen is

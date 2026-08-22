@@ -24,16 +24,18 @@
          line counts them rather than picking one out and leaving the admin
          to guess which row it came from. --}}
     @if ($errors->any())
-        @php
-            $summary = $errors->first('order')
-                ?: ($errors->first('publish')
-                    ?: ($errors->count() === 1
-                        ? 'One position needs fixing before the order can be saved.'
-                        : "{$errors->count()} positions need fixing before the order can be saved."));
-        @endphp
-
         <x-notice variant="failure" class="mb-4">
-            <span class="font-medium text-danger">{{ $summary }}</span>
+            <span class="font-medium text-danger">
+                @if ($errors->has('order'))
+                    {{ $errors->first('order') }}
+                @elseif ($errors->has('publish'))
+                    {{ $errors->first('publish') }}
+                @elseif (count($errors->keys()) === 1)
+                    One position needs fixing before the order can be saved.
+                @else
+                    {{ count($errors->keys()) }} positions need fixing before the order can be saved.
+                @endif
+            </span>
         </x-notice>
     @endif
 
@@ -64,28 +66,39 @@
                  name twice, and the hidden one would win: an admin who
                  retyped a number on a desktop would have their edit
                  overwritten by the value the invisible mobile copy still
-                 held. One row, laid out twice. --}}
-            <table class="w-full text-sm max-sm:block">
+                 held. One row, laid out twice.
+
+                 Which is why every role below is written out. Changing the
+                 `display` of a table element drops its implicit semantics in
+                 every major browser, so the `block` and `grid` this layout
+                 needs would otherwise hand a screen reader a pile of
+                 undifferentiated text at exactly the width where the visual
+                 grouping is doing the most work. The explicit roles say what
+                 the elements already are, and they survive the display
+                 change. The column headers do not: `thead` is genuinely gone
+                 below 640px, which is why each position input carries its own
+                 visible label there. --}}
+            <table role="table" class="w-full text-sm max-sm:block">
                 <caption class="sr-only">Properties, in the order the homepage renders them</caption>
-                <thead class="max-sm:hidden">
-                    <tr class="border-b border-border bg-surface-alt text-left text-[13px] leading-[18px] font-medium text-ink-muted">
-                        <th scope="col" class="w-20 py-3 pr-3 pl-4">
+                <thead role="rowgroup" class="max-sm:hidden">
+                    <tr role="row" class="border-b border-border bg-surface-alt text-left text-[13px] leading-[18px] font-medium text-ink-muted">
+                        <th role="columnheader" scope="col" class="w-20 py-3 pr-3 pl-4">
                             <span class="sr-only">Image</span>
                         </th>
-                        <th scope="col" class="px-3 py-3">Title</th>
-                        <th scope="col" class="px-3 py-3">Category</th>
-                        <th scope="col" class="px-3 py-3">Status</th>
-                        <th scope="col" class="w-28 px-3 py-3">Order</th>
-                        <th scope="col" class="py-3 pr-4 pl-3 text-right">Actions</th>
+                        <th role="columnheader" scope="col" class="px-3 py-3">Title</th>
+                        <th role="columnheader" scope="col" class="px-3 py-3">Category</th>
+                        <th role="columnheader" scope="col" class="px-3 py-3">Status</th>
+                        <th role="columnheader" scope="col" class="w-28 px-3 py-3">Order</th>
+                        <th role="columnheader" scope="col" class="py-3 pr-4 pl-3 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="max-sm:block">
+                <tbody role="rowgroup" class="max-sm:block">
                     @foreach ($properties as $property)
-                        <tr class="border-b border-border transition-colors last:border-b-0 hover:bg-surface-alt max-sm:grid max-sm:grid-cols-[3.5rem_1fr_auto] max-sm:items-start max-sm:gap-x-3 max-sm:gap-y-3 max-sm:p-4">
-                            <td class="py-3 pr-3 pl-4 max-sm:col-start-1 max-sm:row-start-1 max-sm:p-0">
+                        <tr role="row" class="border-b border-border transition-colors last:border-b-0 hover:bg-surface-alt max-sm:grid max-sm:grid-cols-[3.5rem_1fr_auto] max-sm:items-start max-sm:gap-x-3 max-sm:gap-y-3 max-sm:p-4">
+                            <td role="cell" class="py-3 pr-3 pl-4 max-sm:col-start-1 max-sm:row-start-1 max-sm:p-0">
                                 <x-property-thumb :property="$property" />
                             </td>
-                            <td class="px-3 py-3 max-sm:col-start-2 max-sm:row-start-1 max-sm:min-w-0 max-sm:p-0">
+                            <td role="cell" class="px-3 py-3 max-sm:col-start-2 max-sm:row-start-1 max-sm:min-w-0 max-sm:p-0">
                                 <div class="font-medium max-sm:truncate">{{ $property->title }}</div>
                                 <div class="text-[13px] leading-[18px] text-ink-muted">
                                     {{-- The category has no column of its own below 640px, so it
@@ -93,17 +106,17 @@
                                     <span class="sm:hidden">{{ $property->category->label() }} &middot; </span>{{ $property->location }}
                                 </div>
                             </td>
-                            <td class="px-3 py-3 max-sm:hidden">{{ $property->category->label() }}</td>
-                            <td class="px-3 py-3 max-sm:col-start-3 max-sm:row-start-1 max-sm:p-0">
+                            <td role="cell" class="px-3 py-3 max-sm:hidden">{{ $property->category->label() }}</td>
+                            <td role="cell" class="px-3 py-3 max-sm:col-start-3 max-sm:row-start-1 max-sm:p-0">
                                 <x-status-badge :published="$property->is_published" />
                             </td>
-                            <td class="px-3 py-3 max-sm:col-span-3 max-sm:col-start-1 max-sm:row-start-2 max-sm:p-0">
+                            <td role="cell" class="px-3 py-3 max-sm:col-span-3 max-sm:col-start-1 max-sm:row-start-2 max-sm:p-0">
                                 @include('admin.properties.partials.order-input')
                             </td>
                             {{-- ch. 8.7 puts the actions on their own row in the stacked
                                  list, which is also the only way three of them fit at
                                  375px beside anything else. --}}
-                            <td class="py-3 pr-4 pl-3 max-sm:col-span-3 max-sm:col-start-1 max-sm:row-start-3 max-sm:p-0">
+                            <td role="cell" class="py-3 pr-4 pl-3 max-sm:col-span-3 max-sm:col-start-1 max-sm:row-start-3 max-sm:p-0">
                                 <div class="flex items-center justify-end gap-1">
                                     @include('admin.properties.partials.row-actions')
                                 </div>

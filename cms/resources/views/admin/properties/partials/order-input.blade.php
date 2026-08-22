@@ -13,6 +13,8 @@
     property's title is announced either way, because "Order" repeated
     twenty times names nothing.
 --}}
+@use('App\Models\Property')
+
 @php
     $field = "order.{$property->id}";
     $invalid = $errors->has($field);
@@ -33,7 +35,7 @@
         form="reorder"
         value="{{ old($field, $property->sort_order) }}"
         min="0"
-        max="{{ \App\Models\Property::MAX_SORT_ORDER }}"
+        max="{{ Property::MAX_SORT_ORDER }}"
         step="1"
         inputmode="numeric"
         aria-invalid="{{ $invalid ? 'true' : 'false' }}"

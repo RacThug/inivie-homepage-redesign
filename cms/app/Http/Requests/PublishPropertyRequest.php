@@ -43,7 +43,13 @@ class PublishPropertyRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Both failures mean the same thing to the admin: the form
+            // that arrived is not one the panel produces. `index.blade.php`
+            // renders this verbatim, so the default humanisation would put
+            // "The publish field must be true or false" in front of someone
+            // who never saw a field called publish.
             'publish.required' => 'That action did not say whether the property should be live. Reload the page and try again.',
+            'publish.boolean' => 'That action did not say whether the property should be live. Reload the page and try again.',
         ];
     }
 }

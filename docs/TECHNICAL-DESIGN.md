@@ -395,7 +395,7 @@ Three rules make that true. Each is cheap now and expensive to retrofit.
 
 The index page allows editing the order column inline. Submission sends a position for every row the page is showing, as `order[{id}] = {position}`, and the batch is applied inside a database transaction, so a partial failure cannot leave a half reordered list.
 
-The scope is the page rather than the whole table. With a pager in play, saving moves the rows the admin can see and leaves the rest where they were, which is what the footer bar on the table says out loud.
+The scope is the page rather than the whole table. With a pager in play, saving moves the rows the admin can see and leaves the rest where they were, and the footer bar says so in as many words once there is a second page to be confused with.
 
 The batch is accepted or refused whole, and refusing it is validation's job before it is the transaction's. A position that is not a whole number, or is outside the column's range, comes back as a message at its own input. A position naming an id that no longer resolves comes back as one message about the list, because a table left open while a property was deleted elsewhere is not a database error: applying the part of the submission that still resolves would save a running order the admin never saw, and nothing downstream would notice.
 
@@ -404,6 +404,8 @@ The batch is accepted or refused whole, and refusing it is validation's job befo
 **The form and the table are one document.** Each position input carries `form="reorder"` and belongs to the footer bar's form by id rather than by nesting. The rows also carry a publish form and a delete form, and a form cannot contain a form. Associating by id is what lets one submission gather a position from every row while each row keeps its own actions.
 
 That is also why the stacked list below 640px relays the same cells rather than rendering the rows a second time. Two renderings would put two copies of every position input in the document under one name, and the copy the admin cannot see would be the one that wins.
+
+The cost of belonging to a form the row does not contain is that a row action does not carry the positions with it. An admin who retypes three numbers and then hits Publish on a fourth row loses the three, because the publish form submits its own field and the redirect renders the table from the database again. That is the ordinary behaviour of unsaved input on a server rendered page, and it is the same for Edit, Delete and the pager, so it is left alone rather than papered over with a script that guesses when to interrupt. It is written down here because the `form` attribute makes the three inputs look like they are part of the page rather than part of one unsaved form.
 
 ---
 

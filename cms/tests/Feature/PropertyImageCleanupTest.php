@@ -112,3 +112,49 @@ it('follows the configured disk rather than one it decided for itself', function
 
     Storage::disk('somewhere-else')->assertExists(Property::sole()->image_path);
 });
+
+it('takes a fresh upload back down when the create that needed it fails', function () {
+    // The third of the three removals `PropertyImageStore::remove()` names,
+    // and the only one that cannot go through the observer: the row never
+    // existed, so nothing ever fired a model event to hang the cleanup on.
+    // Without it the disk keeps a file no row will ever point at, and
+    // nothing in the application will ever collect it. ch. 5.4.
+    //
+    // The failure is injected rather than provoked, and what it stands in
+    // for is real: `slug` is unique, and validation reads it one statement
+    // before the insert writes it. Two admins saving the same slug at once
+    // is a constraint violation arriving exactly here, with the upload
+    // already on the disk.
+    Property::creating(fn () => throw new RuntimeException('The insert failed.'));
+
+    // Without this the handler renders the exception into a 500 page that
+    // `toThrow` never sees, and spends seconds formatting a stack trace no
+    // assertion below reads.
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->post(route('admin.properties.store'), propertyForm()))
+        ->toThrow(RuntimeException::class);
+
+    expect(Storage::disk(config('filesystems.default'))->allFiles())->toBeEmpty();
+});
+
+it('takes a fresh upload back down when the update that needed it fails', function () {
+    // The same rule from the edit form, where getting it wrong costs twice:
+    // the replacement is orphaned, and the file it was going to replace has
+    // to survive, because the row still points at it.
+    $property = propertyWithRealImage();
+
+    Property::updating(fn () => throw new RuntimeException('The write failed.'));
+
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->put(route('admin.properties.update', $property), propertyForm([
+        'slug' => $property->slug,
+        'image' => FakeImage::png('replacement.png', 1200, 900),
+    ])))->toThrow(RuntimeException::class);
+
+    // One file, and it is the one that was already there: the replacement
+    // went back down, and the original stayed put.
+    expect(Storage::disk(config('filesystems.default'))->allFiles())
+        ->toBe([$property->image_path]);
+});

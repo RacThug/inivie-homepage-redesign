@@ -60,6 +60,19 @@ it('takes the draft off the public endpoint', function () {
     $this->getJson('/api/v1/properties')->assertJsonMissing(['title' => 'Aria Resort Ubud']);
 });
 
+it('puts a published property back onto the public endpoint', function () {
+    // ch. 9.1 asks for the toggle to move a property on and off the public
+    // endpoint. Asserting only the way off would leave a toggle that can
+    // hide a property and never bring it back passing the suite.
+    $property = Property::factory()->draft()->create(['title' => 'Kirana Villa Canggu']);
+
+    $this->getJson('/api/v1/properties')->assertJsonMissing(['title' => 'Kirana Villa Canggu']);
+
+    $this->patch(route('admin.properties.publish', $property), ['publish' => '1']);
+
+    $this->getJson('/api/v1/properties')->assertJsonFragment(['title' => 'Kirana Villa Canggu']);
+});
+
 it('stamps published_at on the first publish and never rewrites it', function () {
     // D6, reached from the row action rather than from the form. The stamp
     // belongs to the observer, so this is a test that the toggle saves the

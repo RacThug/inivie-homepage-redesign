@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Document type | Data Model Specification |
-| Version | 1.0 |
-| Date | 21 August 2026 |
-| Database | MySQL 8.0 |
+| Version | 1.1 |
+| Date | 22 August 2026 |
+| Database | MySQL 8.4 LTS |
 | Status | Living document. Expected to change during implementation |
 
 **Scope of this document.** The database schema, indexes, domain rules, and seed data. It is the source of truth for anything persisted.

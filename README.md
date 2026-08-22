@@ -24,10 +24,10 @@ Option 2 from the brief.
 
 | Layer | Technology |
 | --- | --- |
-| Frontend | Next.js 15 (App Router) + TypeScript |
+| Frontend | Next.js 16 (App Router) + TypeScript |
 | Styling | Tailwind CSS 4 |
-| CMS and API | Laravel 12, PHP 8.3+ |
-| Database | MySQL 8 |
+| CMS and API | Laravel 13, PHP 8.5 |
+| Database | MySQL 8.4 LTS |
 
 **Why Option 2.** The live inivie.com is already a decoupled Next.js frontend served by a headless CMS. Option 2 mirrors that architecture, so this project effectively demonstrates replacing that CMS layer with a Laravel API behind a clean contract. The reasoning and the evidence behind it are in [docs/PRD.md](./docs/PRD.md) ch. 2.2.
 

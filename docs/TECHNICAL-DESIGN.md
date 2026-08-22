@@ -304,11 +304,15 @@ The media host is allowlisted in `next.config.ts` under `images.remotePatterns`,
 - A single role, admin. Demo credentials are documented in the README.
 - Every admin route sits behind the `auth` middleware. Visiting an admin URL without a session redirects to the login page.
 
+That property is asserted by walking the route table rather than by requesting one URL. Probing `/admin` proves only that `/admin` is locked; walking the table fails the suite when a route is added later outside the group. See `tests/Feature/Admin/AdminAccessTest.php`.
+
 ### 5.2 Routes
 
 | Route | Method | Purpose |
 | --- | --- | --- |
+| `/` | GET | Redirects to `/admin`. The CMS has no public web surface, so a reviewer opening `localhost:8000` arrives somewhere real |
 | `/admin/login` | GET, POST | Login screen and submission |
+| `/admin/logout` | POST | Sign out. POST rather than GET, so a prefetch or an image tag cannot end the session |
 | `/admin` | GET | Dashboard with published and draft counts |
 | `/admin/properties` | GET | Index table with thumbnail, title, category, status, order, actions |
 | `/admin/properties/create` | GET | Create form |

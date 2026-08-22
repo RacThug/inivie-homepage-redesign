@@ -324,7 +324,7 @@ The first draft of this chapter specified a topbar, on two arguments that did no
 | Nav item | 36px tall, an icon then a label, `surface` at 70% opacity |
 | Active nav item | Full `surface` label, a `surface` fill at 8% opacity, and a 2px `accent` rule on its leading edge |
 | Session | Pinned to the bottom above a 1px `surface` rule at 12% opacity: the signed in email in `muted`, then a logout button as a ghost variant in `surface` |
-| Collapse toggle | The last item in the sidebar footer, a chevron that mirrors on state |
+| Collapse toggle | In the header row, right aligned against the brand mark. Collapsing is a layout control, and the footer holds the session |
 | Content column | Fills the remaining width, with the 1280px `container-page` from ch. 4.1 applied inside it |
 | Page header | Title on the left, at most one primary action on the right. Stacks below 640px |
 | Vertical rhythm | 24px above the page header, 24px from header to content, 16px between stacked panels |
@@ -335,7 +335,17 @@ The active item is marked with an accent rule while its label stays `surface`, f
 
 Collapsing hides the labels and the group headings, leaving a 64px column of centred icons. Every item keeps an `aria-label` and a `title`, so the label is still reachable by pointer and by screen reader, and the active item keeps its accent rule. Group headings become a divider rule, because the grouping still exists even when its names are not shown.
 
+The brand mark gives way with them, and the toggle takes the whole 64px as a hamburger. An abbreviated wordmark was tried first and is worse in both directions: it either truncates or it says nothing, and it spends the column's one clear affordance on decoration. The hamburger is what the admin already reaches for at this width, since it is the same control the drawer uses below 1024px.
+
 This is the one place the admin needs icons, and it is why ch. 8.8 permits a small inline SVG set: **a rail without icons is a column of nothing**. One icon per nav item, single stroke, 20px, 1.5px stroke width, `currentColor`, from one set and never mixed.
+
+#### Every difference between the two states is CSS
+
+The rail has two drivers that must agree: the server renders it from the cookie on first paint, and the browser applies it on click without a round trip. So **nothing about the rail may be decided in the template**. A wordmark, an icon direction, or an alignment chosen in PHP is correct on load and stale for the rest of the session, because the browser only flips an attribute.
+
+The rule is therefore: render both states into the markup and let `data-rail` choose between them. Two icons ship in the toggle, the full wordmark ships and is hidden, and no width is written in JavaScript.
+
+This is asserted rather than trusted. `tests/Feature/Admin/SidebarStateTest.php` renders the panel in both states and compares them after flattening the state attributes and the per request tokens. Any difference the browser cannot reproduce on its own fails the suite.
 
 #### Where the collapsed state is stored
 

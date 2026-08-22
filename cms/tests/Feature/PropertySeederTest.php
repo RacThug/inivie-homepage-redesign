@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Property;
+use App\Models\User;
 use Database\Seeders\PropertySeeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 /*
@@ -46,19 +48,30 @@ it('puts the picture of every seeded property on the configured disk', function 
     Property::each(fn (Property $property) => $disk->assertExists($property->image_path));
 });
 
-it('seeds pictures the upload rules would themselves accept', function () {
-    // TECHNICAL-DESIGN ch. 5.3 governs what an admin may upload. Seed data
-    // held to a lower bar is seed data that looks fine until the first
-    // reviewer re-uploads one of these files and is told it is too small.
-    $disk = Storage::disk(config('filesystems.default'));
+it('seeds pictures the upload form itself would accept', function () {
+    // TECHNICAL-DESIGN ch. 5.3 governs what an admin may upload, and seed
+    // data held to a lower bar looks fine until the first reviewer
+    // re-uploads one of these files and is told it is too small.
+    //
+    // Restating the mime list, the 2 MB cap and the 800 by 600 floor here
+    // would be the second copy of a rules table ch. 5.3 warns drifts, and
+    // the copy that drifts is the one nobody reads. So this submits each
+    // seed picture through the create form and requires it to be taken.
+    $this->actingAs(User::factory()->create());
 
-    Property::each(function (Property $property) use ($disk) {
-        [$width, $height] = getimagesizefromstring($disk->get($property->image_path));
+    Property::pluck('image_path')->each(function (string $path) {
+        $name = basename($path);
 
-        expect($width)->toBeGreaterThanOrEqual(800)
-            ->and($height)->toBeGreaterThanOrEqual(600)
-            ->and($disk->size($property->image_path))->toBeLessThan(2 * 1024 * 1024)
-            ->and($disk->mimeType($property->image_path))->toBe('image/webp');
+        // Uploaded through a copy, never the committed file itself. Laravel
+        // streams rather than moves, but a test that can empty the
+        // repository if that ever changes is not worth the risk.
+        $upload = tempnam(sys_get_temp_dir(), 'seed');
+        copy(database_path('seeders/images/'.$name), $upload);
+
+        $this->post(route('admin.properties.store'), propertyForm([
+            'slug' => 'upload-check-'.basename($name, '.webp'),
+            'image' => new UploadedFile($upload, $name, 'image/webp', null, true),
+        ]))->assertSessionHasNoErrors();
     });
 });
 

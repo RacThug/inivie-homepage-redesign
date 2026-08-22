@@ -19,8 +19,9 @@ use InvalidArgumentException;
  * derives the absolute URL once, from the configured disk. Storing a URL
  * would bake the host into every row.
  *
- * It stores, it imports, and it removes, and it decides nothing. *When* a file should go
- * is a fact about the record rather than about the disk, so it lives in
+ * It stores, imports and removes, and it decides nothing. *When* a file
+ * should go is a fact about the record rather than about the disk, so it
+ * lives in
  * `PropertyObserver`: the replaced file goes once the save commits, and the
  * file of a deleted property goes only on a force delete, never on the soft
  * delete D5 makes reversible.

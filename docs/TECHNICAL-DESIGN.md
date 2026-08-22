@@ -215,7 +215,7 @@ Run on 22 August 2026:
 | `artisan migrate:fresh --seed` | Re-run 22 August 2026 with the `properties` migration and seeder. Schema matches DATA-MODEL ch. 2 column for column, including the `enum`, `char(3)`, `decimal(2,1)` and all three indexes |
 | `artisan test` | 138 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
 | `vendor/bin/pint --test` | Clean across 62 files |
-| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it joins the `composer setup` script rather than the README: an upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above |
+| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it is in both the `composer setup` script and the README setup block. It was in `composer setup` alone until #27, which is a gap rather than a division of labour: the README's Docker path runs `composer install` and then artisan commands directly, so it never invokes `composer setup`, and a reviewer following it got a populated database and a 403 on every picture. An upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above |
 | Admin property CRUD end to end | Signed in, created a property with a real upload, saw the thumbnail render from `/storage/properties/`, edited it, and cancelled a delete from the confirm modal. Chromium at 1440px and 375px, no console errors |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
 | `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
@@ -491,10 +491,14 @@ inivie-homepage-redesign/
 │   │   ├── Models/Property.php
 │   │   ├── Observers/PropertyObserver.php
 │   │   └── Services/
-│   │       ├── PropertyImageStore.php     stores and removes files
+│   │       ├── PropertyImageStore.php     stores, imports and removes files
 │   │       └── FrontendRevalidator.php    calls the Next.js webhook
 │   ├── config/cors.php        one origin from FRONTEND_URL, never a wildcard
 │   ├── database/{migrations,factories,seeders}/
+│   │   └── seeders/images/    the 6 seed pictures of DATA-MODEL ch. 4, and
+│   │                          generate.py, the tool that drew them. Committed
+│   │                          here rather than under storage/, which is state
+│   │                          the application writes: see ch. 5.4
 │   ├── resources/views/{layouts,admin,auth,components}/
 │   │                          components/ holds the anonymous Blade
 │   │                          components reused across admin screens

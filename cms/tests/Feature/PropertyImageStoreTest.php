@@ -16,33 +16,32 @@ beforeEach(function () {
     Storage::fake(config('filesystems.default'));
 
     $this->store = app(PropertyImageStore::class);
+    $this->disk = Storage::disk(config('filesystems.default'));
     $this->source = database_path('seeders/images/leedon-villa-seminyak.webp');
+    $this->destination = 'properties/leedon-villa-seminyak.webp';
 });
 
 it('copies a repository file onto the configured disk', function () {
-    $this->store->import($this->source, 'properties/leedon-villa-seminyak.webp');
+    $this->store->import($this->source, $this->destination);
 
-    Storage::disk(config('filesystems.default'))
-        ->assertExists('properties/leedon-villa-seminyak.webp');
+    $this->disk->assertExists($this->destination);
 });
 
 it('copies the bytes, not just the name', function () {
-    $this->store->import($this->source, 'properties/leedon-villa-seminyak.webp');
+    $this->store->import($this->source, $this->destination);
 
-    expect(Storage::disk(config('filesystems.default'))->get('properties/leedon-villa-seminyak.webp'))
-        ->toBe(file_get_contents($this->source));
+    expect($this->disk->get($this->destination))->toBe(file_get_contents($this->source));
 });
 
 it('overwrites what is already at the destination', function () {
     // Seeding is a reset to a known state, so an image an editor replaced
     // comes back. Skipping the write instead would leave the row pointing at
     // the canonical path while the disk still held something else.
-    Storage::disk(config('filesystems.default'))->put('properties/leedon-villa-seminyak.webp', 'stale');
+    $this->disk->put($this->destination, 'stale');
 
-    $this->store->import($this->source, 'properties/leedon-villa-seminyak.webp');
+    $this->store->import($this->source, $this->destination);
 
-    expect(Storage::disk(config('filesystems.default'))->get('properties/leedon-villa-seminyak.webp'))
-        ->not->toBe('stale');
+    expect($this->disk->get($this->destination))->not->toBe('stale');
 });
 
 it('refuses a source file that is not there', function () {

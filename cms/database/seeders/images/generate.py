@@ -6,8 +6,17 @@ script belongs to neither: it is a one-off tool that produced the six WebP
 files committed beside it, kept so their provenance is auditable and so they
 can be regenerated rather than being six binaries nobody can account for.
 
-    pip install pillow numpy
+    pip install pillow==12.2.0 numpy==2.4.6
     python generate.py
+
+Those two versions are the ones the committed files were drawn with, checked
+against PyPI on 22 August 2026. AGENTS.md asks every version number in this
+repository to carry the date it was verified, and this one earns it twice
+over: resampling and compression both move between releases, so an unpinned
+run can produce different bytes for an unchanged scene. On those versions a
+re-run reproduces the six committed files byte for byte, checked the same
+day. Nothing in the test suite can check that for you: the suite runs on PHP
+in a container with no Python in it.
 
 Why generated rather than photographed. The repository is public, and the
 photography on the live site is licensed stock: filenames such as
@@ -114,13 +123,20 @@ def ridge_profile(rng: np.random.Generator, width: int, spec: dict) -> np.ndarra
     noise /= weight
 
     if spec.get("cliff"):
+        # Which way the headland faces, read once: +1 puts its mass against
+        # the right edge of the frame, -1 against the left. Both the step and
+        # the tilt follow it, and neither looks at the string again.
+        facing = 1.0 if spec["cliff"] == "right" else -1.0
+
         step = smoothstep(spec["edge"] - 0.16, spec["edge"] + 0.16, xn)
-        if spec["cliff"] == "left":
+        if facing < 0:
             step = 1.0 - step
+
         # Tilted so the crest keeps climbing toward its own side of the frame.
         # A step alone gives a flat topped mesa, which reads as a cut out
         # rather than as a headland.
-        crest = spec["y"] + spec["tilt"] * (xn - 0.5 if spec["cliff"] == "left" else 0.5 - xn)
+        crest = spec["y"] + spec["tilt"] * facing * (0.5 - xn)
+
         # 1.4 is comfortably below the frame, so the low side is simply absent.
         return 1.4 + (crest - 1.4) * step + spec["amp"] * noise
 

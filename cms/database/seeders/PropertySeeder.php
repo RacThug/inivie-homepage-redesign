@@ -134,6 +134,14 @@ class PropertySeeder extends Seeder
      * not nullable, so a row is never written ahead of its file. A soft
      * deleted row still gets its file, because D5 makes that deletion
      * reversible and a restore with no picture is half a property.
+     *
+     * What ch. 5.4 also asks of the upload paths, and what is deliberately
+     * absent here, is removing the file when the write that follows it
+     * throws. There it prevents an orphan: an upload has a hashed name no
+     * later row will ever name again, so nothing would collect it. These
+     * six have fixed names that this seeder writes on every run, so a
+     * failed write leaves the next run's file, not litter. Unwinding it
+     * would only delete something correct.
      */
     public function run(): void
     {

@@ -242,7 +242,8 @@ describe('delete', function () {
 
     it('keeps the image file, because the delete is reversible', function () {
         // D5. A restore with no picture would be a restore of half a
-        // property, so files go only on a force delete, in issue #9.
+        // property, so files go only on a force delete. See
+        // PropertyImageCleanupTest for that half.
         $this->post(route('admin.properties.store'), propertyForm());
 
         $property = Property::sole();

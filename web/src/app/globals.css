@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens for the iNi ViE homepage.
+ *
+ * This block is the single source of truth for the values in
+ * docs/DESIGN-SYSTEM.md. src/design/palette.test.ts parses this file, so the
+ * colours verified for contrast are the ones components actually render,
+ * rather than a copy that could drift away from them.
+ */
+@theme {
+  /* Colour - DESIGN-SYSTEM ch. 2.1 */
+  --color-ink: #1c2434;
+  --color-ink-muted: #4a5468;
+  --color-accent: #ff8737;
+  --color-accent-hover: #f46100;
+  --color-gold: #c9a779;
+  --color-gold-dark: #8e6a39;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f7f7f5;
+  --color-border: #e4e6ea;
+  --color-muted: #aab1bb;
+
+  /**
+   * Text on an accent fill. Measured, not assumed: white on `accent` reaches
+   * only 2.39 to 1, so the fallback named in DESIGN-SYSTEM ch. 2.2 applies and
+   * accented controls carry `ink` text at 6.49 to 1.
+   */
+  --color-on-accent: var(--color-ink);
+
+  /* Typography - DESIGN-SYSTEM ch. 3. Suffixed tokens are the desktop step. */
+  --font-heading: var(--font-poppins);
+  --font-sans: var(--font-inter);
+
+  --text-h1: 2.125rem; /* 34px */
+  --text-h1--line-height: 2.5rem; /* 40px */
+  --text-h1-lg: 2.875rem; /* 46px */
+  --text-h1-lg--line-height: 3.25rem; /* 52px */
+
+  --text-h2: 1.75rem; /* 28px */
+  --text-h2--line-height: 2.25rem; /* 36px */
+  --text-h2-lg: 2.125rem; /* 34px */
+  --text-h2-lg--line-height: 2.625rem; /* 42px */
+
+  --text-h3: 1.125rem; /* 18px */
+  --text-h3--line-height: 1.625rem; /* 26px */
+  --text-h3-lg: 1.25rem; /* 20px */
+  --text-h3-lg--line-height: 1.75rem; /* 28px */
+
+  --text-body: 0.9375rem; /* 15px */
+  --text-body--line-height: 1.5rem; /* 24px */
+  --text-body-lg: 1rem; /* 16px */
+  --text-body-lg--line-height: 1.625rem; /* 26px */
+
+  --text-small: 0.8125rem; /* 13px */
+  --text-small--line-height: 1.125rem; /* 18px */
+
+  --text-eyebrow: 0.75rem; /* 12px */
+  --text-eyebrow--line-height: 1rem; /* 16px */
+  --text-eyebrow--letter-spacing: 0.08em;
+
+  /* Layout - DESIGN-SYSTEM ch. 4.1 and 3.3 */
+  --container-page: 80rem; /* 1280px */
+  --container-measure: 65ch;
+
+  /* Radius - DESIGN-SYSTEM ch. 4.2 */
+  --radius-card: 0.75rem; /* 12px */
+  --radius-control: 0.5rem; /* 8px */
+
+  /**
+   * Elevation - DESIGN-SYSTEM ch. 4.3. Two levels only, both neutral. Depth
+   * comes from imagery and spacing, so these stay deliberately soft.
+   */
+  --shadow-rest: 0 1px 2px rgb(28 36 52 / 0.04), 0 2px 8px rgb(28 36 52 / 0.06);
+  --shadow-raised:
+    0 2px 4px rgb(28 36 52 / 0.06), 0 8px 20px rgb(28 36 52 / 0.1);
+
+  /* Motion - DESIGN-SYSTEM ch. 5 */
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: var(--ease-out);
+
+  /* Scroll entrance: a fade and a 12px rise, no further. */
+  --animate-enter: enter 200ms var(--ease-out) both;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  /* DESIGN-SYSTEM ch. 5. A hard requirement, not a nicety. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

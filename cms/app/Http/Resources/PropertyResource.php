@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * The public shape of a property, defined once here and mirrored in
@@ -37,6 +36,9 @@ class PropertyResource extends JsonResource
             'category' => $this->category->value,
             'location' => $this->location,
             'excerpt' => $this->excerpt,
+            // Derived by the model, which is the seam's single derivation
+            // point (TECHNICAL-DESIGN ch. 5.5). The admin renders the same
+            // image, so the conversion cannot live in this class alone.
             'image_url' => $this->imageUrl(),
             'image_alt' => $this->image_alt,
             'price_from' => $this->price_from,
@@ -48,19 +50,5 @@ class PropertyResource extends JsonResource
             'cta_url' => $this->cta_url,
             'sort_order' => $this->sort_order,
         ];
-    }
-
-    /**
-     * The one place a stored relative path becomes a URL, per the storage
-     * seam in docs/TECHNICAL-DESIGN.md ch. 5.5. `Storage::url()` asks the
-     * configured disk, so moving to object storage is a config change.
-     *
-     * The `url()` wrap makes P6's absolute URL true for every disk: the
-     * local driver returns a root relative path, which next/image
-     * refuses. `url()` leaves an already absolute URL untouched.
-     */
-    private function imageUrl(): string
-    {
-        return url(Storage::url($this->image_path));
     }
 }

@@ -64,6 +64,22 @@
 }
 
 /**
+ * ch. 6.3. One focus treatment, applied on focus-visible only, so keyboard
+ * users get a ring and pointer users do not.
+ *
+ * Declared with `@utility` rather than as a class in the components layer so
+ * that the button and field classes below can `@apply` it. A plain class is
+ * invisible to `@apply` in Tailwind v4, and each of them would then carry
+ * its own copy of the three declarations.
+ */
+@utility focus-ink {
+    &:focus-visible {
+        outline: 2px solid var(--color-ink);
+        outline-offset: 2px;
+    }
+}
+
+/**
  * The three sidebar states of docs/DESIGN-SYSTEM.md ch. 8.3, expressed once
  * here rather than as a repeated string of variant utilities in Blade.
  *
@@ -161,10 +177,92 @@
         }
     }
 
-    /* ch. 6.3. One focus treatment, applied on focus-visible only, so
-       keyboard users get a ring and pointer users do not. */
-    .focus-ink {
-        @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink;
+    /**
+     * The panel of docs/DESIGN-SYSTEM.md ch. 8.5: `surface`, a 1px border,
+     * the 12px card radius, 20px of padding, and no shadow. Admin panels are
+     * containers rather than clickable objects, which is the one elevation
+     * departure ch. 8.1 records.
+     */
+    .panel {
+        @apply rounded-card border border-border bg-surface p-5;
+    }
+
+    /* The optional title row, separated by a 1px rule. The negative margins
+       pull the rule out to the panel edge, where a divider belongs; padding
+       it inward would read as an underlined heading instead. */
+    .panel-title {
+        @apply -mx-5 -mt-5 mb-5 border-b border-border px-5 pb-3 text-[13px] leading-[18px] font-medium text-ink-muted;
+    }
+
+    /**
+     * The form field control of docs/DESIGN-SYSTEM.md ch. 8.5: 40px tall,
+     * 1px border, control radius, 12px of horizontal padding.
+     *
+     * The invalid state is driven by `aria-invalid` rather than by a second
+     * class, so the attribute assistive technology reads and the border a
+     * sighted admin sees cannot disagree. One of them being set without the
+     * other is the bug this shape makes unrepresentable.
+     */
+    .field-control {
+        @apply h-10 w-full rounded-control border border-border bg-surface px-3 text-sm text-ink;
+        @apply focus-ink placeholder:text-muted;
+    }
+
+    .field-control[aria-invalid='true'] {
+        @apply border-danger;
+    }
+
+    /* Height is a line count here, not a fixed 40px, and the vertical
+       padding has to come back because the fixed height is gone. */
+    textarea.field-control,
+    select[multiple].field-control {
+        @apply h-auto py-2.5;
+    }
+
+    /**
+     * Buttons - ch. 6.3 and ch. 8.5. One definition per variant, so the
+     * login screen, the page header action, and the confirm modal cannot
+     * each grow their own version of the same button.
+     *
+     * 44px tall on mobile and 36px from the small breakpoint up, per RS2: a
+     * touch target does not get to be 36px because the same control happens
+     * to be a mouse target on a desktop.
+     *
+     * The focus ring is `ink` on every variant, including the danger one.
+     * ch. 6.3 chose `ink` so the ring stays legible against a fill, and a
+     * per variant ring would be four rings to keep in agreement.
+     */
+    .btn {
+        @apply inline-flex h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-medium sm:h-9;
+        @apply focus-ink transition-colors;
+    }
+
+    .btn-primary {
+        @apply bg-accent text-ink hover:bg-accent-hover;
+    }
+
+    .btn-secondary {
+        @apply border border-ink bg-transparent text-ink hover:bg-ink/5;
+    }
+
+    /* ch. 8.5. The one filled danger control, reserved for the confirm
+       modal, where the destructive action is the subject of the screen. */
+    .btn-danger {
+        @apply bg-danger text-surface hover:bg-danger-hover;
+    }
+
+    /* ch. 6.3. Text only in `ink`, underline on hover. */
+    .btn-ghost {
+        @apply text-ink hover:underline;
+    }
+
+    /**
+     * A row level destructive action, per ch. 8.5. Ghost in `danger` text
+     * rather than a danger fill: six rows each carrying a filled red button
+     * read as an alarm rather than as a list.
+     */
+    .btn-ghost-danger {
+        @apply text-danger hover:text-danger-hover hover:underline;
     }
 }
 

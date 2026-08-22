@@ -30,11 +30,8 @@
                 required
                 autofocus
                 autocomplete="username"
-                @class([
-                    'focus-ink h-10 rounded-control border bg-surface px-3 text-sm',
-                    'border-border' => ! $errors->has('email'),
-                    'border-danger' => $errors->has('email'),
-                ])
+                class="field-control"
+                @if ($errors->has('email')) aria-invalid="true" @endif
             >
         </div>
 
@@ -46,22 +43,17 @@
                 type="password"
                 required
                 autocomplete="current-password"
-                @class([
-                    'focus-ink h-10 rounded-control border bg-surface px-3 text-sm',
-                    'border-border' => ! $errors->has('password'),
-                    'border-danger' => $errors->has('password'),
-                ])
+                class="field-control"
+                @if ($errors->has('password')) aria-invalid="true" @endif
             >
             @error('password')
                 <span class="text-[13px] leading-[18px] text-danger">{{ $message }}</span>
             @enderror
         </div>
 
-        {{-- RS2: 44px on mobile, 36px from the small breakpoint up. --}}
-        <button
-            type="submit"
-            class="focus-ink flex h-11 w-full items-center justify-center rounded-control bg-accent text-sm font-medium text-ink transition-colors hover:bg-accent-hover sm:h-9"
-        >
+        {{-- Full width, per ch. 8.6. The height, the fill, and the focus
+             ring come from the shared variant in app.css. --}}
+        <button type="submit" class="btn btn-primary w-full">
             Sign in
         </button>
     </form>

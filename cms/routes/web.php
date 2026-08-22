@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,5 +30,14 @@ Route::prefix('admin')->group(function () {
     Route::middleware('auth')->name('admin.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
+
+        // The six routes of ch. 5.2, declared as a resource rather than one
+        // by one. `show` is excluded because the CMS has no read only view
+        // of a property: the edit form is where an admin looks at one, and a
+        // detail screen nobody links to is a screen that rots.
+        //
+        // The publish toggle and the reorder endpoint are separate verbs on
+        // separate controllers, arriving with issue #10.
+        Route::resource('properties', PropertyController::class)->except('show');
     });
 });

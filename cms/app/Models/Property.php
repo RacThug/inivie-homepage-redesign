@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * A property shown in the homepage's Featured Properties section.
@@ -60,6 +61,25 @@ class Property extends Model
             'is_published' => 'boolean',
             'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The one place a stored relative path becomes a URL, per the storage
+     * seam in docs/TECHNICAL-DESIGN.md ch. 5.5. `Storage::url()` asks the
+     * configured disk, so moving to object storage stays a config change.
+     *
+     * It sits on the model rather than in `PropertyResource` because the
+     * admin renders the same image in its index thumbnail and its edit
+     * preview. A second derivation for the panel would be a second place to
+     * fix, which is the outcome the seam exists to prevent.
+     *
+     * The `url()` wrap makes P6's absolute URL true for every disk: the
+     * local driver returns a root relative path, which next/image refuses.
+     * `url()` leaves an already absolute URL untouched.
+     */
+    public function imageUrl(): string
+    {
+        return url(Storage::url($this->image_path));
     }
 
     /**

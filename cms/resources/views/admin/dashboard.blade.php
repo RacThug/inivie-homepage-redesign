@@ -12,12 +12,12 @@
         rows, not for a counter that legitimately reads zero.
     --}}
     <div class="grid gap-4 sm:grid-cols-2">
-        <div class="rounded-card border border-border bg-surface p-5">
+        <div class="panel">
             <div class="text-[13px] leading-[18px] font-medium text-ink-muted">Published</div>
             <div class="mt-1 text-[32px] leading-10 font-semibold tabular-nums">{{ $publishedCount }}</div>
         </div>
 
-        <div class="rounded-card border border-border bg-surface p-5">
+        <div class="panel">
             <div class="text-[13px] leading-[18px] font-medium text-ink-muted">Draft</div>
             <div class="mt-1 text-[32px] leading-10 font-semibold tabular-nums">{{ $draftCount }}</div>
         </div>

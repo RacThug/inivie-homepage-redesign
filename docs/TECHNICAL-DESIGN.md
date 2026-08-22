@@ -123,7 +123,7 @@ Decoupling also allows each side to be optimised independently: the frontend for
 
 ### 2.4 Local development environment
 
-**PHP and MySQL run in Docker. Node runs natively.**
+**PHP and MySQL run in Docker. Node runs natively, for both applications.** `cms/` compiles its own assets with Vite, so the split is by toolchain rather than by application. See the Node build step below.
 
 | Part | How it runs | Why |
 | --- | --- | --- |
@@ -160,6 +160,26 @@ The failure mode is worse than a plain error, because it is inconsistent:
 Migrations succeed, the console reports a healthy database, and only real traffic fails. That is a bad afternoon to debug.
 
 Two details make this worth recording rather than quietly fixing. `LARAVEL_SAIL` **is** on that allowlist, which is the tell: Sail does not rely on environment override either, it writes `DB_HOST=mysql` into `.env` during install. And the same stripping cost real time here in a second way, since the refused connection waited out a TCP timeout on every request, which first looked like Windows bind mount latency rather than a configuration fault.
+
+#### The CMS has a Node build step, on both paths
+
+`cms/` runs on PHP, and compiles its own assets with Node. That is Laravel's own arrangement, not an addition here: `cms/vite.config.js` ships in the framework's scaffold, and `resources/css/app.css` is Tailwind. Vite compiles it into `cms/public/build/`, which `@vite()` reads from the Blade layout.
+
+So the split in this chapter needs one clarification. **Node runs natively for `cms/` as well**, and for the same reason it does for `web/`. The Docker image is `php:8.5-cli` plus `pdo_mysql`, `unzip`, and Composer. It carries no Node and is not going to: adding a toolchain to an image so it can run one command at setup is a worse trade than documenting the command.
+
+```
+cd cms
+npm install
+npm run build      # writes public/build/
+```
+
+This is not a new prerequisite. Node is already required for `web/`, so both paths need it whether or not the reviewer uses Docker at all.
+
+##### Why this is worth a paragraph rather than a README line
+
+`cms/public/build/` is gitignored, so it is absent from a fresh clone. Skipping the build does not produce an error, a warning, or a failed request. Laravel starts, routes resolve, `/api/v1/properties` returns correct JSON, and `/admin` renders **unstyled HTML** with a 200 status.
+
+A silent, correct-looking wrong result is the same failure shape as the `DB_HOST` problem recorded above, and it costs the same kind of afternoon. The API is unaffected because JSON needs no stylesheet, which is exactly why this stayed invisible until the first Blade screen was built.
 
 #### Compose scope
 

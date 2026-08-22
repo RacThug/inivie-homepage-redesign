@@ -2,7 +2,7 @@
 
 Homepage redesign for inivie.com, built as a technical test. Two applications in one repository: `cms/` (Laravel, the CMS and REST API) and `web/` (Next.js, the frontend).
 
-**Current state: specification complete, no code yet.** `cms/` and `web/` do not exist. The first implementation work scaffolds them.
+**Current state: both applications scaffolded.** `cms/` has the properties table, model, factory, and seeder. `web/` has the Next.js scaffold and the design system foundation. Neither has feature work on top of that yet.
 
 ## Find the document that owns the topic
 
@@ -56,7 +56,7 @@ Quality gates run once per application. Both must be green before the final comm
 ## Conventions
 
 - **Documentation is English**, including commit messages and PR bodies, matching the product's own language. Conversation with the user is Indonesian.
-- **Plain dash `-`, never an em dash.**
+- **Plain dash `-`, never an em dash.** One exception, and only one: `web/AGENTS.md` is generated. `next dev` rewrites its rules block on every run, so its em dashes are left alone instead of being re-fixed in every diff.
 - **Version numbers carry a verification date.** `docs/TECHNICAL-DESIGN.md` ch. 2.1 records when each version was last checked against primary sources. Bumping a version means re-checking against the npm registry, Packagist, and endoflife.date, then updating that date. Two versions in the first draft were already out of support because they were written from memory.
 - **The brief PDF stays local.** `docs/*.pdf` is gitignored deliberately: it is the client's document, not project output.
 

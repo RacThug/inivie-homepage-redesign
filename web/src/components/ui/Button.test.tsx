@@ -30,10 +30,11 @@ describe("Button", () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it("meets the 44 pixel minimum hit area required by RS2", () => {
+  it("meets the 44 by 44 minimum hit area required by RS2", () => {
     render(<Button>Enquire</Button>);
 
-    expect(screen.getByRole("button")).toHaveClass("min-h-11");
+    // Both axes. Horizontal padding alone leaves a short label under 44px.
+    expect(screen.getByRole("button")).toHaveClass("min-h-11", "min-w-11");
   });
 
   describe("variants", () => {
@@ -62,6 +63,16 @@ describe("Button", () => {
   });
 
   describe("disabled", () => {
+    it("replaces the variant styling rather than layering over it", () => {
+      const { container } = render(<Button disabled>Enquire</Button>);
+
+      expect(container.firstElementChild).toHaveClass(
+        "bg-border",
+        "text-muted",
+      );
+      expect(container.firstElementChild).not.toHaveClass("bg-accent");
+    });
+
     it("marks the control disabled and drops its handler", async () => {
       const onClick = vi.fn();
       render(
@@ -102,13 +113,39 @@ describe("Button", () => {
       expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
 
-    it("keeps the label in the layout but out of the accessibility tree", () => {
+    it("keeps the label readable rather than erasing it", () => {
       const { container } = render(<Button href={null}>View villa</Button>);
       const inert = container.firstElementChild;
 
+      // ch. 6.1 asks for muted and non-interactive, not removed. The label is
+      // still information; there is simply nothing here to act on.
       expect(inert).toHaveTextContent("View villa");
-      expect(inert).toHaveAttribute("aria-hidden", "true");
+      expect(inert).not.toHaveAttribute("aria-hidden");
       expect(inert).toHaveClass("pointer-events-none");
+    });
+
+    /**
+     * The unavailable treatment replaces the variant rather than being
+     * appended to it. Appending left `bg-accent` beside `bg-border` and
+     * `text-on-accent` beside `text-muted`, so which one rendered came down to
+     * the order Tailwind happened to emit the utilities in.
+     */
+    it("carries the muted fill only, with no variant styling left behind", () => {
+      const { container } = render(<Button href={null}>View villa</Button>);
+      const inert = container.firstElementChild;
+
+      expect(inert).toHaveClass("bg-border", "text-muted");
+      expect(inert).not.toHaveClass("bg-accent");
+      expect(inert).not.toHaveClass("text-on-accent");
+      expect(inert).not.toHaveClass("hover:bg-accent-hover");
+    });
+
+    it("carries no focus ring, since there is nothing to focus", () => {
+      const { container } = render(<Button href={null}>View villa</Button>);
+
+      expect(container.firstElementChild?.className).not.toContain(
+        "focus-visible:",
+      );
     });
 
     it("is not reachable by keyboard", async () => {

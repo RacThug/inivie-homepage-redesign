@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 interface CardProps {
   children: ReactNode;
   /** Lets a card carry the right semantics for where it sits. */
-  as?: "div" | "article" | "li";
+  as?: "div" | "article";
 }
 
 /**

@@ -78,6 +78,21 @@
   /* Motion - DESIGN-SYSTEM ch. 5 */
   --default-transition-duration: 200ms;
   --default-transition-timing-function: var(--ease-out);
+
+  /* Scroll entrance: a fade and a 12px rise, no further. */
+  --animate-enter: enter 200ms var(--ease-out) both;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer base {

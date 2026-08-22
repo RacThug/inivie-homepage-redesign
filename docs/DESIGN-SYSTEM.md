@@ -35,7 +35,7 @@ Five principles govern every decision here. They are stated in PRD ch. 6.3 and r
 | --- | --- | --- |
 | `ink` | `#1C2434` | Primary text, dark surfaces, footer |
 | `ink-muted` | `#4A5468` | Secondary text |
-| `accent` | `#FF8737` | Primary buttons, active links, markers |
+| `accent` | `#FF8737` | Primary button fills and markers. Never text on a light surface, see ch. 2.2 |
 | `accent-hover` | `#F46100` | Hover and pressed states |
 | `gold` | `#C9A779` | Luxury accent, dividers, and markers. Never text on a light surface |
 | `gold-dark` | `#8E6A39` | Eyebrow labels, and any gold text on a light surface |
@@ -78,7 +78,7 @@ This was flagged in the first draft as the pairing most likely to fail, to be re
 
 #### Two failures the first draft did not anticipate
 
-**The hover fill.** `accent-hover` was drafted as `#E45826`. Ink text on it reaches only 4.23 to 1, so the primary button would have sat below AA for as long as a pointer rested on it, and white is worse again at 3.67. No text colour clears AA on that fill, so the fill had to change. `#F46100` is the darkest orange on the same hue that still carries ink text at AA, which keeps the hover state clearly darker than the resting state without giving up contrast.
+**The hover fill.** `accent-hover` was drafted as `#E45826`. Ink text on it reaches only 4.23 to 1, so the primary button would have sat below AA for as long as a pointer rested on it, and white is worse again at 3.67. No text colour clears AA on that fill, so the fill had to change. `#F46100` carries ink text at 4.85 to 1 and is clearly darker than the resting fill. Darker oranges on the same hue keep passing for roughly another step of lightness, down to about `#EB5E00` at 4.54, but a hover state one rounding away from failing is not worth the extra depth.
 
 **Gold as text.** ch. 2.1 assigned `gold` to eyebrow labels, which are text. It reaches 2.26 to 1 on `surface` and 2.11 on `surface-alt`, so a gold eyebrow on a light section would have failed AA everywhere it appeared. Production's gold is kept untouched for dividers and markers, and `gold-dark` carries the same hue and saturation at a lightness that clears AA on both light surfaces, so eyebrow labels still read as gold.
 
@@ -205,7 +205,11 @@ Eyebrow label, then heading, then optional intro paragraph. On desktop a seconda
 | Ghost | Text only in `ink`, underline on hover |
 | Disabled | `muted` text on `border` background, no pointer events |
 
-Minimum hit area 44 by 44 pixels on mobile, per requirement RS2.
+The disabled and inert treatments **replace** the variant rather than layering over it. Combining them leaves two backgrounds and two text colours on one element, and which renders comes down to the order the utilities happen to be emitted in.
+
+Minimum hit area 44 by 44 pixels on mobile, per requirement RS2. Both axes, not height alone: horizontal padding leaves a short label under 44 pixels wide.
+
+**Focus.** Every interactive variant carries a two pixel `ink` outline, offset by two pixels, on `focus-visible` only. Keyboard users get a visible ring without pointer users seeing one, and `ink` is used rather than `accent` because the ring must stay legible against the accent fill itself.
 
 ### 6.4 Skeleton
 

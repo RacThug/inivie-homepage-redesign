@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 
-import { Button } from "@/components/ui/Button";
 import {
-  BOOKING_CTA,
   BRAND_LOGO,
   BRAND_NAME,
   isNavGroup,
@@ -185,12 +183,6 @@ export function MobileDrawer({ open, onClose, id }: MobileDrawerProps) {
             ))}
           </ul>
         </nav>
-
-        <div className="border-t border-border p-5">
-          <Button fullWidth href={BOOKING_CTA.href}>
-            {BOOKING_CTA.label}
-          </Button>
-        </div>
       </div>
     </div>
   );

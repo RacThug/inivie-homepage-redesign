@@ -6,10 +6,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { MobileDrawer } from "@/components/layout/MobileDrawer";
 import { NavDropdown } from "@/components/layout/NavDropdown";
-import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import {
-  BOOKING_CTA,
   BRAND_LOGO,
   BRAND_NAME,
   isNavGroup,
@@ -142,10 +140,6 @@ export function Header() {
                 ))}
               </ul>
             </nav>
-
-            <div className="hidden lg:block">
-              <Button href={BOOKING_CTA.href}>{BOOKING_CTA.label}</Button>
-            </div>
 
             <button
               aria-controls={DRAWER_ID}

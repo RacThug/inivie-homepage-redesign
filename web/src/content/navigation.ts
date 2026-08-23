@@ -72,14 +72,16 @@ export const PRIMARY_NAV: readonly NavEntry[] = [
   },
 ] as const;
 
-/**
- * Booking runs on a separate system, which PRD ch. 4.2 puts out of scope. The
- * control leads there rather than implementing it.
+/*
+ * There is deliberately no booking control here.
+ *
+ * The hero's search panel is the page's one way into the booking system, and
+ * it is the one PRD ch. 6 section 2a asks for. A "Book Now" in the header was
+ * a second entrance that answered the same three questions with none of the
+ * visitor's answers: `booking.inivie.com` bare lands on its own search form,
+ * so the control took what the panel had already collected and threw it away.
+ * Production has no such button either; its header carries the search widget.
  */
-export const BOOKING_CTA: NavLink = {
-  label: "Book Now",
-  href: "https://booking.inivie.com",
-} as const;
 
 /** The one spelling of the brand, per the brief ch. 4A. */
 export const BRAND_NAME = "iNi ViE";

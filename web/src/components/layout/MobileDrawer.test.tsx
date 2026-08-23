@@ -63,7 +63,7 @@ describe("MobileDrawer", () => {
 
       const panel = screen.getByRole("dialog");
       const close = screen.getByRole("button", { name: "Close menu" });
-      const last = within(panel).getByRole("link", { name: "Book Now" });
+      const last = within(panel).getByRole("link", { name: "Sign Up" });
 
       last.focus();
       await userEvent.tab();
@@ -76,7 +76,7 @@ describe("MobileDrawer", () => {
 
       const panel = screen.getByRole("dialog");
       const close = screen.getByRole("button", { name: "Close menu" });
-      const last = within(panel).getByRole("link", { name: "Book Now" });
+      const last = within(panel).getByRole("link", { name: "Sign Up" });
 
       close.focus();
       await userEvent.tab({ shift: true });
@@ -128,6 +128,14 @@ describe("MobileDrawer", () => {
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
     }
+  });
+
+  it("carries no booking control, because the hero's panel is the one", () => {
+    renderDrawer();
+
+    expect(
+      screen.queryByRole("link", { name: /book/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("gives every target the 44px minimum on both axes (RS2)", () => {

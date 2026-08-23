@@ -41,13 +41,14 @@ describe("Header", () => {
     expect(home.querySelectorAll("img")).toHaveLength(2);
   });
 
-  it("leads to the separate booking system rather than implementing it", () => {
+  it("carries no booking control, because the hero's panel is the one", () => {
     render(<Header />);
 
-    expect(screen.getByRole("link", { name: "Book Now" })).toHaveAttribute(
-      "href",
-      "https://booking.inivie.com",
-    );
+    // A second entrance answers the same three questions with none of the
+    // visitor's answers. `booking.inivie.com` bare is its own search form.
+    expect(
+      screen.queryByRole("link", { name: /book/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("starts transparent, because it floats over the hero", () => {

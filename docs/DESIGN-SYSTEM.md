@@ -291,11 +291,19 @@ invisible over the hero, so the header's own controls take `currentColor` and
 follow the label. Inside a group panel the ring is `ink` again, because the
 panel is `surface` whatever the header behind it is doing.
 
+**No booking control, in either navigation.** The hero's search panel of ch.
+6.8 is the page's one way into the booking system, and it is the one PRD ch. 6
+section 2a asks for. A "Book Now" in the header was a second entrance that
+answered the same three questions with none of the visitor's answers:
+`booking.inivie.com` bare lands on its own search form, so the control took
+what the panel had already collected and discarded it. Two entrances to one
+system, behaving differently, is what makes a booking flow feel untrustworthy.
+Production has no such button either; its header carries the search widget.
+
 **The drawer**, per RS3. A `surface` panel from the left, at most `24rem` wide,
 over an `ink` scrim at 50 per cent. Focus moves to the close control on open,
 is trapped inside while open, and returns to the toggle on close. Escape
-closes. The booking control is pinned to the bottom of the panel. Every target
-is at least 44 by 44 pixels on both axes.
+closes. Every target is at least 44 by 44 pixels on both axes.
 
 The entries match the desktop navigation exactly. Production's own drawer adds
 Consultant and Offers that its desktop bar never shows, which teaches the

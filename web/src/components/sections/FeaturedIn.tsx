@@ -50,8 +50,19 @@ export function FeaturedIn({ tone }: { tone?: SectionTone }) {
         than a very wide row, and the mask fades both ends so a mark leaves the
         frame instead of being cut in half at it, the same treatment the
         carousel's edges take in ch. 6.17.
+
+        `overflow-hidden` clips both axes, and the window is exactly as tall as
+        the row, so a lifted mark had its top 4px cut off and its shadow cut
+        off underneath. The vertical padding is the room those two need. It is
+        taken back out of the layout by the margins either side of it, so the
+        gap above the row is the 24px and 32px it was before: `mt-3` plus the
+        padding on top, and `-mb-3` against the padding below.
+
+        The margins are written as separate utilities rather than as `-my-3`
+        beside `mt-3`, because one of those two would silently win on emission
+        order. The same shorthand trap the ribbon's own animation sprang.
       */}
-      <div className="mt-6 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_3rem,#000_calc(100%-3rem),transparent)] lg:mt-8">
+      <div className="mt-3 -mb-3 overflow-hidden py-3 [mask-image:linear-gradient(to_right,transparent,#000_3rem,#000_calc(100%-3rem),transparent)] lg:mt-5">
         {/*
           `w-max` so the track is as wide as its contents rather than as wide
           as the window, which is what the 50% translation is measured

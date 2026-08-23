@@ -49,6 +49,26 @@ describe("FeaturedIn", () => {
     }
   });
 
+  /**
+   * `overflow-hidden` is what makes the track a ribbon, and it clips both
+   * axes. With the window exactly as tall as the row, a mark that lifts on
+   * hover had its top cut off and its shadow cut off underneath it. The
+   * padding is the room those need and the margins take it back out of the
+   * layout, so all three belong together: remove any one and the row either
+   * clips again or moves.
+   *
+   * Asserted as classes because there is nothing else to assert it as. jsdom
+   * lays nothing out, so the clipping this prevents cannot be measured here;
+   * what a test can do is say why the classes are there.
+   */
+  it("leaves the row room to lift into", () => {
+    const { container } = render(<FeaturedIn />);
+
+    const window = container.querySelector(".overflow-hidden");
+
+    expect(window).toHaveClass("py-3", "mt-3", "-mb-3");
+  });
+
   /** None of these is a link on production either, and inventing outbound URLs
    *  to make the row feel interactive would be inventing facts. */
   it("claims nothing beyond having been written about", () => {

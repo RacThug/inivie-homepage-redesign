@@ -66,7 +66,15 @@ export function SectionLayout({
         </div>
       ) : null}
 
-      <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2">
+      {/*
+        `min-w-0` because a grid item's own minimum is its content's, and a
+        section whose content is wider than the page then widens the page
+        instead of being held to it. The carousel is where this showed up: a
+        track six cards long sits behind `overflow-hidden`, which stops it
+        scrolling anything but does not stop it counting toward the minimum
+        here, and at 390 it stretched the whole document to 1101.
+      */}
+      <div className="min-w-0 lg:col-span-2 lg:col-start-1 lg:row-start-2">
         {children}
       </div>
     </div>

@@ -1,8 +1,8 @@
 """
-Draws the six seed property images of docs/DATA-MODEL.md ch. 4.
+Draws the eight seed property images of docs/DATA-MODEL.md ch. 4.
 
 Not part of either toolchain. `cms/` is Composer and `web/` is npm, and this
-script belongs to neither: it is a one-off tool that produced the six WebP
+script belongs to neither: it is a one-off tool that produced the WebP
 files committed beside it, kept so their provenance is auditable and so they
 can be regenerated rather than being six binaries nobody can account for.
 
@@ -14,8 +14,9 @@ against PyPI on 22 August 2026. AGENTS.md asks every version number in this
 repository to carry the date it was verified, and this one earns it twice
 over: resampling and compression both move between releases, so an unpinned
 run can produce different bytes for an unchanged scene. On those versions a
-re-run reproduces the six committed files byte for byte, checked the same
-day. Nothing in the test suite can check that for you: the suite runs on PHP
+re-run reproduces the committed files byte for byte, checked the same day.
+Each scene draws from a generator seeded on its own slug, so adding a scene
+leaves every file already committed untouched. Nothing in the test suite can check that for you: the suite runs on PHP
 in a container with no Python in it.
 
 Why generated rather than photographed. The repository is public, and the
@@ -313,6 +314,36 @@ SCENES: list[dict] = [
         "ridges": [
             {"y": 0.651, "amp": 0.005, "freq": 1.5, "colour": "#6B5A6B", "haze": 0.72},
             {"y": 0.945, "amp": 0.016, "freq": 4.0, "colour": "#17131F", "haze": 0.03},
+        ],
+    },
+    {
+        # Blue hour on the Legian sand, minutes after the sun has gone. The
+        # only scene with no disc at all: the glow is centred below the
+        # horizon and only its bleed above the waterline is drawn.
+        "slug": "ini-vie-villa-legian",
+        "horizon": 0.63,
+        "sky": [(0.0, "#101A3A"), (0.38, "#22315C"), (0.68, "#4E4A73"), (0.88, "#A96A67"), (1.0, "#E9A272")],
+        "sun": {"x": 0.44, "y": 0.700, "r": 0.050, "core": "#FFD9A8", "glow": "#FF8A54", "disc": 0.0, "strength": 0.62},
+        "cloud": {"y": 0.26, "spread": 0.19, "colour": "#3B4470", "alpha": 0.50},
+        "water": {"top": "#6B5A70", "bottom": "#0C1430", "glitter": "#FFC28A"},
+        "mist_colour": "#C9A79A",
+        "ridges": [
+            {"y": 0.955, "amp": 0.014, "freq": 2.8, "colour": "#0B1020", "haze": 0.05},
+        ],
+    },
+    {
+        # An overcast afternoon over the Batu Bolong break. The one grey
+        # scene in the set, and the one dark sand foreground.
+        "slug": "aeera-villa-canggu",
+        "horizon": 0.57,
+        "sky": [(0.0, "#5A6E82"), (0.42, "#8298A6"), (0.78, "#B9C6CA"), (1.0, "#D8DFDA")],
+        "sun": {"x": 0.72, "y": 0.30, "r": 0.050, "core": "#FFFFFF", "glow": "#F2F0E2", "disc": 0.0, "strength": 0.50},
+        "cloud": {"y": 0.27, "spread": 0.26, "colour": "#48566A", "alpha": 0.55},
+        "water": {"top": "#4C7A78", "bottom": "#16323C", "glitter": "#DCEDE6"},
+        "mist_colour": "#C3CFCC",
+        "ridges": [
+            {"y": 0.556, "amp": 0.009, "freq": 1.6, "colour": "#2C4442", "haze": 0.34},
+            {"y": 0.965, "amp": 0.018, "freq": 3.4, "colour": "#141F22", "haze": 0.05},
         ],
     },
     {

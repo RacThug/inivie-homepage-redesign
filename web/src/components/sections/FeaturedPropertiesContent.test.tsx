@@ -2,6 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { FEATURED_PROPERTY_COUNT } from "@/content/featured-properties";
 import type { PropertiesResult } from "@/lib/api/properties";
 import { fetchProperties } from "@/lib/api/properties";
 import type { Property } from "@/types/property";
@@ -56,7 +57,7 @@ describe("FeaturedPropertiesContent", () => {
 
     await renderSection();
 
-    expect(fetchProperties).toHaveBeenCalledWith(3);
+    expect(fetchProperties).toHaveBeenCalledWith(FEATURED_PROPERTY_COUNT);
   });
 
   it("renders a card per property, in the order the API sent them", async () => {
@@ -76,7 +77,9 @@ describe("FeaturedPropertiesContent", () => {
     ).toEqual(["Leedon Villa Seminyak", "Ajowa Resort", "La Mewali Resort"]);
   });
 
-  /** F3. Three is the default, six must not damage the layout. */
+  /** F3. Six is what the section asks for, and none of them may be dropped.
+   *  Counted by card rather than by list item: the carousel has a second list
+   *  of its own, one dot per card, and counting both would pass at twelve. */
   it("renders six cards without dropping any", async () => {
     answers({
       properties: Array.from({ length: 6 }, (_, index) =>
@@ -87,7 +90,7 @@ describe("FeaturedPropertiesContent", () => {
 
     await renderSection();
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(6);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
   });
 
   /** F4. The heading goes with the grid, leaving no empty gap. */

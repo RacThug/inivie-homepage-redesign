@@ -1,9 +1,9 @@
 import Image from "next/image";
 
+import { CAROUSEL_IMAGE_SIZES } from "@/components/property/track";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { CARD_IMAGE_SIZES } from "@/components/ui/CardGrid";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { PROPERTY_CARD_ACTION } from "@/content/featured-properties";
 import type { Property } from "@/types/property";
@@ -38,7 +38,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           alt={property.image_alt}
           className="object-cover transition-transform group-hover:scale-104"
           fill
-          sizes={CARD_IMAGE_SIZES}
+          sizes={CAROUSEL_IMAGE_SIZES}
           src={property.image_url}
         />
         <div className="absolute left-3 top-3">

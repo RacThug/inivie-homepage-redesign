@@ -346,9 +346,11 @@ reservations team, which is a redesign of the business rather than of the page.
 
 ### 6.6 Skeleton
 
-The loading skeleton for the property grid renders three placeholder cards whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
+The loading skeleton for the property carousel renders one placeholder card per card to come, whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
 
-Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same `CardGrid` the real cards land in, with the same padding and the same button box, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
+Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same track the real cards land in, at the same slide widths, with the same padding and the same button box, and holds the controls' row open beneath it, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
+
+What it does not reproduce is where along the track the cards sit. A looping carousel decides that when it initialises, and there is no card here yet to centre. Height is the only axis a shift can happen on, and height is matched.
 
 **What "exactly" cannot cover.** The two title lines and three excerpt lines are the clamps above, and a clamp is a ceiling rather than a shape. Measured against the seed data at 1440, the skeleton card stands 28 pixels taller than the real one, because every seeded title fits on one of its two permitted lines. Reserving one line instead would move the same 28 pixels onto the first property an editor names at length, so the clamp is what is reserved. This is bounded rather than solved, and it is worth knowing that on the homepage as it ships the skeleton is never painted at all: the page is prerendered, so the read resolves before the document exists.
 
@@ -449,7 +451,7 @@ Appearance is the smaller half of it. A native `date` input cannot draw two mont
 
 **The calendar.** Two months from 640px and one below it, weeks starting Monday, everything before today disabled, and a range of at least two days so a stay always has a night in it. Range ends are `ink` filled with `surface` text and the nights between them are `surface-alt`; accent marks today as a ring and never fills a day, because accent reaches 2.39 to 1 on a light ground and a selected day has to stay readable.
 
-`react-day-picker` supplies the calendar, and it is the project's first runtime dependency in `web/`. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
+`react-day-picker` supplies the calendar, and it was the project's first runtime dependency in `web/`. `embla-carousel-react` is the second, for the track in ch. 6.17. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
 
 **What the calendar cannot say.** Availability. Baymard's research is direct that a date picker which does not communicate it sends people elsewhere to check and sometimes they do not come back. Booking is a separate application that PRD ch. 3.2 puts out of scope, so this calendar shows dates and stops. It is a known gap, not an oversight.
 
@@ -557,6 +559,33 @@ A 32 by 2 pixel `gold` rule, set above a heading with 12px beneath it. It marks 
 ch. 2.1 gives gold exactly this job: rules, dividers and markers, never text on a light surface. It is what this palette has in place of an accent that could be used decoratively, and it is the one mark on the page that carries the brand's warmth without a photograph doing it.
 
 Decorative, so it is hidden from assistive technology. The block it opens already announces itself with a heading, and a rule that announced itself as well would be read out four times in a row for no gain.
+
+### 6.17 Featured properties carousel
+
+The cards of ch. 6.1 sit on a centre mode track rather than in a grid: the selected card is centred at full size, and the cards either side of it show at both edges and stand slightly smaller. Featured Properties is the only section that carries one. PRD ch. 6.2 asks for it there and nowhere else, and a page that scrolls sideways in four places is a page that has stopped meaning anything by it.
+
+| Property | Value |
+| --- | --- |
+| Slide width | 72% of the track on mobile, 56% from `sm`, 36% from `lg` |
+| Gutter | The grid's own: 20px, 32px from `lg` (ch. 4.1). Padding inside the slide, not a `gap` |
+| Alignment | The selected card centred, including the first and the last |
+| Selected card | Scale 1 |
+| Every other card | Scale 0.94, at the standard 200ms of ch. 5 |
+| Edges | The track fades out over the last 12px, 48px from `lg` |
+| Controls | A step either side of one dot per property, centred beneath the track. The steps appear from `sm` |
+| Auto-rotation | None |
+
+**Why the slide width decides everything.** A slide narrower than the track is the whole of the effect: it is what leaves the neighbouring cards showing, and centring is what puts the selected one between them. The two follow each other exactly, so the peek cannot be tuned separately: at 36% the track shows a little over two and a half cards and clips about a ninth off each edge card, and any narrower peek means a wider card.
+
+**Why the edges fade.** That clipped ninth ends mid word. Cut square it reads as a fault; faded out it reads as a card carrying on past the edge of the page. The fade is short on a phone, where the peek is 42px wide and a long one would swallow it whole, leaving a single card centred in white space, which is not a carousel.
+
+**Scale without dimming.** Fading the unselected cards is the usual other half of this effect and it is deliberately absent: it puts `ink-muted` body copy below the AA contrast ch. 2.2 measures it at. A card a visitor can read is worth more than a card that looks further away.
+
+**Motion.** Nothing moves on its own. PRD ch. 2 records three auto-rotating carousels on the production site with no `prefers-reduced-motion` query behind any of them, and reproducing a catalogued defect is worse than never having had the feature. Under `prefers-reduced-motion: reduce` the scale transition collapses with every other transition through `globals.css`, and the track's own animation is skipped so a step arrives instantly.
+
+**Looping.** The track loops only when there are at least six cards. Below that it cannot cover its own width twice over, which is what looping without cloning needs, and it stops at its ends instead with the step controls disabled where they lead nowhere. F3 permits as few as three, so this is read from the data rather than assumed.
+
+**Announced as one thing.** The track is a labelled carousel holding a list. Every card is in the document, visible and reachable by tab, so a screen reader says how many properties there are before reading the first, and a card reached by keyboard is scrolled into view rather than left clipped. The steps and dots carry no visible text, so each is named by what it reaches: "Next property", "Go to Ajowa Resort". Dots hold the 44 by 44 of RS2 on mobile and narrow from `sm`, where the requirement no longer applies and six full-size targets read as six separate controls rather than as one scale.
 
 ---
 

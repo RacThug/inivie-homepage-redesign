@@ -2,6 +2,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { FEATURED_PROPERTY_COUNT } from "@/content/featured-properties";
+
 import { FeaturedProperties } from "./FeaturedProperties";
 
 /**
@@ -26,11 +28,13 @@ describe("FeaturedProperties while the CMS is answering", () => {
   });
 
   /** DESIGN-SYSTEM ch. 6.6: as many placeholders as there will be cards, in
-   *  the grid the cards will land in. */
-  it("holds the grid open with one placeholder per card to come", () => {
+   *  the track the cards will land in. */
+  it("holds the track open with one placeholder per card to come", () => {
     render(<FeaturedProperties />);
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+    expect(screen.getAllByRole("listitem")).toHaveLength(
+      FEATURED_PROPERTY_COUNT,
+    );
   });
 
   it("has no cards yet, so nothing is claimed that the CMS has not said", () => {

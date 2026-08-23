@@ -43,7 +43,22 @@ export const FEATURED_PROPERTIES_ACTION: Action = {
 } as const;
 
 /**
- * F3: three cards by default. The grid tolerates up to six without layout
- * damage, so raising this number is a one line change rather than a redesign.
+ * The words on the carousel's own controls, none of which are visible: the
+ * steps and the dots are icons and marks, so each of these is the whole of
+ * what the control says when it is read out.
  */
-export const FEATURED_PROPERTY_COUNT = 3;
+export const FEATURED_PROPERTIES_CAROUSEL = {
+  /** Without the word carousel, which `aria-roledescription` already says. */
+  label: "Featured properties",
+  previous: "Previous property",
+  next: "Next property",
+  goTo: (title: string) => `Go to ${title}`,
+} as const;
+
+/**
+ * F3: up to six cards, and six is what the carousel asks for. Below six the
+ * track cannot cover its own viewport twice and stops looping, which is a
+ * decision `PropertyCarousel` makes from the data rather than from this
+ * number, so a CMS with three published properties still reads correctly.
+ */
+export const FEATURED_PROPERTY_COUNT = 6;

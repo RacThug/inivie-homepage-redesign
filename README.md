@@ -80,6 +80,14 @@ The six seeded properties come with their pictures. They are drawings committed 
 
 Using your own PHP and MySQL instead of Docker? Change `DB_HOST` in `cms/.env` from `mysql` to `127.0.0.1`. That is the only line that differs between the two paths.
 
+### Looking at the database
+
+`docker compose up -d` also starts **phpMyAdmin at http://localhost:8080**, signed in with the `inivie` / `secret` pair from `cms/.env`. It is a browser for the database and no part of the application: deleting it from `cms/docker-compose.yml`, or deleting that file outright, leaves Laravel working.
+
+MySQL is published on `127.0.0.1:3306` as well, so any client will do. Set `FORWARD_PMA_PORT` or `FORWARD_DB_PORT` if either port is already taken on your machine.
+
+`docker compose down` keeps the data. `docker compose down -v` deletes the volume with it, and the way back is `migrate --seed`.
+
 ### Admin access
 
 The panel is at **http://localhost:8000/admin**.

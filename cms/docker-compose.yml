@@ -23,6 +23,28 @@ services:
         condition: service_healthy
     command: php artisan serve --host=0.0.0.0 --port=8000
 
+  # A database browser, not part of the application. It reaches MySQL over the
+  # compose network under the same hostname `app` uses, which is why nothing
+  # here duplicates a credential: `.env` stays the single source, exactly as
+  # the note on `app` above says.
+  #
+  # Deleting this block, or the whole file, still leaves a working Laravel
+  # application (docs/TECHNICAL-DESIGN.md ch. 2.4). It is here because a
+  # reviewer should be able to look at the six seeded rows without installing
+  # a client first, which is goal G6.
+  phpmyadmin:
+    image: phpmyadmin:5
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    ports:
+      # Shift this if 8080 is already taken on the host.
+      - "${FORWARD_PMA_PORT:-8080}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   mysql:
     image: mysql:8.4
     environment:

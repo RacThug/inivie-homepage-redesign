@@ -402,6 +402,8 @@ Two columns mobile, four from the tablet breakpoint, which lands eight marks as 
 
 **Every mark is named.** Production serves nine logo files with no alternative text at all, so a screen reader is handed nine images and told nothing. Eight are named here and the ninth is not shown, because its owner could not be established and an unnamed logo in a "featured in" row is a claim nobody can check. The marks are not links, on production either.
 
+**The header is one label, at the eyebrow scale, and that label is the section's heading.** Production and the design pass both set this line and write nothing under it. A sentence invented to fill that gap would be placeholder copy wearing a design system's clothes, and a landmark still has to be named by something a reader can see. This is the one section whose header does not use `SectionHeading`.
+
 ### 6.15 FAQ accordion
 
 `details` and `summary`. The browser supplies the role, the expanded state, Enter and Space, and it all works before hydration and with script switched off, which is what issue #15 means by keyboard operable without custom JavaScript. A `div` with an `onClick` and a hand written `aria-expanded` is the same component with more ways to be wrong, and an `aria-expanded` written here would be a second source of truth for a fact `details` already publishes.

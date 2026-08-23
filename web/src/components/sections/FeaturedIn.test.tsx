@@ -39,4 +39,29 @@ describe("FeaturedIn", () => {
 
     expect(screen.queryByRole("link")).toBeNull();
   });
+
+  /**
+   * The label is the heading. Production and the design pass both give this
+   * section one small line and nothing under it, so there is no sentence to
+   * write here, and a landmark still has to be named by something a reader can
+   * see rather than by an `aria-label` nobody else gets.
+   */
+  describe("its header", () => {
+    it("is the label and nothing else", () => {
+      render(<FeaturedIn />);
+
+      expect(
+        screen.getByRole("heading", { name: FEATURED_IN.heading }),
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole("heading")).toHaveLength(1);
+    });
+
+    it("names the region from it", () => {
+      render(<FeaturedIn />);
+
+      expect(
+        screen.getByRole("region", { name: FEATURED_IN.heading }),
+      ).toBeInTheDocument();
+    });
+  });
 });

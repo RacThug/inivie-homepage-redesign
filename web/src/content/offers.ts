@@ -43,8 +43,9 @@ export interface Offer {
 export const OFFERS = {
   eyebrow: "Offers",
   heading: "Our Special Offers",
-  intro:
-    "Seasonal rates, celebrations, and partnerships across the family of properties.",
+  /* No intro. Neither production nor the design pass writes one here, and a
+     sentence invented to fill the gap would be the placeholder copy the brief
+     ch. 7 rules out. The banners are the section. */
   action: { label: "All offers", href: "/offers" },
   items: [
     {

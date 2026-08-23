@@ -34,7 +34,6 @@ export function SpecialOffers({ tone }: { tone?: SectionTone }) {
         eyebrow={OFFERS.eyebrow}
         heading={OFFERS.heading}
         headingId={HEADING_ID}
-        intro={OFFERS.intro}
       >
         <CardGrid>
           {OFFERS.items.map((offer, index) => (

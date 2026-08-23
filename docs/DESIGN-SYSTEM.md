@@ -370,11 +370,31 @@ A section that is not `Container` wide is a hero, and a hero is not a `Section`.
 
 ### 6.8 Hero and search panel
 
-Height 70vh mobile, 75vh tablet, 85vh desktop, with a 480px floor so a short landscape window still gets a photograph rather than a strip. One image, `priority`, and nothing composited over it.
+**Full viewport height at every breakpoint**, which is production's, over a 480px floor so a short landscape window still gets a hero rather than a strip. `vh` rather than `dvh`: `dvh` follows a mobile browser's chrome as it hides and shows, which would resize the hero under the visitor mid scroll and take the layout shift score with it.
 
-A scrim runs across the lower half only, `ink` at 45 per cent fading up to nothing. The header carries its own scrim at the top (ch. 6.4) and the panel carries its own contrast, so this one is for the join between them: without it the panel appears to float on whatever the picture happens to be doing at its edge.
+Production's own height took some finding. `inivie.com` stamps `data-is-bot="true"` on the document for automated visitors and carries `html[data-is-bot="true"] .hero { height: 400px !important }`, so a headless browser measures a 400px hero and a person sees `100vh`. Every measurement of that page in this document was re-taken with the flag defeated.
 
-**The panel overlaps the foot of the image** rather than sitting inside it, by 32px on mobile and 80px on desktop. On a phone that keeps 70vh of photograph whole and puts the panel one row below its edge.
+**Production's film, over production's poster.** Two cuts, because production ships two and they are different edits rather than two crops of one: a 1920x1080 landscape film, and a portrait one stored 1080 by 1080 with a 9:16 sample aspect. The switch is production's own, at 768px. Both are production's files with the audio track stripped and the moov atom moved to the front; no video frame is re-encoded, so what plays here is what plays on inivie.com, pixel for pixel.
+
+| | landscape | portrait |
+| --- | --- | --- |
+| Serves | 768px and up | below 768px |
+| Runtime | 31.7s | 36.5s |
+| Weight | 15.8MB | 11.6MB |
+
+**The poster is what paints.** It is a `next/image` with `priority`, and the film mounts only after hydration and fades in over it across one second. The largest contentful paint is therefore the same 143KB still it was before the film existed, which is what keeps ch. 8.2's floor reachable. If the film never arrives, the hero is exactly what it was.
+
+Only one cut is ever fetched, and the choice is made once. A `media` attribute on two `<source>` elements leaves both files reachable and browsers have long disagreed about which they pull, so the decision is made in script instead. It is not revisited: a phone at 390 by 844 turned on its side is 844 wide and crosses the switch, and a live query would answer a rotation with a fifteen megabyte download.
+
+**Under `prefers-reduced-motion: reduce` the film is never requested.** Not fetched and paused, never asked for. This is the one place the hero departs from production, which plays its loop whatever the operating system has been told, and it departs because ch. 5 calls the setting a hard requirement rather than a preference.
+
+**What the film shows, and why the overlay covers everything.** Both cuts are advertisements rather than background footage, with copy burned into the frame for most of their runtime: a Forbes award card, a "WE sustain our nature" sequence, a screen recording of a signup form, a fifty thousand welcome coins promotion on the landscape cut and a membership benefits list on the portrait one, and four seconds of white end card at the close of each. Playing them behind a hero was a decision taken with those frames on the table.
+
+The overlay is what makes it survivable, and it is production's: `ink` solid at the top, through 40 per cent at the middle, to 40 per cent at the foot. The lower half scrim this hero used to carry is gone. A still can be chosen to sit under a panel; 31 seconds of film cannot, and a white end card under a 95 per cent `ink` panel with `surface` text would take the panel's text with it. Solid `ink` at the top is what holds the header's labels through the same four seconds.
+
+The cost is the one production pays too: the picture is never seen undimmed. That is the trade the overlay buys, and it is the reason production's hero reads slightly murky in every state.
+
+**The panel overlaps the foot of the hero** rather than sitting inside it, by 32px on mobile and 80px on desktop. On a phone that keeps the viewport of film whole and puts the panel one row below its edge. Production instead docks its widget into the header at the top of the hero; the foot is kept here because PRD ch. 6 section 2a describes this arrangement and because a panel at the top competes with the navigation for the same 90 pixels.
 
 | Element | Treatment |
 | --- | --- |
@@ -508,7 +528,7 @@ Design mobile first. Every rule is written as a minimum width, never a maximum.
 | Special offers | 1 column | 2 columns | 3 columns, first item spanning 2 |
 | Navigation | Drawer | Drawer | Inline |
 | Footer columns | 1 | 2 | 4 |
-| Hero height | 70vh | 75vh | 85vh |
+| Hero height | 100vh | 100vh | 100vh |
 
 ### 7.3 Non-negotiables
 

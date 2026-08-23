@@ -19,7 +19,7 @@ describe("Hero", () => {
     expect(screen.queryByRole("heading")).toBeNull();
   });
 
-  it("carries one image, described, and eager", () => {
+  it("carries the poster, described, and eager", () => {
     render(<Hero />);
     const image = screen.getByRole("img");
 
@@ -35,14 +35,14 @@ describe("Hero", () => {
     ).toBeInTheDocument();
   });
 
-  /** DESIGN-SYSTEM ch. 7.2: 70vh, 75vh, 85vh. */
-  it("grows with the viewport across the three breakpoints", () => {
+  /** DESIGN-SYSTEM ch. 6.8: full viewport, as production has it, over a 480px
+   *  floor for a short landscape window. */
+  it("fills the viewport, with a floor under it", () => {
     const { container } = render(<Hero />);
 
     expect(container.querySelector("section > div")).toHaveClass(
-      "h-[70vh]",
-      "sm:h-[75vh]",
-      "lg:h-[85vh]",
+      "h-screen",
+      "min-h-120",
     );
   });
 });

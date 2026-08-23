@@ -165,20 +165,50 @@ label stays ink, because accent is never text.
 The drawer needs a visible close control, touch targets at least 44 by 44 pixels
 on both axes, and the same item order as desktop.
 
-### 4.2 Hero
+### 4.2 Hero and the welcome block
 
-One large image, a heading, a subheading, and a single primary CTA. **No
-carousel**, so the largest contentful paint stays cheap. Height 70vh mobile,
-75vh tablet, 85vh desktop.
+**No carousel**, so the largest contentful paint stays cheap. Height 70vh
+mobile, 75vh tablet, 85vh desktop.
 
-The tagline *"Turn Bali Into Yours"* belongs to the membership section in
-production, so the hero needs its own line. Two starting points, not final copy:
+Production splits this into two parts, and the split is worth keeping:
 
-- *"One island. Six ways to belong to it."*
-- *"Stays, tables and rituals across Bali, held to eight mantras."*
+**The hero itself** is one large image carrying the search panel and nothing
+else. No headline sits on the photograph.
 
-Photography leads here more than anywhere else on the page. Copy supports the
-image, never the other way round.
+**The welcome block** follows it on a light ground: the H1 *"iNi ViE
+Hospitality"* centred, then the company paragraph centred beneath it, then a
+single primary CTA.
+
+Keeping them separate solves three things at once. The paragraph is roughly 350
+characters, which is unreadable over a photograph but fine on a plain ground.
+The hero stays a single image with no text to composite, which is the cheapest
+possible largest paint. And the measure cap in ch. 2.2 can actually be honoured,
+because a centred block can be constrained to 65 characters without fighting the
+image behind it.
+
+Photography leads in the hero. Copy leads in the welcome block. Neither competes
+with the other.
+
+### 4.2.1 Search panel
+
+Production carries a destination selector, a check in and check out range, and a
+Search button, sitting directly under the navigation and over the top of the
+hero image. It is part of the homepage and is designed here.
+
+| Element | Treatment |
+| --- | --- |
+| Ground | `ink` panel, 12px radius |
+| Field labels | Eyebrow scale, `gold` on the ink ground |
+| Field values | Body scale, `surface` |
+| Search button | Primary, `accent` fill with `ink` text per ch. 2.1 |
+| Mobile | Collapses to a single tappable summary row that opens the full panel. Three fields side by side do not fit 375px |
+
+Every control is at least 44 by 44 pixels on both axes. The panel is a form, so
+each field needs a visible focus ring per ch. 2.3.
+
+This is the one homepage element outside the twelve sections in PRD ch. 6.1.
+Booking itself still runs on a separate system and stays out of scope: the
+button leads there, it does not implement it.
 
 ### 4.3 Featured Properties, the dynamic section
 
@@ -186,10 +216,18 @@ image, never the other way round.
 Laravel API, not from static content.
 
 Composition: eyebrow *"Stay With Us"*, heading *"Featured property for you"*, a
-one to two sentence intro, the card grid, then a secondary *"View all
-properties"* link. On desktop that link may sit right aligned on the heading row.
-On mobile it moves below the content, because a right aligned link beside a
-wrapped heading looks broken at narrow widths.
+one to two sentence intro, the card grid, then a secondary **"View All Family"**
+control. On desktop that control may sit right aligned on the heading row. On
+mobile it moves below the content, because a right aligned link beside a wrapped
+heading looks broken at narrow widths.
+
+**On the label.** PRD ch. 6.2 writes this link as "View all properties".
+Production says *"View All Family"*, rendered as a filled `ink` pill rather than
+a text link, and that is the wording adopted here. It is brand voice: the
+portfolio is the family. It is also less immediately obvious to a first time
+visitor than "properties" would be, and that cost is accepted knowingly. PRD ch.
+6.2 needs updating to match, so the specification and the design do not
+disagree.
 
 The API returns three properties by default. **Real** seed data, in sort order:
 
@@ -215,13 +253,43 @@ Card treatment, per DESIGN-SYSTEM ch. 6.1:
 | Title | H3, `ink`, clamped to 2 lines, never truncated mid word |
 | Location | Small, `ink-muted`, preceded by a 16px pin icon |
 | Description | Body, `ink-muted`, clamped to 3 lines |
-| Price | Amount in `ink` medium, the "per night" qualifier in `ink-muted` |
+| Price | Prefixed with **"From"**, amount in `ink` medium, the "per night" qualifier in `ink-muted`. Reads *"From IDR 3,200,000 per night"* |
 | Button | Full width on mobile, auto on desktop, `accent` fill with `ink` text |
 | Card | `surface`, 1px `border`, 12px radius, rest elevation, raised on hover |
 
 **Equal height is a rule.** Cards in a row match height regardless of content
 length, achieved by clamping title and description and pinning the button to the
-bottom, never by fixing a card height.
+bottom, never by fixing a card height. A card whose price row is omitted is the
+case this rule exists for: it must end level with its neighbours, not 50 pixels
+short of them.
+
+**Why this card carries more than production's.** Production's card carries five
+things and no more: a portrait image, a category badge, a status badge reading
+*"New Opening"*, the title, and the location. Both badges sit below the image as
+outlined pills rather than overlaid on it. There is no price, no rating, no
+description and no button.
+
+That is a defensible choice, and the reason behind it is real: a nightly rate
+moves with season, length of stay and channel, so a figure typed into a CMS goes
+stale and becomes a promise the booking engine will not honour.
+
+This project keeps price and rating anyway, for two reasons. The column is
+`price_from`, an indicative floor rather than a live rate, which is the field
+hospitality actually publishes and the slowest moving number on the page. And
+these two fields are the only ones on the card that can be null, so they are
+what demonstrates rule D7 and requirement F5: the price row vanishing whole, the
+rating never rendering as zero, the CTA going inert rather than broken. Remove
+them and the dynamic section loses the behaviour it exists to prove.
+
+The honesty problem is solved by the word **"From"** rather than by deleting the
+field, and an editor who does not want to publish a figure at all simply clears
+it, which is already a supported state.
+
+**Worth considering, not yet specified.** Production's *"New Opening"* status
+badge is more durable than any price and the schema has nothing like it. Adding
+it means a new column, a PRD change, and a matching field in `PropertyResource`
+and `types/property.ts` in the same commit. Out of scope for this design pass,
+but worth recording as the strongest candidate for the next one.
 
 Three card variants must be drawn, because all three occur in the real data:
 
@@ -265,12 +333,19 @@ two unrelated treatments.
 
 ### 4.6 WeInivie Membership
 
-**A dark `ink` panel.** This is where accent discipline is demonstrated: the
-section that needs the most emphasis on the page gets it from an ink ground, not
-from orange. Gold is legible as text here.
+**A dark `ink` panel.** Production makes this section a full bleed **orange**
+block. That is exactly the large decorative accent fill ch. 2.3 forbids, and the
+departure is deliberate: the section that needs the most emphasis on the page
+gets it from an ink ground instead. Do not "correct" this back towards
+production. Gold is legible as text here, at 6.87 to 1.
 
-Four benefits and one CTA. Production's line is *"Turn Bali Into Yours. Make
-Every Journey More Rewarding."*
+**Two columns, not one.** Copy, tagline and CTA on the left; the four benefits
+as a two by two grid on the right. A single left column with the benefits strung
+along the bottom leaves the top right of the panel empty, which is what makes
+the section read as unfinished at 1440.
+
+Production's line is *"Turn Bali Into Yours. Make Every Journey More
+Rewarding."*
 
 ### 4.7 Our Story
 
@@ -290,8 +365,20 @@ here is deliberate.
 
 ### 4.8 Our Special Offers
 
-A promotional banner grid. One column mobile, two tablet, three desktop with the
-first item spanning two columns.
+**Five offers, not four.** One column mobile, two tablet, three desktop with the
+first item spanning two columns. Five items fill that grid exactly: a wide one
+plus one on the first row, three on the second. Four items leave a visible hole
+in the bottom right corner. Production carries five.
+
+Production renders this as a horizontal carousel. It is a grid here, because a
+carousel needs script, hides items from the first view, and sits awkwardly
+beside the no carousel rule the hero already follows.
+
+**The title appears once.** Production sets it over the photograph and adds no
+second label underneath. Follow that, with two corrections: the overlay needs
+the same top down scrim the header uses, because white type over an arbitrary
+photograph has no guaranteed contrast ratio; and the title is title case, not
+all caps. Never render the title over the image and again beneath it.
 
 ### 4.9 What's New
 
@@ -304,8 +391,15 @@ A row of media logos in greyscale. Production carries nine.
 
 ### 4.11 FAQ
 
-An accordion, keyboard operable. Production carries eight question and answer
+An accordion, keyboard operable. Production carries nine question and answer
 pairs.
+
+**Centred, following production.** The heading is centred, and the accordion is
+a centred column of roughly 900 pixels rather than a left aligned block that
+leaves the right half of the container empty. Question text stays left aligned
+inside that column, with the expand marker right aligned on the same row. This
+is the one section on the page where centring is correct, because a list of
+questions has no second column to pair with.
 
 ### 4.12 Footer
 
@@ -346,9 +440,36 @@ Bottom row:
     General Policy
     2026 iNi ViE Hospitality. All Rights Reserved
 
-**Deliberately excluded.** Production has a Search and Book widget with a
-destination selector and date picker. It is not in the PRD ch. 6.1 section list,
-because booking runs on a separate system that is out of scope. Do not design it.
+---
+
+## 4A. Copy rules
+
+**One brand spelling: `iNi ViE`.** Production is inconsistent with itself, using
+"Ini Vie" throughout the FAQ and "iNi ViE" everywhere else. This redesign uses
+`iNi ViE` in every position, including inside FAQ answers. It is a small
+correction worth naming in the README alongside the two production findings in
+PRD ch. 2.3.
+
+**Every call to action names its destination.** Production leans on a single
+repeated "Discover More", which appeared twelve times on one page in the first
+design pass. A control says exactly what happens:
+
+| Where | Label |
+| --- | --- |
+| Welcome block | About iNi ViE |
+| The Culinary Journey | All restaurants |
+| Wellness Harmony Escape | All spas |
+| Membership, primary | Become a Member |
+| Membership, secondary | Membership benefits |
+| Our Story, About Us | About us |
+| Our Story, What Makes Us Different | Why choose us |
+| Our Story, Our Eight Mantras | Read the mantras |
+| Our Story, Sustainability | Our sustainability work |
+
+**Em dashes.** Copy quoted verbatim from production keeps whatever punctuation
+production used, because it is quoted content. Everything written for this
+project uses a plain dash, per the repository convention. Artboard annotations
+are written for this project, so they follow the rule.
 
 ---
 
@@ -369,6 +490,62 @@ Non negotiable: no horizontal scroll from 320px upward; touch targets at least
 44 by 44 pixels on mobile on both axes; navigation collapses to a drawer below
 1024px with a focus trap and Escape to close; no clipped or overflowing text on
 the longest title in the seed data.
+
+---
+
+## 5A. Motion, hover, and focus
+
+The budget in ch. 2.3 is the whole budget: 200ms, `ease-out`, on hover, focus,
+colour and transform. Nothing else. What follows is which states actually have
+to be drawn, because a static artboard that declares a transition but never
+shows the second state leaves the decision to whoever implements it.
+
+### 5A.1 States that must be drawn
+
+| Element | Rest | Hover | Focus |
+| --- | --- | --- | --- |
+| Property card | 1px `border`, rest elevation | Raised elevation, image scaled to 1.04 with the overflow clipped | Ring on the card's link |
+| Primary button | `accent` fill, `ink` text | `accent-hover` fill, `ink` text | Ring |
+| Secondary button | Transparent, 1px `ink` border | Border and label darken | Ring |
+| Ghost link | `ink`, no underline | Underline appears | Ring |
+| Inert CTA | `muted` on `border` | **No change.** Nothing happens, and nothing suggests it will | Not focusable |
+| Nav item | Label only | Label only, no rule | Ring |
+| Nav item, active | Accent rule under an `ink` or white label | Unchanged | Ring |
+| FAQ row | Collapsed, plus marker | Row ground shifts to `surface-alt` | Ring on the whole row |
+| Offer banner | Scrimmed image | Image scaled to 1.04, scrim unchanged | Ring |
+| Footer link | `gold` on `ink` | Underline appears | Ring |
+
+**The focus ring is one treatment everywhere**, per ch. 2.3: a two pixel `ink`
+outline, offset by two pixels, on `focus-visible` only. `ink` rather than
+`accent`, because the ring has to stay legible against the accent fill itself.
+Pointer users never see it, keyboard users always do.
+
+### 5A.2 Scroll entrance
+
+A fade plus an upward translate of at most 12 pixels, 200ms, `ease-out`, once
+per element. It is not a scroll linked animation and nothing tracks scroll
+position continuously. Worth one artboard showing an element mid entrance, so
+the 12 pixel limit is a drawn quantity rather than a number in a table.
+
+### 5A.3 Reduced motion is not optional
+
+Every transition and animation collapses under `prefers-reduced-motion: reduce`.
+`web/src/app/globals.css` already implements this globally.
+
+**This is a third production weakness not replicated.** 205KB of production CSS
+carries 258 hover rules, 51 transitions, 5 keyframe animations and three Swiper
+carousels, and **zero** occurrences of `prefers-reduced-motion`. Someone who has
+asked their operating system to reduce motion gets the full set anyway.
+Vestibular sensitivity is an accessibility concern rather than a preference, so
+this belongs alongside the two findings already in PRD ch. 2.3 and in the README
+note they feed.
+
+### 5A.4 What production does that this design does not
+
+Production drives Featured Properties, Special Offers and What's New with
+Swiper. Three carousels on one homepage means items hidden from the first view,
+script on the critical path, and a horizontal drag surface competing with
+vertical page scroll on mobile. All three are grids here.
 
 ---
 
@@ -398,11 +575,16 @@ Production itself: [inivie.com](https://inivie.com) and its
 
 ## 7. What to avoid
 
-- All caps headlines.
+- All caps headlines, including on the offer banners, where production uses them.
+- The same generic label on more than one call to action.
+- A title rendered twice on one card, over the image and again beneath it.
 - Mega menus or nested dropdowns in the header.
 - Cream or sand palettes. Colour is closed.
-- Orange as a background, a large fill, or a decorative shape.
+- Orange as a background, a large fill, or a decorative shape, including on the
+  membership panel where production uses it.
 - A hero carousel, parallax, or scroll jacking.
+- A section that fills only the left half of the container at 1440. Either give
+  it a second column or centre it, per ch. 4.6 and ch. 4.11.
 - Purple to blue gradients, accent rails on rounded cards, emoji as section
   markers, everything centred. These are generator defaults rather than
   decisions.

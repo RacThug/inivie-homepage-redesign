@@ -37,12 +37,11 @@ describe("the venue sections", () => {
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
   });
 
-  /** The grounds alternate down the page, and these two are neighbours. */
-  it("do not sit on the same ground as each other", () => {
-    const culinary = render(<CulinaryJourney />).container.firstElementChild;
-    const wellness = render(<WellnessEscape />).container.firstElementChild;
+  /** The ground is the page's decision, not the section's (DESIGN-SYSTEM
+   *  ch. 6.7). All a section owes is to pass it through. */
+  it("takes the ground it is handed rather than choosing one", () => {
+    const { container } = render(<CulinaryJourney tone="alt" />);
 
-    expect(culinary).toHaveClass("bg-surface-alt");
-    expect(wellness).not.toHaveClass("bg-surface-alt");
+    expect(container.firstElementChild).toHaveClass("bg-surface-alt");
   });
 });

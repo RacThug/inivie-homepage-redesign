@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-import { Section } from "@/components/ui/Section";
+import { CardGrid } from "@/components/ui/CardGrid";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionLayout } from "@/components/ui/SectionLayout";
 import { OFFERS } from "@/content/offers";
 
@@ -20,13 +21,14 @@ import { OFFERS } from "@/content/offers";
  * name is set into the artwork. Printing it again underneath would be the
  * "title twice on one card" the brief ch. 7 rules out, so the name is the
  * link's accessible name instead. Production ships all five with
- * `alt="promo"`, which is the defect this fixes.
+ * `alt="promo"`, which is the defect this fixes: a screen reader is now told
+ * which offer each tile is, once.
  */
 const HEADING_ID = "offers";
 
-export function SpecialOffers() {
+export function SpecialOffers({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID} tone="alt">
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <SectionLayout
         action={OFFERS.action}
         eyebrow={OFFERS.eyebrow}
@@ -34,7 +36,7 @@ export function SpecialOffers() {
         headingId={HEADING_ID}
         intro={OFFERS.intro}
       >
-        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <CardGrid>
           {OFFERS.items.map((offer, index) => (
             <li
               className={index === 0 ? "lg:col-span-2" : undefined}
@@ -52,8 +54,11 @@ export function SpecialOffers() {
                   widths in one row.
                 */}
                 <div className="relative aspect-square h-full overflow-hidden rounded-card lg:aspect-auto lg:min-h-88">
+                  {/* Empty on purpose. The link around it is named by the
+                      offer, so a description here would either be swallowed by
+                      that name or make the tile announce itself twice. */}
                   <Image
-                    alt={offer.imageAlt}
+                    alt=""
                     className="object-cover transition-transform group-hover:scale-104"
                     fill
                     sizes={
@@ -72,7 +77,7 @@ export function SpecialOffers() {
               </a>
             </li>
           ))}
-        </ul>
+        </CardGrid>
       </SectionLayout>
     </Section>
   );

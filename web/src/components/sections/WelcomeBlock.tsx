@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { Section } from "@/components/ui/Section";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { WELCOME } from "@/content/hero";
 
 /**
@@ -19,9 +19,9 @@ import { WELCOME } from "@/content/hero";
  */
 const HEADING_ID = "welcome";
 
-export function WelcomeBlock() {
+export function WelcomeBlock({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID} tone="alt">
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <div className="mx-auto max-w-3xl text-center">
         <h1
           className="font-heading text-h1 text-ink lg:text-h1-lg"

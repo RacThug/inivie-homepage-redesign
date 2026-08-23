@@ -1,5 +1,30 @@
 export type HeadingTone = "light" | "dark";
 
+/**
+ * Every colour this component sets, per ground. `gold` fails AA on a light
+ * surface at 2.26 to 1, so the eyebrow uses the darkened token there and the
+ * undarkened one on ink, where it reaches 6.87 to 1 (DESIGN-SYSTEM ch. 2.2).
+ *
+ * A table rather than three separate conditionals on one flag: a fourth line
+ * of text arriving here should be one row to fill in, not a fourth place to
+ * remember the rule.
+ */
+const TONES: Record<
+  HeadingTone,
+  { eyebrow: string; heading: string; intro: string }
+> = {
+  light: {
+    eyebrow: "text-gold-dark",
+    heading: "text-ink",
+    intro: "text-ink-muted",
+  },
+  dark: {
+    eyebrow: "text-gold",
+    heading: "text-surface",
+    intro: "text-on-ink-muted",
+  },
+};
+
 interface SectionHeadingProps {
   eyebrow: string;
   heading: string;
@@ -43,25 +68,17 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   const Heading = `h${level}` as "h1" | "h2" | "h3";
   const centred = align === "center";
-  const dark = tone === "dark";
+  const colours = TONES[tone];
 
   return (
     <div className={centred ? "text-center" : undefined}>
-      {/*
-        `gold` fails AA on a light surface, so eyebrow text uses the darkened
-        token there and the undarkened one on ink. See DESIGN-SYSTEM ch. 2.2.
-      */}
       <span
-        className={`block text-eyebrow font-medium uppercase ${
-          dark ? "text-gold" : "text-gold-dark"
-        }`}
+        className={`block text-eyebrow font-medium uppercase ${colours.eyebrow}`}
       >
         {eyebrow}
       </span>
       <Heading
-        className={`mt-3 font-heading text-h2 lg:mt-4 lg:text-h2-lg ${
-          dark ? "text-surface" : "text-ink"
-        }`}
+        className={`mt-3 font-heading text-h2 lg:mt-4 lg:text-h2-lg ${colours.heading}`}
         id={headingId}
       >
         {heading}
@@ -69,7 +86,7 @@ export function SectionHeading({
       {intro ? (
         <p
           className={`mt-3 max-w-measure text-body lg:mt-4 lg:text-body-lg ${
-            dark ? "text-on-ink-muted" : "text-ink-muted"
+            colours.intro
           } ${centred ? "mx-auto" : ""}`}
         >
           {intro}

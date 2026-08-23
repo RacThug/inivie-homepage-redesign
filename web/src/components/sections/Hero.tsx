@@ -22,7 +22,7 @@ import { HERO_IMAGE } from "@/content/hero";
 export function Hero() {
   return (
     <section aria-label="iNi ViE Hospitality" className="relative">
-      <div className="relative h-[70vh] min-h-[30rem] w-full sm:h-[75vh] lg:h-[85vh]">
+      <div className="relative h-[70vh] min-h-120 w-full sm:h-[75vh] lg:h-[85vh]">
         <Image
           alt={HERO_IMAGE.alt}
           className="object-cover"

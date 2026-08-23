@@ -48,15 +48,13 @@ export const SEARCH_PANEL = {
   /** Named for assistive technology, because the panel is a landmark with no
    *  heading of its own: putting an H1 on it would fight the welcome block. */
   label: "Search for a stay",
-  destination: "Choose destination",
+  destination: "Destination",
   checkIn: "Check in",
   checkOut: "Check out",
-  guests: "Guests",
   submit: "Search",
-  /** The one tappable row the panel collapses into below the desktop
+  /** The one tappable row the panel collapses into below the tablet
    *  breakpoint, where three fields side by side do not fit 375px. */
   summary: "Where and when",
-  expand: "Open the search panel",
 } as const;
 
 /** Two adults, production's own default, sent as a hidden field rather than

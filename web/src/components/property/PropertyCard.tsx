@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { CARD_IMAGE_SIZES } from "@/components/ui/CardGrid";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { PROPERTY_CARD_ACTION } from "@/content/featured-properties";
 import type { Property } from "@/types/property";
@@ -21,14 +22,6 @@ interface PropertyCardProps {
  */
 
 /**
- * The grid is one column below 640px, two below 1024px, and three inside a
- * 1280px container above it, which puts a card at roughly 379px on a desktop.
- * Spelled out so a phone never downloads a desktop asset (RS4).
- */
-const IMAGE_SIZES =
-  "(min-width: 1280px) 379px, (min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw";
-
-/**
  * `price_from` is whole currency units and `currency` is an ISO 4217 code the
  * CMS chose, so the code is placed rather than looked up: asking Intl to
  * render the currency as a symbol would put a Rupiah sign on a column that
@@ -45,7 +38,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           alt={property.image_alt}
           className="object-cover transition-transform group-hover:scale-104"
           fill
-          sizes={IMAGE_SIZES}
+          sizes={CARD_IMAGE_SIZES}
           src={property.image_url}
         />
         <div className="absolute left-3 top-3">

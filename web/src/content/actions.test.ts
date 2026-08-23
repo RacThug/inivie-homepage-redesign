@@ -50,9 +50,24 @@ describe("the page's calls to action", () => {
     }
   });
 
-  it("covers every section that leads somewhere", () => {
-    // Eleven sections; the FAQ and Featured In lead nowhere by design, the
-    // property card's control is per card, and membership carries two.
-    expect(LABELS).toHaveLength(13);
+  /** A label that names nothing is the failure this file is about; a label
+   *  that names the wrong thing is the other half of it. Every destination is
+   *  a real path or a real origin, never a placeholder. */
+  it("sends every control somewhere real", () => {
+    const hrefs = [
+      WELCOME.action.href,
+      FEATURED_PROPERTIES_ACTION.href,
+      CULINARY.action.href,
+      WELLNESS.action.href,
+      MEMBERSHIP.primary.href,
+      MEMBERSHIP.secondary.href,
+      ...STORY.chapters.map((chapter) => chapter.action.href),
+      OFFERS.action.href,
+      JOURNAL.action.href,
+    ];
+
+    for (const href of hrefs) {
+      expect(href).toMatch(/^(\/[a-z0-9-]|https:\/\/)/);
+    }
   });
 });

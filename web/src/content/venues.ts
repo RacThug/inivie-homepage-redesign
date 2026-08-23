@@ -12,6 +12,8 @@
  * fetch, not rewriting `VenueCard`.
  */
 
+import type { Action } from "./action";
+
 export interface Venue {
   readonly name: string;
   /** What kind of place it is, at a glance. Production's own words. */
@@ -25,7 +27,7 @@ export interface VenueSectionContent {
   readonly eyebrow: string;
   readonly heading: string;
   readonly intro: string;
-  readonly action: { readonly label: string; readonly href: string };
+  readonly action: Action;
   readonly venues: readonly Venue[];
 }
 

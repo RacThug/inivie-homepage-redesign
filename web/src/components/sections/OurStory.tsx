@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-import { Section } from "@/components/ui/Section";
+import { Button } from "@/components/ui/Button";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { STORY } from "@/content/story";
 
@@ -19,9 +20,9 @@ import { STORY } from "@/content/story";
  */
 const HEADING_ID = "our-story";
 
-export function OurStory() {
+export function OurStory({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID}>
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <SectionHeading
         eyebrow={STORY.eyebrow}
         heading={STORY.heading}
@@ -52,7 +53,7 @@ export function OurStory() {
 
       <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:mt-14 lg:gap-x-12 lg:gap-y-12">
         {STORY.chapters.map((chapter) => (
-          <section key={chapter.heading}>
+          <div key={chapter.heading}>
             <h3 className="font-heading text-h3 text-ink lg:text-h3-lg">
               {chapter.heading}
             </h3>
@@ -65,13 +66,16 @@ export function OurStory() {
             <p className="mt-3 max-w-measure text-body text-ink-muted lg:text-body-lg">
               {chapter.body}
             </p>
-            <a
-              className="mt-4 inline-flex min-h-11 items-center text-small font-medium text-ink underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              href={chapter.action.href}
-            >
-              {chapter.action.label}
-            </a>
-          </section>
+            {/* A text link rather than a pill: four filled controls in a
+                two by two grid would out-shout the one primary action the page
+                gives each section. `ghost` carries no horizontal padding, so
+                it stays flush with the paragraph above it. */}
+            <div className="mt-4">
+              <Button href={chapter.action.href} variant="ghost">
+                {chapter.action.label}
+              </Button>
+            </div>
+          </div>
         ))}
       </div>
     </Section>

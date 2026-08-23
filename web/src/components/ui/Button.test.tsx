@@ -177,4 +177,74 @@ describe("Button", () => {
     rerender(<Button fullWidth>Enquire</Button>);
     expect(screen.getByRole("button")).toHaveClass("w-full");
   });
+
+  /**
+   * The ground a control sits on changes two things and only two: the focus
+   * ring, for the reason DESIGN-SYSTEM ch. 6.5 gives about the footer, and the
+   * one variant that has no fill of its own to be read against.
+   */
+  describe("on a dark ground", () => {
+    it("inverts the focus ring, which is invisible on ink otherwise", () => {
+      render(
+        <Button href="/membership" tone="dark" variant="ghost">
+          Membership benefits
+        </Button>,
+      );
+
+      expect(screen.getByRole("link")).toHaveClass(
+        "focus-visible:outline-surface",
+      );
+    });
+
+    it("carries the ghost label in the one colour that survives ink", () => {
+      render(
+        <Button href="/membership" tone="dark" variant="ghost">
+          Membership benefits
+        </Button>,
+      );
+
+      expect(screen.getByRole("link")).toHaveClass("text-gold");
+    });
+
+    it("leaves a filled variant alone, since its fill already reads", () => {
+      render(
+        <Button href="/join" tone="dark">
+          Become a Member
+        </Button>,
+      );
+
+      expect(screen.getByRole("link")).toHaveClass(
+        "bg-accent",
+        "text-on-accent",
+      );
+    });
+  });
+
+  /** A text link, so it sits flush with the copy it follows. A button's
+   *  horizontal inset would push it out of line, and there is no fill here for
+   *  that inset to be inside of. */
+  it("gives the ghost variant no horizontal padding", () => {
+    render(<Button href="/about">Filled</Button>);
+    const filled = screen.getByRole("link");
+    expect(filled).toHaveClass("px-5");
+
+    render(
+      <Button href="/about" variant="ghost">
+        Text
+      </Button>,
+    );
+    expect(screen.getByRole("link", { name: "Text" })).not.toHaveClass("px-5");
+  });
+
+  /** So a submit control ends level with the 48px inputs beside it rather than
+   *  4px short of them (DESIGN-SYSTEM ch. 6.8). */
+  it("can take the height of a form field", () => {
+    render(
+      <Button size="field" type="submit">
+        Search
+      </Button>,
+    );
+
+    expect(screen.getByRole("button")).toHaveClass("h-12");
+  });
 });

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { Section } from "@/components/ui/Section";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MEMBERSHIP } from "@/content/membership";
 
@@ -17,9 +17,9 @@ import { MEMBERSHIP } from "@/content/membership";
  */
 const HEADING_ID = "membership";
 
-export function Membership() {
+export function Membership({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID} tone="alt">
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <div className="rounded-card bg-ink p-8 lg:p-14">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
@@ -43,15 +43,16 @@ export function Membership() {
               <Button href={MEMBERSHIP.primary.href}>
                 {MEMBERSHIP.primary.label}
               </Button>
-              {/* The `ghost` variant is `ink` text, which disappears here, so
-                  the second control is drawn on the panel's own terms: a gold
-                  label with the same underline on hover. */}
-              <a
-                className="inline-flex min-h-11 items-center text-small font-medium text-gold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
+              {/* `ghost` on a dark tone, which resolves to the one colour
+                  that carries text on ink, and inverts the focus ring with it
+                  (DESIGN-SYSTEM ch. 6.3). */}
+              <Button
                 href={MEMBERSHIP.secondary.href}
+                tone="dark"
+                variant="ghost"
               >
                 {MEMBERSHIP.secondary.label}
-              </a>
+              </Button>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Section } from "@/components/ui/Section";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionLayout } from "@/components/ui/SectionLayout";
 import {
   FEATURED_PROPERTIES,
@@ -9,6 +9,7 @@ import {
 
 interface FeaturedPropertiesFrameProps {
   children: ReactNode;
+  tone?: SectionTone;
 }
 
 /**
@@ -34,9 +35,10 @@ const HEADING_ID = "featured-properties";
 
 export function FeaturedPropertiesFrame({
   children,
+  tone,
 }: FeaturedPropertiesFrameProps) {
   return (
-    <Section labelledBy={HEADING_ID}>
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <SectionLayout
         action={FEATURED_PROPERTIES_ACTION}
         actionVariant="ink"

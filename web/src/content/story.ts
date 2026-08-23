@@ -6,11 +6,19 @@
  * Sustainability in a secondary menu; surfacing them here is deliberate, and
  * it is why the header could drop to six items.
  *
+ * One correction to production's own words. Its intro reads "iNi ViE
+ * Hospitality guided by eight mantras", which is missing its verb. That is a
+ * grammatical error rather than a house punctuation style, so it is fixed here
+ * for the same reason the FAQ's "Ini Vie" is: a sentence a visitor has to
+ * re-read is a defect whoever wrote it would want back.
+ *
  * The pairing below is not the design pass's. That pass put Mother Earth and
  * Sustainability Impact under "Our Eight Mantras" and Technology Adaptation
  * under "Sustainability", which reads as a shuffle rather than a grouping.
  * Each subsection now carries the two mantras its own paragraph is about.
  */
+
+import type { Action } from "./action";
 
 export interface StoryImage {
   readonly src: string;
@@ -23,14 +31,14 @@ export interface StoryChapter {
    *  in the string, so the separator is a style decision and not content. */
   readonly mantras: readonly [string, string];
   readonly body: string;
-  readonly action: { readonly label: string; readonly href: string };
+  readonly action: Action;
 }
 
 export const STORY = {
   eyebrow: "Who We Are",
   heading: "Our Story",
   intro:
-    "iNi ViE Hospitality guided by eight mantras that honour people, culture, and nature. Through deeply personalised stays, distinctive resorts and villas, meaningful dining, wellness, and lifestyle experiences, we create memorable journeys across Bali with sustainability at the heart of every decision.",
+    "iNi ViE Hospitality is guided by eight mantras that honour people, culture, and nature. Through deeply personalised stays, distinctive resorts and villas, meaningful dining, wellness, and lifestyle experiences, we create memorable journeys across Bali with sustainability at the heart of every decision.",
   images: [
     {
       src: "/home/story/1.webp",

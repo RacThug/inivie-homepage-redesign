@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 
 import { PropertyCardSkeleton } from "@/components/property/PropertyCardSkeleton";
-import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { FeaturedPropertiesContent } from "@/components/sections/FeaturedPropertiesContent";
 import { FeaturedPropertiesFrame } from "@/components/sections/FeaturedPropertiesFrame";
+import { CardGrid } from "@/components/ui/CardGrid";
+import type { SectionTone } from "@/components/ui/Section";
 import { FEATURED_PROPERTY_COUNT } from "@/content/featured-properties";
 
 const PLACEHOLDERS = Array.from(
@@ -25,22 +26,22 @@ const PLACEHOLDERS = Array.from(
  * before knowing whether there is anything to head is not possible, and an
  * empty CMS is a state a live site passes through once.
  */
-export function FeaturedProperties() {
+export function FeaturedProperties({ tone }: { tone?: SectionTone }) {
   return (
     <Suspense
       fallback={
-        <FeaturedPropertiesFrame>
-          <PropertyGrid>
+        <FeaturedPropertiesFrame tone={tone}>
+          <CardGrid>
             {PLACEHOLDERS.map((index) => (
               <li key={index}>
                 <PropertyCardSkeleton />
               </li>
             ))}
-          </PropertyGrid>
+          </CardGrid>
         </FeaturedPropertiesFrame>
       }
     >
-      <FeaturedPropertiesContent />
+      <FeaturedPropertiesContent tone={tone} />
     </Suspense>
   );
 }

@@ -39,11 +39,14 @@ describe("SpecialOffers", () => {
       }
     });
 
-    it("describes the photograph in the alternative text, not the offer", () => {
-      render(<SpecialOffers />);
+    /** The banner beneath a link that already names the offer is mood, not
+     *  information, and a second string on it would make each tile announce
+     *  itself twice. */
+    it("leaves the photograph itself undescribed, so no tile speaks twice", () => {
+      const { container } = render(<SpecialOffers />);
 
-      for (const offer of OFFERS.items) {
-        expect(screen.getByAltText(offer.imageAlt)).toBeInTheDocument();
+      for (const image of container.querySelectorAll("img")) {
+        expect(image).toHaveAttribute("alt", "");
       }
     });
   });
@@ -52,9 +55,9 @@ describe("SpecialOffers", () => {
    *  items hidden from the first view, and no horizontal drag surface against
    *  vertical page scroll. Every offer is in the document from the start. */
   it("puts every offer in the first view rather than behind a control", () => {
-    render(<SpecialOffers />);
+    const { container } = render(<SpecialOffers />);
 
-    expect(screen.getAllByRole("img")).toHaveLength(OFFERS.items.length);
+    expect(container.querySelectorAll("img")).toHaveLength(OFFERS.items.length);
     expect(screen.queryByRole("button")).toBeNull();
   });
 });

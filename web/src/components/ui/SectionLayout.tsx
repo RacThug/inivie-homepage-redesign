@@ -2,11 +2,7 @@ import type { ReactNode } from "react";
 
 import { Button, type ButtonVariant } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-
-export interface SectionAction {
-  readonly label: string;
-  readonly href: string;
-}
+import type { Action } from "@/content/action";
 
 interface SectionLayoutProps {
   eyebrow: string;
@@ -16,7 +12,7 @@ interface SectionLayoutProps {
   /** Omitted where a section leads nowhere, which on this page is the FAQ and
    *  Featured In. A control that exists only for symmetry is a control that
    *  competes with the one that matters. */
-  action?: SectionAction;
+  action?: Action;
   actionVariant?: ButtonVariant;
   children: ReactNode;
 }

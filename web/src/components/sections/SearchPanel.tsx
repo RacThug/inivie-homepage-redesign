@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/Button";
 import { PinIcon } from "@/components/ui/PinIcon";
 import {
   DEFAULT_ADULTS,
@@ -17,7 +18,7 @@ import {
  * three things a visitor picked. Booking runs on a separate application, which
  * PRD ch. 3.2 puts out of scope, so this hands over and stops.
  *
- * Below the desktop breakpoint it collapses to one tappable row, because three
+ * Below the tablet breakpoint it collapses to one tappable row, because three
  * fields side by side do not fit 375px. That collapse is the only React state
  * here, and it is one boolean.
  */
@@ -161,17 +162,17 @@ export function SearchPanel() {
           />
         </Field>
 
-        {/* Not the shared `Button`: that one renders an anchor or a plain
-            button, and this has to submit the form. The fill, the radius and
-            the 44px floor are the same, so the two match in a row. */}
-        <button
-          className={`inline-flex h-12 min-w-11 items-center justify-center rounded-control bg-accent px-6 text-small font-medium text-on-accent transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:col-span-2 sm:mt-1 lg:col-span-1 lg:mt-0 ${
+        {/* `field` size, so the control ends level with the inputs beside
+            it rather than 4px short of them. */}
+        <div
+          className={`sm:col-span-2 sm:mt-1 lg:col-span-1 lg:mt-0 ${
             open ? "mt-1" : ""
           }`}
-          type="submit"
         >
-          {SEARCH_PANEL.submit}
-        </button>
+          <Button fullWidth size="field" type="submit">
+            {SEARCH_PANEL.submit}
+          </Button>
+        </div>
       </div>
     </form>
   );

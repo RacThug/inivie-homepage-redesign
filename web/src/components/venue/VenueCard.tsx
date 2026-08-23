@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/Badge";
+import { CARD_IMAGE_SIZES } from "@/components/ui/CardGrid";
 import { PinIcon } from "@/components/ui/PinIcon";
 import type { Venue } from "@/content/venues";
 
@@ -23,13 +24,6 @@ interface VenueCardProps {
  * something inert would be decoration, and ch. 5 lists what motion is for.
  */
 
-/**
- * Three columns inside a 1280px container puts a card at roughly 379px on a
- * desktop. Spelled out so a phone never downloads a desktop asset (RS4).
- */
-const IMAGE_SIZES =
-  "(min-width: 1280px) 379px, (min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw";
-
 export function VenueCard({ venue }: VenueCardProps) {
   return (
     <article className="h-full">
@@ -38,7 +32,7 @@ export function VenueCard({ venue }: VenueCardProps) {
           alt={venue.imageAlt}
           className="object-cover"
           fill
-          sizes={IMAGE_SIZES}
+          sizes={CARD_IMAGE_SIZES}
           src={venue.image}
         />
         <div className="absolute left-3 top-3">

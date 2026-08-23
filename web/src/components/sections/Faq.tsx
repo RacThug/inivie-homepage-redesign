@@ -1,4 +1,4 @@
-import { Section } from "@/components/ui/Section";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { FAQ } from "@/content/faq";
 
@@ -22,9 +22,9 @@ import { FAQ } from "@/content/faq";
  */
 const HEADING_ID = "faq";
 
-export function Faq() {
+export function Faq({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID}>
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <div className="mx-auto max-w-4xl">
         <SectionHeading
           align="center"

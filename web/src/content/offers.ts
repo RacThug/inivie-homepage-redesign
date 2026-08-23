@@ -19,6 +19,12 @@
  * five of its banners carry `alt="promo"` and are unreadable to a screen
  * reader.
  *
+ * There is no separate description of the photograph, and that is deliberate.
+ * The link is already named by the title, so a second string on the image
+ * inside it would either be swallowed by that name or make every tile
+ * announce itself twice. The photograph carries mood rather than information
+ * once the link says where it goes, which is what an empty `alt` means.
+ *
  * One departure worth naming: four of the five banners set that baked in
  * title in all caps, which the brief ch. 7 rules out for type this project
  * sets. It is not type this project sets. Re-lettering a client's artwork is
@@ -32,9 +38,6 @@ export interface Offer {
   readonly title: string;
   readonly href: string;
   readonly image: string;
-  /** What the photograph shows, not what the offer is called. The title is
-   *  carried by the link's own accessible name. */
-  readonly imageAlt: string;
 }
 
 export const OFFERS = {
@@ -48,34 +51,26 @@ export const OFFERS = {
       title: "Bali, Yours",
       href: "/bali-offers-yours",
       image: "/home/offers/bali-yours.webp",
-      imageAlt:
-        "Two guests on a walkway above a tree fern garden, with rattan loungers below.",
     },
     {
       title: "Advance Saver",
       href: "/offers/advance-saver",
       image: "/home/offers/advance-saver.webp",
-      imageAlt:
-        "Two guests standing hand in hand at the edge of a green pool surrounded by jungle.",
     },
     {
       title: "iNi ViE x Tap Club Canggu",
       href: "/offers/ini-vie-x-tap-club-canggu",
       image: "/home/offers/tap-club-canggu.webp",
-      imageAlt: "A player reaching for a low shot on an indoor padel court.",
     },
     {
       title: "Summer Deals",
       href: "/offers/summer-deals",
       image: "/home/offers/summer-deals.webp",
-      imageAlt:
-        "Two guests walking hand in hand past the daybeds around a resort pool.",
     },
     {
       title: "Premium Honeymoon Package",
       href: "/offers/premium-honeymoon-package",
       image: "/home/offers/premium-honeymoon-package.webp",
-      imageAlt: "A couple embracing under an arch of greenery on a stone path.",
     },
   ] as readonly Offer[],
 } as const;

@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { Section } from "@/components/ui/Section";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { FEATURED_IN } from "@/content/featured-in";
 
@@ -18,9 +18,9 @@ import { FEATURED_IN } from "@/content/featured-in";
  */
 const HEADING_ID = "featured-in";
 
-export function FeaturedIn() {
+export function FeaturedIn({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID} tone="alt">
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <SectionHeading
         align="center"
         eyebrow={FEATURED_IN.eyebrow}
@@ -33,13 +33,17 @@ export function FeaturedIn() {
         eight as two clean rows at every width. `object-contain` inside a fixed
         box is what keeps marks of very different proportions optically level:
         a wordmark six times as wide as a monogram cannot share a width.
+
+        `grayscale` is set rather than assumed. The eight files happen to be
+        monochrome already, so the filter changes nothing today, and it is the
+        reason a coloured ninth could not arrive and quietly break the row.
       */}
       <ul className="mt-10 grid grid-cols-2 items-center gap-x-8 gap-y-10 sm:grid-cols-4 lg:mt-14">
         {FEATURED_IN.publications.map((publication) => (
           <li className="relative h-10 lg:h-12" key={publication.name}>
             <Image
               alt={publication.name}
-              className="object-contain opacity-70"
+              className="object-contain opacity-70 grayscale"
               fill
               sizes="(min-width: 640px) 25vw, 50vw"
               src={publication.logo}

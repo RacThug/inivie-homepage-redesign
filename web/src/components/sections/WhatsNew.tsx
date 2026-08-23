@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import { CardGrid } from "@/components/ui/CardGrid";
-import { Section } from "@/components/ui/Section";
+import { CardGrid, CARD_IMAGE_SIZES } from "@/components/ui/CardGrid";
+import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionLayout } from "@/components/ui/SectionLayout";
 import { JOURNAL } from "@/content/journal";
 
@@ -14,13 +14,9 @@ import { JOURNAL } from "@/content/journal";
  */
 const HEADING_ID = "whats-new";
 
-/** Three columns inside a 1280px container is roughly 379px on a desktop. */
-const IMAGE_SIZES =
-  "(min-width: 1280px) 379px, (min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw";
-
-export function WhatsNew() {
+export function WhatsNew({ tone }: { tone?: SectionTone }) {
   return (
-    <Section labelledBy={HEADING_ID}>
+    <Section labelledBy={HEADING_ID} tone={tone}>
       <SectionLayout
         action={JOURNAL.action}
         eyebrow={JOURNAL.eyebrow}
@@ -41,7 +37,7 @@ export function WhatsNew() {
                       alt={article.imageAlt}
                       className="object-cover transition-transform group-hover:scale-104"
                       fill
-                      sizes={IMAGE_SIZES}
+                      sizes={CARD_IMAGE_SIZES}
                       src={article.image}
                     />
                   </div>

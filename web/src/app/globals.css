@@ -22,6 +22,15 @@
   --color-muted: #aab1bb;
 
   /**
+   * Secondary text on a dark ground. `ink-muted` is built for light surfaces
+   * and disappears against ink, and the footer is the first dark surface on
+   * the site that needs a second level of text. Added for the same reason
+   * `ink-muted` was: production has no consistent secondary token and reads
+   * flatter for it. Measured in `palette.test.ts`, not assumed.
+   */
+  --color-on-ink-muted: #b0b7c2;
+
+  /**
    * Text on an accent fill. Measured, not assumed: white on `accent` reaches
    * only 2.39 to 1, so the fallback named in DESIGN-SYSTEM ch. 2.2 applies and
    * accented controls carry `ink` text at 6.49 to 1.

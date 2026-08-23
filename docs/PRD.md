@@ -4,8 +4,9 @@
 | --- | --- |
 | Document type | Product Requirements Document |
 | Project | Technical Test - Homepage Redesign for inivie.com |
-| Version | 2.1 |
-| Date | 22 August 2026 |
+| Version | 2.2 |
+| Date | 23 August 2026 |
+| Last amendment | ch. 2.3, 6.1 and 6.2, on the user's decision after the visual design pass. See [briefs/homepage-design-brief.md](./briefs/homepage-design-brief.md) |
 | Submission deadline | 27 August 2026 (GitHub link sent to the HR team) |
 | Tech stack | Option 2: Next.js + Tailwind CSS + Laravel (CMS & API) + MySQL |
 | Dynamic section chosen | **Featured Properties** ("Featured property for you") |
@@ -79,12 +80,13 @@ Production fonts: **Poppins**, **Inter**, **Lato**, and **Great Vibes** (script,
 
 ### 2.3 Production weaknesses deliberately not replicated
 
-Two issues were found in production and are corrected in this redesign. Both are worth a brief mention in the README as evidence of critical reading, not as criticism.
+Three issues were found in production and are corrected in this redesign. All are worth a brief mention in the README as evidence of critical reading, not as criticism.
 
 | Production finding | Impact | Treatment in this project |
 | --- | --- | --- |
 | The homepage pulls the entire article body, `_links`, revision history, and Yoast schema even though the card only needs a title, image, and date. A single post weighs roughly 37 KB | Inflated page payload and slower render | The API returns only the fields the card actually uses. No HAL envelope, no unused relations. See API-SPEC ch. 1 |
 | The frontend requests `_embed` for author data, but the `users` endpoint rejects anonymous callers, so `_embedded.author` in the homepage payload contains a `rest_user_cannot_view` error object | The API contract fails halfway, silently and undetected | The payload shape is defined once and mirrored as a TypeScript type. Feature tests assert every promised field is genuinely populated. See API-SPEC ch. 6 |
+| 205 KB of production CSS carries 258 `:hover` rules, 51 transitions, 5 keyframe animations and three Swiper carousels, and no `prefers-reduced-motion` query at all. Measured 23 August 2026 | A visitor who has asked their operating system to reduce motion receives the full set anyway. Vestibular sensitivity is an accessibility concern, not a preference | Every transition and animation collapses under `prefers-reduced-motion: reduce`, implemented globally in `web/src/app/globals.css`. See DESIGN-SYSTEM ch. 5 and the brief ch. 5A |
 
 ### 2.4 Existing homepage section inventory
 
@@ -186,7 +188,9 @@ Scored 1 to 5, higher is better.
 | # | Section | Data source | Requirement |
 | --- | --- | --- | --- |
 | 1 | Header and navigation | Static | Sticky. Transparent over the hero, solid on scroll. A drawer below 1024px |
-| 2 | Hero | Static | One large image, heading, subheading, and a single primary CTA. No carousel, so the largest paint stays cheap |
+| 2 | Hero | Static | One large image carrying the search panel and nothing else. No headline over the photograph, and no carousel, so the largest paint stays cheap |
+| 2a | Search panel | Static | Destination selector, check in and check out range, and a Search button. Leads to the separate booking system, does not implement it. Collapses to one tappable summary row below the tablet breakpoint |
+| 2b | Welcome block | Static | On a light ground below the hero: a centred H1, the company paragraph, and a single primary CTA |
 | 3 | **Featured Properties** | **Dynamic, via the Laravel API** | The centrepiece of the test. Detailed in ch. 6.2 |
 | 4 | The Culinary Journey | Static | Three restaurant cards |
 | 5 | Wellness Harmony Escape | Static | Three spa cards |
@@ -208,7 +212,7 @@ All static content must be stored as typed structured data, never inline in mark
 - A section heading, "Featured property for you".
 - A one to two sentence intro paragraph.
 - The property card grid.
-- A secondary "View all properties" link.
+- A secondary "View All Family" control, rendered as a filled `ink` pill rather than a text link. Production's wording, kept as brand voice: the portfolio is the family. It is less immediately obvious to a first time visitor than "properties" would be, and that cost is accepted knowingly.
 
 **Information each card must communicate**
 

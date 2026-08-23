@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | Document type | Design System Specification |
-| Version | 1.2 |
-| Date | 22 August 2026 |
+| Version | 1.3 |
+| Date | 23 August 2026 |
 | Status | Living document. Expected to change during implementation |
 
 **Scope of this document.** Visual tokens and their application: colour, typography, spacing, radius, elevation, motion, breakpoints, and the visual specification of shared components. Chapters 1 to 7 specify the public homepage. Chapter 8 specifies the admin panel, which reuses most of the same tokens and departs from a few of them deliberately.
@@ -43,6 +43,7 @@ Five principles govern every decision here. They are stated in PRD ch. 6.3 and r
 | `surface-alt` | `#F7F7F5` | Alternating section backgrounds |
 | `border` | `#E4E6EA` | Borders and separators |
 | `muted` | `#AAB1BB` | Placeholder and disabled text |
+| `on-ink-muted` | `#B0B7C2` | Secondary text on a dark ground. The mirror of `ink-muted`, added in #13 when the footer became the first dark surface needing two levels of text |
 | `on-accent` | `#1C2434` | Text and icons on an accent fill. A decision, not a new colour: it resolves to `ink`, for the reason in ch. 2.2 |
 
 `ink`, `accent`, and `gold` are taken directly from production. `ink-muted`, `surface-alt`, and `border` are additions, because production has no consistent secondary text or surface token and the page reads flatter for it.
@@ -63,6 +64,7 @@ Measured on 22 August 2026 against the tokens in `web/src/app/globals.css`. The 
 | `ink-muted` on `surface` | 7.61 | Passes |
 | `ink-muted` on `surface-alt` | 7.10 | Passes |
 | `gold` on `ink` | 6.87 | Passes. Gold carries text only on a dark panel |
+| `on-ink-muted` on `ink` | 7.70 | Passes. Fails on a light surface by design, exactly as `ink-muted` fails on a dark one |
 | `on-accent` on `accent` | 6.49 | Passes |
 | `gold-dark` on `surface` | 4.92 | Passes |
 | `on-accent` on `accent-hover` | 4.85 | Passes |
@@ -211,7 +213,64 @@ Minimum hit area 44 by 44 pixels on mobile, per requirement RS2. Both axes, not 
 
 **Focus.** Every interactive variant carries a two pixel `ink` outline, offset by two pixels, on `focus-visible` only. Keyboard users get a visible ring without pointer users seeing one, and `ink` is used rather than `accent` because the ring must stay legible against the accent fill itself.
 
-### 6.4 Skeleton
+### 6.4 Header
+
+Implemented in #13. Fixed to the top, so the hero runs underneath it rather
+than being pushed down by it. Height 64px on mobile, 80px from the desktop
+breakpoint.
+
+**Two states.**
+
+| State | Treatment |
+| --- | --- |
+| Resting, over the hero | No background. A scrim carries the labels: `ink` at 55 per cent fading to nothing over 220px, so the gradient ends below the header rather than at its edge. Labels and logo in `surface` |
+| Scrolled | `surface` background, 1px `border` along the bottom, labels and logo in `ink`. The scrim is removed rather than faded, because it has nothing left to do |
+
+The state is read from a sentinel one header tall at the top of the document,
+watched by an `IntersectionObserver`. A scroll listener would run on every
+frame to answer a question that changes twice.
+
+**Navigation.** Six items, inline from 1024px, drawer below it. The active item
+is marked with a 2px `accent` rule under a label that keeps its own colour.
+Accent reaches 2.39 to 1 on a light surface, so it marks and never carries text.
+
+**The drawer**, per RS3. A `surface` panel from the left, at most `24rem` wide,
+over an `ink` scrim at 50 per cent. Focus moves to the close control on open,
+is trapped inside while open, and returns to the toggle on close. Escape
+closes. The item order matches the desktop navigation exactly, and the booking
+control is pinned to the bottom of the panel. Every target is at least 44 by 44
+pixels on both axes.
+
+### 6.5 Footer
+
+Implemented in #13. An `ink` ground, four columns at 1024px, two from 640px,
+one below that.
+
+| Column | Contents |
+| --- | --- |
+| 1 | Wordmark, head office address, general phone and email, map link |
+| 2 | The five department desks, each with its own phone, email, and any secondary action |
+| 3 | Company links, including the B2B consultancy lines the header no longer carries |
+| 4 | Newsletter field and button, then social channels |
+
+A legal row closes it, separated by a 1px rule at 15 per cent `surface`.
+
+**Text.** Column headings are eyebrow scale in `gold`, which is the one surface
+on the site where gold is allowed to carry text, at 6.87 to 1. Primary values
+are `surface`. Secondary values are `on-ink-muted`. Actions are `gold`.
+
+**The focus ring inverts here.** ch. 6.3 sets an `ink` ring, which is invisible
+on an ink ground, so the footer uses a `surface` ring at the same width and
+offset. This is the only place the ring changes colour, and it changes for the
+same reason ch. 6.3 chose ink in the first place: the ring has to stay legible
+against what is behind it.
+
+**The five desks are not collapsible.** Production splits enquiries across
+Reservations, Marketing, Media, Human Resources, Travel Agents and a general
+line. Merging them into a single "contact us" would send a job applicant to the
+reservations team, which is a redesign of the business rather than of the page.
+
+### 6.6 Skeleton
 
 The loading skeleton for the property grid renders three placeholder cards whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
 

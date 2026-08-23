@@ -15,6 +15,29 @@ export const HERO_IMAGE = {
 } as const;
 
 /**
+ * The hero footage, matching production.
+ *
+ * Two cuts rather than one file at two crops, because production ships two:
+ * a 1920x1080 landscape film and a portrait one that is a different edit
+ * entirely, not a reframing of the first. The portrait cut is stored 1080 by
+ * 1080 with a 9:16 sample aspect, so it is 9:16 on screen rather than the
+ * square its pixel dimensions read as. The breakpoint is production's:
+ * it serves the square cut below 768px.
+ *
+ * Both are production's own files with the audio track removed and the moov
+ * atom moved to the front. Neither video frame was re-encoded, so what plays
+ * here is what plays on inivie.com, pixel for pixel; the audio was 164 kbps of
+ * a track that a muted element can never sound, and `faststart` lets playback
+ * begin before the whole file has arrived.
+ */
+export const HERO_VIDEO = {
+  desktop: "/home/hero-desktop.mp4",
+  mobile: "/home/hero-mobile.mp4",
+  /** Production's own switch point. Below this width it serves the square cut. */
+  mobileQuery: "(max-width: 767px)",
+} as const;
+
+/**
  * Booking runs on a separate system, which PRD ch. 3.2 puts out of scope. The
  * panel is a real form that hands its fields to that system over a GET, and
  * stops there.
@@ -49,17 +72,35 @@ export const SEARCH_PANEL = {
    *  heading of its own: putting an H1 on it would fight the welcome block. */
   label: "Search for a stay",
   destination: "Destination",
-  checkIn: "Check in",
-  checkOut: "Check out",
+  /** One label for the stay, because it is one decision. The two dates are
+   *  still two values, and still cross the seam as `checkin` and `checkout`. */
+  dates: "Dates",
+  datesEmpty: "Add dates",
+  guests: "Guests",
   submit: "Search",
   /** The one tappable row the panel collapses into below the tablet
-   *  breakpoint, where three fields side by side do not fit 375px. */
+   *  breakpoint, where the fields side by side do not fit 375px. */
   summary: "Where and when",
 } as const;
 
-/** Two adults, production's own default, sent as a hidden field rather than
- *  asked for: a guest count picker is booking flow, not homepage. */
-export const DEFAULT_ADULTS = 2;
+/**
+ * The guest count, asked for rather than assumed.
+ *
+ * It was a hidden `adults=2` until the field existed, on the reasoning that a
+ * guest picker is booking flow. That was wrong in one direction that matters:
+ * a couple is not the same search as a family of five, and sending everybody
+ * to a two adult result set means the first thing a family does on the booking
+ * system is redo the search they already did here.
+ *
+ * `adults` is the only guest parameter production's query string carries, so
+ * it is the only one offered. A children field would be a control whose value
+ * is dropped at the seam.
+ */
+export const GUESTS = {
+  min: 1,
+  max: 8,
+  default: 2,
+} as const;
 
 export const WELCOME = {
   heading: "iNi ViE Hospitality",

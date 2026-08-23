@@ -1,82 +1,170 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { DESTINATIONS, SEARCH_ACTION, SEARCH_PANEL } from "@/content/hero";
+import { DESTINATIONS, GUESTS, SEARCH_ACTION, SEARCH_PANEL } from "@/content/hero";
 
 import { SearchPanel } from "./SearchPanel";
 
-function fields() {
-  return {
-    destination: screen.getByLabelText(SEARCH_PANEL.destination),
-    checkIn: screen.getByLabelText(SEARCH_PANEL.checkIn),
-    checkOut: screen.getByLabelText(SEARCH_PANEL.checkOut),
-  };
+/** The calendar asks how wide the window is, and jsdom does not volunteer. */
+beforeAll(() => {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }),
+  });
+});
+
+function hidden(container: HTMLElement, name: string) {
+  return container.querySelector<HTMLInputElement>(`input[name="${name}"]`);
+}
+
+function trigger(label: string) {
+  return screen.getByRole("button", { name: new RegExp(label, "i") });
 }
 
 describe("SearchPanel", () => {
   /**
    * Booking runs on a separate application, which PRD ch. 3.2 puts out of
-   * scope. The panel hands three fields over and stops, so the names it sends
-   * are the contract and are worth pinning.
+   * scope. The panel hands its values over and stops, so the names it sends
+   * are the contract and are worth pinning. They are hidden inputs because
+   * the fields are this project's and the query string is production's.
    */
-  it("hands the booking system a GET with the fields it expects", () => {
-    render(<SearchPanel />);
+  it("hands the booking system a GET with the parameters it expects", () => {
+    const { container } = render(<SearchPanel />);
     const form = screen.getByRole("form", { name: SEARCH_PANEL.label });
 
     expect(form).toHaveAttribute("action", SEARCH_ACTION);
     expect(form).toHaveAttribute("method", "get");
 
-    const { destination, checkIn, checkOut } = fields();
-    expect(destination).toHaveAttribute("name", "city");
-    expect(checkIn).toHaveAttribute("name", "checkin");
-    expect(checkOut).toHaveAttribute("name", "checkout");
+    for (const name of ["city", "checkin", "checkout", "adults"]) {
+      expect(hidden(container, name)).toHaveAttribute("type", "hidden");
+    }
   });
 
-  it("offers every destination production offers", () => {
-    render(<SearchPanel />);
+  describe("the destination", () => {
+    it("starts on production's first and says so on the trigger", () => {
+      const { container } = render(<SearchPanel />);
 
-    expect(screen.getAllByRole("option")).toHaveLength(DESTINATIONS.length);
-    expect(fields().destination).toHaveValue(DESTINATIONS[0].value);
-  });
-
-  /**
-   * The homepage is prerendered, so a default computed while rendering would
-   * be the date the build ran and would still be that date a month later. The
-   * date fields are uncontrolled and are filled once, on mount.
-   */
-  describe("the dates it starts with", () => {
-    it("fills tonight and tomorrow rather than leaving the fields empty", () => {
-      render(<SearchPanel />);
-      const { checkIn, checkOut } = fields();
-
-      expect(checkIn).toHaveValue();
-      expect(checkOut).toHaveValue();
-      expect(
-        (checkOut as HTMLInputElement).value >
-          (checkIn as HTMLInputElement).value,
-      ).toBe(true);
+      expect(hidden(container, "city")).toHaveValue(DESTINATIONS[0].value);
+      expect(trigger(DESTINATIONS[0].label)).toBeInTheDocument();
     });
 
-    it("moves the check out floor when the check in moves past it", async () => {
+    it("offers every destination production offers, once opened", async () => {
       const user = userEvent.setup();
       render(<SearchPanel />);
-      const { checkIn, checkOut } = fields();
 
-      await user.clear(checkIn);
-      await user.type(checkIn, "2027-03-15");
+      await user.click(trigger(DESTINATIONS[0].label));
+      const panel = screen.getByRole("dialog", {
+        name: SEARCH_PANEL.destination,
+      });
 
-      expect(checkOut).toHaveAttribute("min", "2027-03-16");
-      expect(checkOut).toHaveValue("2027-03-16");
+      expect(within(panel).getAllByRole("button")).toHaveLength(
+        DESTINATIONS.length,
+      );
+    });
+
+    it("takes a choice, closes, and sends it", async () => {
+      const user = userEvent.setup();
+      const { container } = render(<SearchPanel />);
+
+      await user.click(trigger(DESTINATIONS[0].label));
+      await user.click(screen.getByRole("button", { name: DESTINATIONS[6].label }));
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(hidden(container, "city")).toHaveValue(DESTINATIONS[6].value);
+    });
+  });
+
+  describe("the stay", () => {
+    /**
+     * The homepage is prerendered, so a default computed while rendering would
+     * be the date the build ran and would still be that date a month later.
+     */
+    it("starts on tonight and tomorrow rather than empty", () => {
+      const { container } = render(<SearchPanel />);
+
+      const checkIn = hidden(container, "checkin")!.value;
+      const checkOut = hidden(container, "checkout")!.value;
+
+      expect(checkIn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(checkOut > checkIn).toBe(true);
+    });
+
+    /** NN/G: a month spelled out, because `10/11/2016` is two different days
+     *  either side of the Atlantic. */
+    it("spells the month rather than writing an ambiguous number", () => {
+      render(<SearchPanel />);
+
+      expect(
+        screen.getByRole("button", { name: /\d{1,2} [A-Z][a-z]{2}/ }),
+      ).toBeInTheDocument();
+    });
+
+    it("names the length of the stay, which neither date says alone", () => {
+      render(<SearchPanel />);
+
+      expect(screen.getByText("1 night")).toBeInTheDocument();
+    });
+
+    it("opens a calendar rather than the browser's own control", async () => {
+      const user = userEvent.setup();
+      const { container } = render(<SearchPanel />);
+
+      // The control this replaced rendered as a different widget in every
+      // engine, and as plain ISO text with no calendar at all in WebKit.
+      expect(container.querySelector('input[type="date"]')).toBeNull();
+
+      await user.click(trigger(SEARCH_PANEL.dates));
+
+      expect(
+        screen.getByRole("dialog", { name: SEARCH_PANEL.dates }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("grid")).toBeInTheDocument();
+    });
+  });
+
+  describe("the guest count", () => {
+    it("starts at production's default and reads as a phrase", () => {
+      const { container } = render(<SearchPanel />);
+
+      expect(hidden(container, "adults")).toHaveValue(String(GUESTS.default));
+      expect(trigger("2 guests")).toBeInTheDocument();
+    });
+
+    it("steps within its bounds and sends what it shows", async () => {
+      const user = userEvent.setup();
+      const { container } = render(<SearchPanel />);
+
+      await user.click(trigger("2 guests"));
+      await user.click(screen.getByRole("button", { name: "More guests" }));
+
+      expect(hidden(container, "adults")).toHaveValue("3");
+    });
+
+    it("stops at one guest rather than offering a stay for nobody", async () => {
+      const user = userEvent.setup();
+      render(<SearchPanel />);
+
+      await user.click(trigger("2 guests"));
+      const fewer = screen.getByRole("button", { name: "Fewer guests" });
+
+      await user.click(fewer);
+      expect(fewer).toBeDisabled();
     });
   });
 
   /**
-   * Three fields and a button do not fit 375px. Below the tablet breakpoint
-   * the panel is one tappable row, and the row is not rendered above it: a
-   * hidden control still reporting a collapsed state would describe a panel
-   * that is permanently open.
+   * The fields side by side do not fit 375px. Below the tablet breakpoint the
+   * panel is one tappable row, and the row is not rendered above it: a hidden
+   * control still reporting a collapsed state would describe a panel that is
+   * permanently open.
    */
   describe("the summary row", () => {
     it("starts collapsed and reports it", () => {
@@ -97,7 +185,7 @@ describe("SearchPanel", () => {
       expect(toggle).toHaveAttribute("aria-expanded", "true");
       expect(
         document.getElementById(toggle.getAttribute("aria-controls")!),
-      ).toContainElement(fields().destination);
+      ).toContainElement(trigger(DESTINATIONS[0].label));
     });
 
     it("is not on screen from the tablet breakpoint", () => {
@@ -108,15 +196,79 @@ describe("SearchPanel", () => {
       ).toHaveClass("sm:hidden");
     });
   });
+});
 
-  /** Two adults, production's own default, sent rather than asked for: a guest
-   *  count picker is booking flow, not homepage. */
-  it("sends the guest count without asking for it", () => {
-    const { container } = render(<SearchPanel />);
+/**
+ * The panel does not leave with the hero. `SearchDock` swaps its position on
+ * an `IntersectionObserver`; what is checked here is the presentation it
+ * takes when it lands, because that is this component's half of the deal.
+ */
+describe("docked under the header", () => {
+  it("keeps its labels for assistive technology while hiding them", () => {
+    render(<SearchPanel docked />);
 
-    expect(container.querySelector('input[name="adults"]')).toHaveAttribute(
-      "type",
-      "hidden",
+    const dates = screen.getByRole("button", {
+      name: new RegExp(SEARCH_PANEL.dates, "i"),
+    });
+
+    // Still named, still not drawn: a bar across a page someone is reading
+    // has no room for three eyebrows.
+    expect(dates).toBeInTheDocument();
+    expect(screen.getByText(SEARCH_PANEL.dates)).toHaveClass("sr-only");
+  });
+
+  it("opens its menus downward, because upward is off the top of the window", async () => {
+    const user = userEvent.setup();
+    render(<SearchPanel docked />);
+
+    await user.click(trigger(SEARCH_PANEL.dates));
+
+    expect(screen.getByRole("dialog", { name: SEARCH_PANEL.dates })).toHaveClass(
+      "sm:top-full",
     );
+  });
+
+  it("opens them upward at rest, where the panel sits on the hero's foot", async () => {
+    const user = userEvent.setup();
+    render(<SearchPanel />);
+
+    await user.click(trigger(SEARCH_PANEL.dates));
+
+    expect(screen.getByRole("dialog", { name: SEARCH_PANEL.dates })).toHaveClass(
+      "sm:bottom-full",
+    );
+  });
+
+  it("stops being a card and carries no ground of its own", () => {
+    render(<SearchPanel docked />);
+
+    // The ground belongs to the band around it, so that band can run edge to
+    // edge while these fields stay on the page's container.
+    const form = screen.getByRole("form", { name: SEARCH_PANEL.label });
+    expect(form).not.toHaveClass("rounded-card");
+    expect(form).not.toHaveClass("bg-ink/95");
+    expect(form).not.toHaveClass("shadow-raised");
+  });
+
+  /**
+   * The band is `surface`, so the fields turn over with it. `ink-muted` is
+   * measured at 7.61 to 1 there; `border` reaches 1.25 and `muted` 2.16, and
+   * a control's boundary needs 3.
+   */
+  it("turns its fields over to the light tone", () => {
+    render(<SearchPanel docked />);
+
+    const dates = trigger(SEARCH_PANEL.dates);
+    expect(dates).toHaveClass("border-ink-muted", "text-ink");
+    expect(dates).toHaveClass("focus-visible:outline-ink");
+  });
+
+  it("keeps the dark tone on the hero, where the ground is ink", () => {
+    render(<SearchPanel />);
+
+    const dates = trigger(SEARCH_PANEL.dates);
+    expect(dates).toHaveClass("border-surface/25", "text-surface");
+    // An ink ring is invisible on ink, for the reason ch. 6.5 gives.
+    expect(dates).toHaveClass("focus-visible:outline-surface");
   });
 });

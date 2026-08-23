@@ -188,8 +188,8 @@ Scored 1 to 5, higher is better.
 | # | Section | Data source | Requirement |
 | --- | --- | --- | --- |
 | 1 | Header and navigation | Static | Sticky. Transparent over the hero, solid on scroll. A drawer below 1024px |
-| 2 | Hero | Static | One large image carrying the search panel and nothing else. No headline over the photograph, and no carousel, so the largest paint stays cheap |
-| 2a | Search panel | Static | Destination selector, check in and check out range, and a Search button. Leads to the separate booking system, does not implement it. Collapses to one tappable summary row below the tablet breakpoint |
+| 2 | Hero | Static | Production's film carrying the search panel, over production's poster. No headline of our own over it, and no carousel. The poster is what paints, so the largest paint stays cheap; see DESIGN-SYSTEM ch. 6.8 for what the film costs and what it shows |
+| 2a | Search panel | Static | Destination selector, stay date range, guest count, and a Search button. Leads to the separate booking system, does not implement it. Collapses to one tappable summary row below the tablet breakpoint. Sits inside the hero rather than below it, so every field clears the fold |
 | 2b | Welcome block | Static | On a light ground below the hero: a centred H1, the company paragraph, and a single primary CTA |
 | 3 | **Featured Properties** | **Dynamic, via the Laravel API** | The centrepiece of the test. Detailed in ch. 6.2 |
 | 4 | The Culinary Journey | Static | Three restaurant cards |

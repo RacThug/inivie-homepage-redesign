@@ -1,17 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { BOOKING_CTA, PRIMARY_NAV } from "@/content/navigation";
+import {
+  BRAND_LOGO,
+  BRAND_NAME,
+  isNavGroup,
+  PRIMARY_NAV,
+} from "@/content/navigation";
 
 interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
   /** Ties the panel to the toggle that opened it, for `aria-controls`. */
   id: string;
-  /** The path the drawer should mark as current, if any. */
-  pathname?: string;
 }
 
 /**
@@ -31,15 +34,16 @@ const FOCUSABLE =
  * is what stops a keyboard user being dropped at the top of the document every
  * time they dismiss the menu.
  *
- * The item order matches the desktop navigation exactly. A drawer that
- * reorders its links teaches the visitor two different site structures.
+ * The entries match the desktop navigation exactly. A drawer that reorders or
+ * adds links teaches the visitor two different site structures, which is the
+ * one thing production's own drawer does wrong: it carries Consultant and
+ * Offers that the desktop bar never shows. Both have a home in `footer.ts`.
+ *
+ * Groups are laid out open rather than as accordions. There are eleven links
+ * in total and the panel scrolls, so collapsing them would hide the structure
+ * behind a tap for no space that is actually short.
  */
-export function MobileDrawer({
-  open,
-  onClose,
-  id,
-  pathname,
-}: MobileDrawerProps) {
+export function MobileDrawer({ open, onClose, id }: MobileDrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -124,7 +128,17 @@ export function MobileDrawer({
         ref={panelRef}
         role="dialog"
       >
-        <div className="flex items-center justify-end border-b border-border px-5 py-3">
+        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+          {/* The same mark the header carries, so the panel reads as the site
+              rather than as a list that arrived from somewhere else. */}
+          <Image
+            alt={BRAND_NAME}
+            className="h-11 w-11 object-contain"
+            height={BRAND_LOGO.height}
+            src={BRAND_LOGO.ink}
+            width={BRAND_LOGO.width}
+          />
+
           <button
             aria-label="Close menu"
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-control text-ink transition-colors hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
@@ -136,39 +150,65 @@ export function MobileDrawer({
           </button>
         </div>
 
-        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-5">
+        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-5 py-2">
           <ul className="flex flex-col">
-            {PRIMARY_NAV.map((item) => {
-              const current = pathname === item.href;
-
-              return (
-                <li key={item.href}>
-                  <a
-                    aria-current={current ? "page" : undefined}
-                    className="flex min-h-11 items-center border-b border-border py-3 font-heading text-h3 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-                    href={item.href}
-                  >
-                    <span
-                      className={
-                        current ? "border-b-2 border-accent pb-0.5" : undefined
-                      }
-                    >
-                      {item.label}
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
+            {PRIMARY_NAV.map((entry) => (
+              <li className="border-b border-border py-3" key={entry.label}>
+                {isNavGroup(entry) ? (
+                  <>
+                    {/*
+                      A caption rather than a control: production's own drawer
+                      lays every group open too, and the label leads nowhere on
+                      either. `ink-muted` rather than accent, because this one
+                      is text and accent cannot carry text on a light surface
+                      (DESIGN-SYSTEM ch. 2.3).
+                    */}
+                    <p className="text-eyebrow font-medium uppercase text-ink-muted">
+                      {entry.label}
+                    </p>
+                    <ul className="mt-1 flex flex-col border-l border-border pl-4">
+                      {entry.children.map((child) => (
+                        <li key={child.href}>
+                          <DrawerLink href={child.href}>
+                            {child.label}
+                          </DrawerLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <DrawerLink href={entry.href}>{entry.label}</DrawerLink>
+                )}
+              </li>
+            ))}
           </ul>
         </nav>
-
-        <div className="border-t border-border p-5">
-          <Button fullWidth href={BOOKING_CTA.href}>
-            {BOOKING_CTA.label}
-          </Button>
-        </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Every destination is on the live site, so every one opens in a new tab. The
+ * 44px minimum is requirement RS2 and is set here rather than left to the
+ * line height of whatever text ends up inside.
+ */
+function DrawerLink({
+  children,
+  href,
+}: {
+  children: string;
+  href: string;
+}) {
+  return (
+    <a
+      className="flex min-h-11 items-center font-heading text-h3 text-ink transition-colors hover:text-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      href={href}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {children}
+    </a>
   );
 }
 

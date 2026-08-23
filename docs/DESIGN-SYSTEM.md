@@ -240,23 +240,80 @@ breakpoint.
 
 | State | Treatment |
 | --- | --- |
-| Resting, over the hero | No background. A scrim carries the labels: `ink` at 55 per cent fading to nothing over 220px, so the gradient ends below the header rather than at its edge. Labels and logo in `surface` |
-| Scrolled | `surface` background, 1px `border` along the bottom, labels and logo in `ink`. The scrim is removed rather than faded, because it has nothing left to do |
+| Resting, over the hero | No background. A scrim carries the labels: `ink` at 55 per cent fading to nothing over 220px, so the gradient ends below the header rather than at its edge. Labels and wordmark in `surface` |
+| Scrolled | `surface` background, 1px `border` along the bottom, labels and wordmark in `ink`. The scrim is removed rather than faded, because it has nothing left to do |
 
 The state is read from a sentinel one header tall at the top of the document,
 watched by an `IntersectionObserver`. A scroll listener would run on every
 frame to answer a question that changes twice.
 
-**Navigation.** Six items, inline from 1024px, drawer below it. The active item
-is marked with a 2px `accent` rule under a label that keeps its own colour.
-Accent reaches 2.39 to 1 on a light surface, so it marks and never carries text.
+**The wordmark**, 48px on mobile and 64px from the desktop breakpoint, in the
+tone the state above sets. Both tones are in the markup at once and crossfade
+with the header, rather than one `src` swapping on scroll: a swap flashes on
+the first crossing while the second file loads, and it fights the colour
+transition already running beside it. The ink tone is a recolour of the
+production asset rather than a runtime `filter`, because a filter that
+approximates ink resolves differently in every browser and ch. 2.1 is meant to
+be the only place a colour is decided.
+
+**Navigation.** Five entries, inline from 1024px, drawer below it. Four are
+groups over a brand family and open a panel; one is a plain link. The
+structure is production's, and so is every destination: this project redesigns
+the homepage and nothing else, so each link is an absolute URL to the live
+property that owns it and opens in a new tab.
+
+A hovered or open entry is marked with a 2px `accent` rule under a label that
+keeps its own colour, the same marker as ch. 6.4's earlier active state. Accent
+reaches 2.39 to 1 on a light surface, so it marks and never carries text.
+Production recolours the label to accent instead, which works on its own dark
+header and would not survive the scrolled state here.
+
+**The group panels.** A `surface` panel below the trigger, at least 224px wide,
+`radius-control`, 1px `border`, `shadow-raised`, entering on the `animate-enter`
+of ch. 5. Padding on the panel's wrapper bridges the gap under the trigger, so
+the pointer does not cross a dead strip on the way down; a timeout there would
+be guessing how fast someone moves a mouse.
+
+Production opens these on `group-hover` and nothing else, which leaves four of
+the five entries unreachable without a mouse. Hover is kept, because it is the
+right behaviour for a pointer, but as an addition to a real disclosure rather
+than the whole mechanism: the trigger is a button reporting `aria-expanded`,
+Down arrow opens it and moves into the panel, Escape closes it and hands focus
+back, and tabbing out of the last item dismisses it.
+
+A click means different things by input. Touch and keyboard toggle, because
+neither has a hover that could have opened the panel already. A mouse click
+opens and does not close: dismissing what the pointer is still resting on is
+what makes a hover menu feel broken, and production does nothing at all here.
+
+**The focus ring inverts with the state.** ch. 6.3 sets an `ink` ring, which is
+invisible over the hero, so the header's own controls take `currentColor` and
+follow the label. Inside a group panel the ring is `ink` again, because the
+panel is `surface` whatever the header behind it is doing.
+
+**No booking control, in either navigation.** The hero's search panel of ch.
+6.8 is the page's one way into the booking system, and it is the one PRD ch. 6
+section 2a asks for. A "Book Now" in the header was a second entrance that
+answered the same three questions with none of the visitor's answers:
+`booking.inivie.com` bare lands on its own search form, so the control took
+what the panel had already collected and discarded it. Two entrances to one
+system, behaving differently, is what makes a booking flow feel untrustworthy.
+Production has no such button either; its header carries the search widget.
 
 **The drawer**, per RS3. A `surface` panel from the left, at most `24rem` wide,
 over an `ink` scrim at 50 per cent. Focus moves to the close control on open,
 is trapped inside while open, and returns to the toggle on close. Escape
-closes. The item order matches the desktop navigation exactly, and the booking
-control is pinned to the bottom of the panel. Every target is at least 44 by 44
-pixels on both axes.
+closes. Every target is at least 44 by 44 pixels on both axes.
+
+The entries match the desktop navigation exactly. Production's own drawer adds
+Consultant and Offers that its desktop bar never shows, which teaches the
+visitor two site structures; both already have a home in the footer of ch. 6.5.
+
+Groups are laid out open rather than as accordions, with the group name as an
+eyebrow caption in `ink-muted` and its links indented behind a 1px rule. There
+are ten links in total and the panel scrolls, so collapsing them would hide the
+structure behind a tap for no space that is actually short. The caption is
+`ink-muted` and not `accent` because this one is text.
 
 ### 6.5 Footer
 
@@ -313,21 +370,94 @@ A section that is not `Container` wide is a hero, and a hero is not a `Section`.
 
 ### 6.8 Hero and search panel
 
-Height 70vh mobile, 75vh tablet, 85vh desktop, with a 480px floor so a short landscape window still gets a photograph rather than a strip. One image, `priority`, and nothing composited over it.
+**Full viewport height at every breakpoint**, which is production's, over a 480px floor so a short landscape window still gets a hero rather than a strip. `vh` rather than `dvh`: `dvh` follows a mobile browser's chrome as it hides and shows, which would resize the hero under the visitor mid scroll and take the layout shift score with it.
 
-A scrim runs across the lower half only, `ink` at 45 per cent fading up to nothing. The header carries its own scrim at the top (ch. 6.4) and the panel carries its own contrast, so this one is for the join between them: without it the panel appears to float on whatever the picture happens to be doing at its edge.
+Production's own height took some finding. `inivie.com` stamps `data-is-bot="true"` on the document for automated visitors and carries `html[data-is-bot="true"] .hero { height: 400px !important }`, so a headless browser measures a 400px hero and a person sees `100vh`. Every measurement of that page in this document was re-taken with the flag defeated.
 
-**The panel overlaps the foot of the image** rather than sitting inside it, by 32px on mobile and 80px on desktop. On a phone that keeps 70vh of photograph whole and puts the panel one row below its edge.
+**Production's film, over production's poster.** Two cuts, because production ships two and they are different edits rather than two crops of one: a 1920x1080 landscape film, and a portrait one stored 1080 by 1080 with a 9:16 sample aspect. The switch is production's own, at 768px. Both are production's files with the audio track stripped and the moov atom moved to the front; no video frame is re-encoded, so what plays here is what plays on inivie.com, pixel for pixel.
 
-| Element | Treatment |
-| --- | --- |
-| Ground | `ink` at 95 per cent, 12px radius, raised elevation |
-| Field labels | Eyebrow scale, `gold`, which carries text on ink at 6.87 to 1 |
-| Fields | 48px tall, 8px radius, a 1px `surface` border at 25 per cent, `surface` text |
-| Search button | `accent` fill with `ink` text, at the same 48px so the row is level |
-| Focus ring | `surface`, not `ink`: the ring inverts on a dark ground for the reason ch. 6.5 gives |
+| | landscape | portrait |
+| --- | --- | --- |
+| Serves | 768px and up | below 768px |
+| Runtime | 31.7s | 36.5s |
+| Weight | 15.8MB | 11.6MB |
 
-**One height for every field.** A date input is taller than a select at the same padding, because the browser draws a picker inside it, and three fields in a row that disagree by three pixels put their labels on three different lines.
+**The poster is what paints.** It is a `next/image` with `priority`, and the film mounts only after hydration and fades in over it across one second. The largest contentful paint is therefore the same 143KB still it was before the film existed, which is what keeps ch. 8.2's floor reachable. If the film never arrives, the hero is exactly what it was.
+
+Only one cut is ever fetched, and the choice is made once. A `media` attribute on two `<source>` elements leaves both files reachable and browsers have long disagreed about which they pull, so the decision is made in script instead. It is not revisited: a phone at 390 by 844 turned on its side is 844 wide and crosses the switch, and a live query would answer a rotation with a fifteen megabyte download.
+
+**Under `prefers-reduced-motion: reduce` the film is never requested.** Not fetched and paused, never asked for. This is the one place the hero departs from production, which plays its loop whatever the operating system has been told, and it departs because ch. 5 calls the setting a hard requirement rather than a preference.
+
+**What the film shows, and why the overlay covers everything.** Both cuts are advertisements rather than background footage, with copy burned into the frame for most of their runtime: a Forbes award card, a "WE sustain our nature" sequence, a screen recording of a signup form, a fifty thousand welcome coins promotion on the landscape cut and a membership benefits list on the portrait one, and four seconds of white end card at the close of each. Playing them behind a hero was a decision taken with those frames on the table.
+
+The overlay is what makes it survivable, and it is production's: `ink` solid at the top, through 40 per cent at the middle, to 40 per cent at the foot. The lower half scrim this hero used to carry is gone. A still can be chosen to sit under a panel; 31 seconds of film cannot, and a white end card under a 95 per cent `ink` panel with `surface` text would take the panel's text with it. Solid `ink` at the top is what holds the header's labels through the same four seconds.
+
+The cost is the one production pays too: the picture is never seen undimmed. That is the trade the overlay buys, and it is the reason production's hero reads slightly murky in every state.
+
+**The panel sits inside the hero**, pinned to its foot with 24px of clearance on mobile and 48px on desktop, and the section is one 100vh unit holding both. It used to hang off the hero's bottom edge on a negative margin, which put the Search control 30px below the fold at every desktop and tablet size once the hero grew to the full viewport. Baymard's travel accommodations testing is blunt about that failure: a visitor must not have to scroll while entering search criteria, and where the search sat below the fold, testers took up to 30 seconds to find it at all. Positioning inside the section makes it true by construction rather than by a margin that has to be re-tuned whenever the panel's height changes.
+
+Production docks its widget into the header at the top of the hero instead. The foot is kept here because a panel at the top competes with the navigation for the same 90 pixels, which is visible on production whenever its film reaches a bright frame.
+
+**It does not leave with the hero.** As the panel's top edge passes under the header it docks there, as a compact card 12px below it, and undocks on the way back up. The handoff is watched with an `IntersectionObserver` on a one pixel line at the panel's resting top edge, with the header's height as a negative root margin. Watching the hero's own bottom edge instead would leave the panel gone for the 160px of scroll between the two.
+
+It is the same panel moved, not a second one drawn. Two would be two sets of fields to keep in step, and a visitor who chose their dates on the hero would find them missing from the bar that replaced it. Because it is the same element in the same place in the component tree, its values and its focus survive the change of position.
+
+This is the other half of ch. 6.4's decision to carry no booking control. Removing the header's empty "Book Now" left nothing below the fold to book with; what follows the visitor down the page is now the panel they already filled in rather than a button that would discard it.
+
+Docked, the panel drops its eyebrows to screen reader only labels and tightens to a single 72px band. Its menus open downward there, for the same reason they open upward on the hero: whichever direction has the window in it.
+
+**Docked it is a band, not a card.** Flush against the header at that header's own height, `surface` edge to edge, divided from the header by the same hairline the header already carries, so the two read as one strip of chrome. The ground sits on the wrapper rather than on the form, so the band can run the full width while its fields stay on the page's container. No radius, no shadow, no gap.
+
+Floating it as a card was tried first and is worse in a way only rendering shows: the 12px between it and the header showed the page through, and the card stood on top of the property grid with the cards' titles cut off behind its top edge. It read as a foreign object dropped on the page rather than as chrome.
+
+`ink` was tried next, on the reasoning that a dark band keeps the booking control prominent. That reasoning was wrong and the render says so: against a `surface` header the ink band is a heavy slab, hardest to defend where it cuts across a section of photographs, and the accent Search button is **more** prominent on `surface` than on `ink`, not less, because nothing dark is competing with it. Two bands of different colour is what makes anyone ask the question in the first place; on a pair of elements fused with no gap between them, it reads as an accident.
+
+**The fields turn over with the band.** `FieldChrome` carries a tone, named as ch. 6.3 names `Button`'s: the ground, not the field. The light row is measured rather than chosen by eye, because a control's boundary needs 3 to 1 against what is behind it and the obvious candidates fail on `surface`.
+
+| Token | On `surface` | |
+| --- | --- | --- |
+| `border` | 1.25 to 1 | fails |
+| `muted` | 2.16 to 1 | fails |
+| `ink-muted` | 7.61 to 1 | what the border takes |
+
+The first attempt at a light band used `muted` and looked right, which is exactly why the number is written down here: it was already below the bar this document holds everywhere else.
+
+| | on `ink` (hero) | on `surface` (docked) |
+| --- | --- | --- |
+| Border | `surface` at 25 per cent | `ink-muted` |
+| Text | `surface` | `ink` |
+| Icon and detail | `gold`, `on-ink-muted` | `ink-muted` |
+| Focus ring | `surface` | `ink` |
+
+The submit control takes the same tone, which also fixes a ring that was inheriting `ink` onto the ink panel.
+
+**Three fields, and none of them the browser's own.**
+
+| Field | Control | Sends |
+| --- | --- | --- |
+| Destination | Listbox of production's nine, in a `surface` panel | `city` |
+| Dates | One trigger, one range, a two month calendar | `checkin`, `checkout` |
+| Guests | Stepper, 1 to 8 | `adults` |
+
+Every one writes to a hidden input, so the panel stays a real GET form: the fields are this project's and the query string is production's.
+
+**Why none of them are native.** A `select` and two `date` inputs took almost no styling and took it differently per engine: in WebKit the destination rendered as a white pill with dark text on an ink panel, ignoring every token it was given, and the dates rendered as `2026-08-23` with no calendar control at all. Only a few WebKit and Chromium pseudo-elements accept CSS and Firefox exposes almost nothing.
+
+Appearance is the smaller half of it. A native `date` input cannot draw two months, cannot tint the nights between two days, and cannot show a check-out grid refusing the days before check-in. Two separate fields also made the visitor hold the first date in their head while choosing the second, when a stay is one decision. Consolidating them is where the column for the guest count came from.
+
+**The month is spelled.** `23 Aug 2026`, not `23/08/2026`. NN/G's date input guidance asks for this precisely because `10/11/2016` is two different days either side of the Atlantic, and the numeric form is what a native input gave us.
+
+**The calendar.** Two months from 640px and one below it, weeks starting Monday, everything before today disabled, and a range of at least two days so a stay always has a night in it. Range ends are `ink` filled with `surface` text and the nights between them are `surface-alt`; accent marks today as a ring and never fills a day, because accent reaches 2.39 to 1 on a light ground and a selected day has to stay readable.
+
+`react-day-picker` supplies the calendar, and it is the project's first runtime dependency in `web/`. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
+
+**What the calendar cannot say.** Availability. Baymard's research is direct that a date picker which does not communicate it sends people elsewhere to check and sometimes they do not come back. Booking is a separate application that PRD ch. 3.2 puts out of scope, so this calendar shows dates and stops. It is a known gap, not an oversight.
+
+**The panels open upward**, and on a phone they are a sheet pinned to the bottom of the window. The search panel lives at the foot of the hero, so a menu opening below its trigger opens off the bottom of the window: the two month calendar measured 418px tall against 60px of room.
+
+**The guest count is asked for rather than assumed.** It was a hidden `adults=2` until this field existed. A couple is not the same search as a family of five, and sending everyone to a two adult result set means the first thing a family does on the booking system is redo the search they already did here. `adults` is the only guest parameter production's query string carries, so it is the only one offered: a children field would be a control whose value is dropped at the seam.
+
+**One height for every field**, 48px, set here rather than inherited. This used to be a note about a `date` input standing taller than a `select` at the same padding; now that every control is this project's, the shared height is simply declared and three fields in a row cannot disagree by three pixels.
 
 **Where it collapses.** One tappable summary row below 640px, two columns from 640px, one row from 1024px. The brief put the collapse below the tablet breakpoint; 728px of usable width fits four controls comfortably, so a tablet gets the fields rather than a control it has to open first. The summary row is not rendered above 640px at all: a hidden toggle still reporting a collapsed state describes a panel that is permanently open.
 
@@ -451,7 +581,7 @@ Design mobile first. Every rule is written as a minimum width, never a maximum.
 | Special offers | 1 column | 2 columns | 3 columns, first item spanning 2 |
 | Navigation | Drawer | Drawer | Inline |
 | Footer columns | 1 | 2 | 4 |
-| Hero height | 70vh | 75vh | 85vh |
+| Hero height | 100vh | 100vh | 100vh |
 
 ### 7.3 Non-negotiables
 

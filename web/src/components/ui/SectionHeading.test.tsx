@@ -62,36 +62,26 @@ describe("SectionHeading", () => {
     expect(screen.getByText("Some copy.")).toHaveClass("max-w-measure");
   });
 
-  describe("the optional action", () => {
-    it("renders after the heading, so it falls below the copy on mobile", () => {
-      const { container } = render(
-        <SectionHeading
-          eyebrow="Stay"
-          heading="Featured"
-          action={<a href="/properties">See all</a>}
-        />,
-      );
-      const [copy, action] = Array.from(container.firstElementChild!.children);
+  /** So a surrounding landmark can name itself from the heading a reader can
+   *  already see, instead of from a second copy of the words. */
+  it("takes an id when something needs to point at the heading", () => {
+    render(
+      <SectionHeading
+        eyebrow="Stay"
+        heading="Featured"
+        headingId="featured-properties"
+      />,
+    );
 
-      expect(copy).toContainElement(screen.getByRole("heading"));
-      expect(action).toContainElement(screen.getByRole("link"));
-    });
+    expect(screen.getByRole("heading")).toHaveAttribute(
+      "id",
+      "featured-properties",
+    );
+  });
 
-    it("moves onto the heading row only from the desktop breakpoint", () => {
-      const { container } = render(
-        <SectionHeading
-          eyebrow="Stay"
-          heading="Featured"
-          action={<a href="/properties">See all</a>}
-        />,
-      );
+  it("leaves the id off when nothing needs one", () => {
+    render(<SectionHeading eyebrow="Stay" heading="Featured" />);
 
-      expect(container.firstElementChild).toHaveClass(
-        "flex-col",
-        "lg:flex-row",
-        "lg:items-end",
-        "lg:justify-between",
-      );
-    });
+    expect(screen.getByRole("heading")).not.toHaveAttribute("id");
   });
 });

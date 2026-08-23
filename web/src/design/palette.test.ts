@@ -58,6 +58,9 @@ describe("text pairings meet WCAG AA", () => {
     ["ink", "surface-alt"],
     ["ink-muted", "surface-alt"],
     ["surface", "ink"],
+    // The ink pill of DESIGN-SYSTEM ch. 6.3, resting and hovered. The hover
+    // fill lightens, so it is the one of the two that has to be measured.
+    ["surface", "ink-muted"],
     ["gold", "ink"],
     ["on-ink-muted", "ink"],
     ["gold-dark", "surface"],

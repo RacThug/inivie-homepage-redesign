@@ -60,6 +60,19 @@ describe("Button", () => {
       expect(button).toHaveClass("text-ink");
       expect(button).not.toHaveClass("bg-accent");
     });
+
+    /**
+     * The filled ink pill PRD ch. 6.2 asks for on Featured Properties. It sits
+     * one step below the accent fill so a section control never competes with
+     * a card's call to action.
+     */
+    it("renders the ink variant as a filled pill carrying surface text", () => {
+      render(<Button variant="ink">View All Family</Button>);
+      const button = screen.getByRole("button");
+
+      expect(button).toHaveClass("bg-ink", "text-surface");
+      expect(button).not.toHaveClass("bg-accent");
+    });
   });
 
   describe("disabled", () => {

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "ink";
 
 interface ButtonProps {
   children: ReactNode;
@@ -34,6 +34,16 @@ const VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-accent text-on-accent hover:bg-accent-hover",
   secondary: "border border-ink text-ink hover:bg-surface-alt",
   ghost: "text-ink underline-offset-4 hover:underline",
+  /**
+   * A filled ink pill, for a section's own secondary control. PRD ch. 6.2 asks
+   * for one on Featured Properties, deliberately quieter than the accent fill
+   * a card's call to action carries so the two do not compete.
+   *
+   * Hover lightens to `ink-muted` rather than to an unnamed shade: it is the
+   * one declared colour between ink and the page, and `surface` on it is
+   * measured at AA in palette.test.ts rather than assumed.
+   */
+  ink: "bg-ink text-surface hover:bg-ink-muted",
 };
 
 /** Replaces the variant outright. Appending it instead would leave two

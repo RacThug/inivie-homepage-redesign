@@ -44,6 +44,17 @@ describe("Card", () => {
     );
   });
 
+  /**
+   * ch. 6.1 scales a property card's image when the card is hovered, so the
+   * card has to be the hover group. A group declared further in would only
+   * ever see part of the card.
+   */
+  it("is the hover group its contents react to", () => {
+    const { container } = render(<Card>Contents</Card>);
+
+    expect(container.firstElementChild).toHaveClass("group");
+  });
+
   it("can render as a semantic element other than a div", () => {
     const { container } = render(<Card as="article">Contents</Card>);
 

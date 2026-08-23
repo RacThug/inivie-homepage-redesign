@@ -272,6 +272,12 @@ The behaviour requirements F4 and F5 in PRD ch. 6.2 are implemented as follows:
 | API unreachable or 5xx | The fetch wrapper catches, logs server side, and returns an empty result with an error flag. The section renders a short fallback line instead of the grid |
 | Slow response | The section is wrapped in `Suspense` with a three card skeleton matching the final card dimensions, so there is no layout shift |
 
+The empty case and the unreachable case both arrive as an empty list, which is why the result carries the flag as well: a bare array cannot tell "nothing is published" from "nothing answered", and the two have opposite answers.
+
+The boundary sits above the read and the section's own chrome sits below it, so the heading and the pill paint before the API answers and only the grid waits.
+
+**F4 is met in the rendering mode that ships.** The homepage is prerendered (`○ Static`, revalidate 60), so the read resolves before the document exists and the skeleton never reaches it: with nothing published the built HTML carries no Featured Properties section at all, verified by building against an emptied CMS and reading `.next/server/app/index.html`. The fallback lives only in the flight payload, as a branch nothing takes. Streaming the boundary would paint the frame and then remove it, which is why the empty case is worth re-checking if this page ever becomes dynamic.
+
 ---
 
 ## 4. Frontend Design
@@ -519,7 +525,11 @@ inivie-homepage-redesign/
     │   │   ├── page.tsx
     │   │   └── api/revalidate/route.ts
     │   ├── components/
-    │   │   ├── layout/{Header,MobileNav,Footer}.tsx
+    │   │   ├── layout/{Header,MobileDrawer,Footer}.tsx
+    │   │   ├── property/{PropertyCard,PropertyCardSkeleton,PropertyGrid}.tsx
+    │   │   │                  the pieces of the dynamic section, kept apart
+    │   │   │                  from sections/ because the skeleton and the real
+    │   │   │                  cards have to share one grid
     │   │   ├── sections/{Hero,FeaturedProperties,Culinary,...}.tsx
     │   │   └── ui/{Button,Card,Badge,Container,SectionHeading}.tsx
     │   ├── content/           typed static content

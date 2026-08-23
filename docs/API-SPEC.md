@@ -244,6 +244,7 @@ The rule is enforced from both ends, against the key list in ch. 3.3 written out
 | --- | --- |
 | `cms/tests/Feature/Api/V1/PropertyIndexTest.php` | The resource returning a different key set from the documented one, asserted against a real response |
 | `web/src/types/property.test.ts` | The TypeScript interface drifting from the same list. `tsc` locks its fixtures to the interface, and the assertions lock the fixtures to the list |
+| `web/src/lib/api/properties.ts` | The same drift at run time, on a real response rather than a fixture. Its field table is typed `Record<keyof Property, ...>`, so a field added to the interface and not to the table fails `tsc`: the check cannot fall behind the contract it checks |
 
 Neither test asks the code under test what its fields are. A test that does cannot notice the code returning the wrong thing.
 
@@ -257,9 +258,15 @@ How the frontend is required to call this API.
 | --- | --- |
 | Server side only | The API is called from Server Components. No browser fetch, so the API base URL never needs to be publicly reachable |
 | Single access module | `lib/api/properties.ts` is the only module aware of the base URL and response shape |
+| Base URL | `CMS_API_URL` in `web/.env`, `http://localhost:8000` locally. No `NEXT_PUBLIC_` prefix, deliberately: the prefix is what puts a value in the browser bundle, and nothing in the browser is allowed to know this one |
 | Caching | `next: { revalidate: 60, tags: ['properties'] }` |
 | Timeout | 5 seconds. A slow CMS must not hold the homepage hostage |
 | Failure handling | Catch, log server side, return an empty result with an error flag. Never throw into the render tree |
+| Payload check | Every documented field of every property is verified before anything renders from it, rather than cast. A cast is exactly how the production defect in PRD ch. 2.3 stayed invisible, and the envelope alone would not have caught it: a renamed field arrives as an array of objects and reaches a card as `undefined`. A field this side has not heard of is ignored, so an additive change to the payload stays additive |
+
+A response that fails the payload check is refused whole rather than filtered down to the properties that still parse. Rendering the half that parses hides the drift behind a page that looks fine, which is the failure being defended against.
+
+A missing or unparseable `CMS_API_URL` is treated as the API being unreachable rather than as a crash. A configuration mistake and a stopped CMS look the same to a visitor, and both are the F5 case.
 
 ### 7.1 Required frontend behaviour on failure
 

@@ -9,8 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-const FOCUS_RING =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface";
+const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2";
 
 /**
  * How a search field is dressed, which depends on where the panel is.
@@ -24,12 +23,33 @@ const FOCUS_RING =
 export interface FieldChrome {
   compact: boolean;
   placement: "top" | "bottom";
+  /** The ground the field sits on, named as `Button` names it: the ground,
+   *  not the field. `dark` is the ink panel on the hero. */
+  tone: "light" | "dark";
 }
 
-export const RESTING_CHROME: FieldChrome = {
-  compact: false,
-  placement: "top",
-};
+/**
+ * Field colours per ground.
+ *
+ * The light row is measured, not chosen by eye. A control's boundary needs
+ * 3 to 1 against what is behind it, and the obvious candidates fail on
+ * `surface`: `border` reaches 1.25 and `muted` 2.16. `ink-muted` reaches 7.61
+ * and is what the border takes.
+ */
+const TONES = {
+  dark: {
+    trigger:
+      "border-surface/25 text-surface hover:border-surface/50 focus-visible:outline-surface",
+    icon: "text-gold",
+    detail: "text-on-ink-muted",
+  },
+  light: {
+    trigger:
+      "border-ink-muted text-ink hover:border-ink focus-visible:outline-ink",
+    icon: "text-ink-muted",
+    detail: "text-ink-muted",
+  },
+} as const;
 
 interface FieldPopoverProps {
   chrome: FieldChrome;
@@ -146,16 +166,20 @@ export function FieldPopover({
         */
         aria-labelledby={`${labelId} ${triggerId}`}
         id={triggerId}
-        className={`flex h-12 w-full items-center gap-2 rounded-control border border-surface/25 px-3 text-left text-body text-surface transition-colors hover:border-surface/50 ${FOCUS_RING}`}
+        className={`flex h-12 w-full items-center gap-2 rounded-control border px-3 text-left text-body transition-colors ${TONES[chrome.tone].trigger} ${FOCUS_RING}`}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         ref={triggerRef}
         type="button"
       >
-        {icon && <span className="flex-none text-gold">{icon}</span>}
+        {icon && (
+          <span className={`flex-none ${TONES[chrome.tone].icon}`}>{icon}</span>
+        )}
         <span className="min-w-0 flex-1 truncate">
           {value}
           {detail && (
-            <span className="ml-2 text-small text-on-ink-muted">{detail}</span>
+            <span className={`ml-2 text-small ${TONES[chrome.tone].detail}`}>
+              {detail}
+            </span>
           )}
         </span>
       </button>

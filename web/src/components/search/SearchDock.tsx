@@ -75,19 +75,20 @@ export function SearchDock() {
         under the header. The scroll is the motion here.
       */}
       {/*
-        Docked, the ink ground belongs to this wrapper rather than to the form
+        Docked, the ground belongs to this wrapper rather than to the form
         inside it, so the band runs edge to edge while its fields stay on the
         page's container. Floating it as a card instead put a 12px gap under
         the header that showed the page through, and stood the panel on top of
         the property cards with their titles cut off behind its top edge.
 
-        Flush at the header's own height, so the two read as two deliberate
-        bands rather than two competing objects.
+        `surface`, flush at the header's own height and divided from it by the
+        same hairline the header already carries, so the two read as one strip
+        of chrome. The fields take the light tone with it.
       */}
       <div
         className={
           docked
-            ? "fixed inset-x-0 top-16 z-30 bg-ink lg:top-20"
+            ? "fixed inset-x-0 top-16 z-30 border-b border-border bg-surface lg:top-20"
             : "absolute inset-x-0 bottom-0 pb-6 sm:pb-8 lg:pb-12"
         }
       >

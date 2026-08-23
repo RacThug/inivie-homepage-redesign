@@ -406,11 +406,30 @@ This is the other half of ch. 6.4's decision to carry no booking control. Removi
 
 Docked, the panel drops its eyebrows to screen reader only labels and tightens to a single 72px band. Its menus open downward there, for the same reason they open upward on the hero: whichever direction has the window in it.
 
-**Docked it is a band, not a card.** Flush against the header at that header's own height, `ink` edge to edge, with the ground on the wrapper so the band can run the full width while its fields stay on the page's container. It carries no radius, no shadow and no gap.
+**Docked it is a band, not a card.** Flush against the header at that header's own height, `surface` edge to edge, divided from the header by the same hairline the header already carries, so the two read as one strip of chrome. The ground sits on the wrapper rather than on the form, so the band can run the full width while its fields stay on the page's container. No radius, no shadow, no gap.
 
-Floating it as a card was tried first and is worse in a way that only rendering shows: the 12px between it and the header showed the page through, and the card stood on top of the property grid with the cards' titles cut off behind its top edge. It read as a foreign object dropped on the page rather than as chrome.
+Floating it as a card was tried first and is worse in a way only rendering shows: the 12px between it and the header showed the page through, and the card stood on top of the property grid with the cards' titles cut off behind its top edge. It read as a foreign object dropped on the page rather than as chrome.
 
-Matching the scrolled header's `surface` instead was also tried, and is the natural suggestion, since two bands of different colour is what raises the question. It does not work. The band, the header and the white cards behind become one mass with no edge between them, and the booking control ends up the quietest thing on the screen, which is the opposite of what ch. 6.8's own research asks for. It would also need a light tone for the fields, which this document does not define: `border` on `surface` is nearly invisible at a field's size, so it would take `muted` and a new decision. `ink` needs none. Two bands of different colour is the point rather than the problem, as long as neither is floating.
+`ink` was tried next, on the reasoning that a dark band keeps the booking control prominent. That reasoning was wrong and the render says so: against a `surface` header the ink band is a heavy slab, hardest to defend where it cuts across a section of photographs, and the accent Search button is **more** prominent on `surface` than on `ink`, not less, because nothing dark is competing with it. Two bands of different colour is what makes anyone ask the question in the first place; on a pair of elements fused with no gap between them, it reads as an accident.
+
+**The fields turn over with the band.** `FieldChrome` carries a tone, named as ch. 6.3 names `Button`'s: the ground, not the field. The light row is measured rather than chosen by eye, because a control's boundary needs 3 to 1 against what is behind it and the obvious candidates fail on `surface`.
+
+| Token | On `surface` | |
+| --- | --- | --- |
+| `border` | 1.25 to 1 | fails |
+| `muted` | 2.16 to 1 | fails |
+| `ink-muted` | 7.61 to 1 | what the border takes |
+
+The first attempt at a light band used `muted` and looked right, which is exactly why the number is written down here: it was already below the bar this document holds everywhere else.
+
+| | on `ink` (hero) | on `surface` (docked) |
+| --- | --- | --- |
+| Border | `surface` at 25 per cent | `ink-muted` |
+| Text | `surface` | `ink` |
+| Icon and detail | `gold`, `on-ink-muted` | `ink-muted` |
+| Focus ring | `surface` | `ink` |
+
+The submit control takes the same tone, which also fixes a ring that was inheriting `ink` onto the ink panel.
 
 **Three fields, and none of them the browser's own.**
 

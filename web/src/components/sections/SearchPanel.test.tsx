@@ -242,11 +242,33 @@ describe("docked under the header", () => {
   it("stops being a card and carries no ground of its own", () => {
     render(<SearchPanel docked />);
 
-    // The ink belongs to the band around it, so that band can run edge to
+    // The ground belongs to the band around it, so that band can run edge to
     // edge while these fields stay on the page's container.
     const form = screen.getByRole("form", { name: SEARCH_PANEL.label });
     expect(form).not.toHaveClass("rounded-card");
     expect(form).not.toHaveClass("bg-ink/95");
     expect(form).not.toHaveClass("shadow-raised");
+  });
+
+  /**
+   * The band is `surface`, so the fields turn over with it. `ink-muted` is
+   * measured at 7.61 to 1 there; `border` reaches 1.25 and `muted` 2.16, and
+   * a control's boundary needs 3.
+   */
+  it("turns its fields over to the light tone", () => {
+    render(<SearchPanel docked />);
+
+    const dates = trigger(SEARCH_PANEL.dates);
+    expect(dates).toHaveClass("border-ink-muted", "text-ink");
+    expect(dates).toHaveClass("focus-visible:outline-ink");
+  });
+
+  it("keeps the dark tone on the hero, where the ground is ink", () => {
+    render(<SearchPanel />);
+
+    const dates = trigger(SEARCH_PANEL.dates);
+    expect(dates).toHaveClass("border-surface/25", "text-surface");
+    // An ink ring is invisible on ink, for the reason ch. 6.5 gives.
+    expect(dates).toHaveClass("focus-visible:outline-surface");
   });
 });

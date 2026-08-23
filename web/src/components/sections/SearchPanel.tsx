@@ -48,6 +48,7 @@ export function SearchPanel({ docked = false }: SearchPanelProps) {
   const chrome: FieldChrome = {
     compact: docked,
     placement: docked ? "bottom" : "top",
+    tone: docked ? "light" : "dark",
   };
   const [open, setOpen] = useState(false);
 
@@ -121,7 +122,9 @@ export function SearchPanel({ docked = false }: SearchPanelProps) {
             open ? "mt-1" : ""
           }`}
         >
-          <Button fullWidth size="field" type="submit">
+          {/* The tone the fields are on, so the focus ring stays legible
+              against it rather than inheriting an ink ring onto ink. */}
+          <Button fullWidth size="field" tone={chrome.tone} type="submit">
             {SEARCH_PANEL.submit}
           </Button>
         </div>

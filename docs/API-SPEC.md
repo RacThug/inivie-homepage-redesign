@@ -190,20 +190,32 @@ CORS is the framework's `HandleCors` middleware reading `cms/config/cors.php`, w
 After a successful create, update, delete, reorder, or publish toggle, Laravel calls the frontend:
 
 ```
-POST {NEXT_PUBLIC_SITE_URL}/api/revalidate
+POST {FRONTEND_INTERNAL_URL}/api/revalidate
 X-Revalidate-Secret: {REVALIDATE_SECRET}
 Content-Type: application/json
 
 { "tag": "properties" }
 ```
 
-| Status | Meaning |
-| --- | --- |
-| `200` | Cache tag dropped, next request re-renders |
-| `401` | Secret missing or wrong |
-| `400` | Unknown tag |
+`FRONTEND_INTERNAL_URL` is deliberately not `FRONTEND_URL`. That one is the origin a browser presents, which CORS compares as a string; this one is an address the CMS process has to open a socket to. Everywhere else they are the same value, and it defaults to it, but inside Compose the frontend runs on the host and `localhost` from inside the container is the container. TECHNICAL-DESIGN ch. 2.4 has the rule both variables follow.
+
+`REVALIDATE_SECRET` is in both `.env` files, and both `.env.example` files ship the same local default so a fresh clone revalidates without a step.
+
+| Status | Body | Meaning |
+| --- | --- | --- |
+| `200` | `{ "revalidated": true, "tag": "properties" }` | Cache tag dropped, next request re-renders |
+| `401` | `{ "revalidated": false, "message": "Invalid revalidation secret." }` | Secret missing or wrong |
+| `400` | `{ "revalidated": false, "message": "Unknown tag." }` | Unknown tag, or a body with no readable tag in it |
+
+Three details of the route handler are decisions rather than mechanics:
+
+- **The secret is checked before the body is read.** An unauthenticated caller learns nothing about which tags exist, and no work is done on its behalf.
+- **An unset `REVALIDATE_SECRET` refuses everything with a 401.** Failing closed is the safe reading of an incomplete environment. The alternative leaves an open cache-busting endpoint on a deployment whose variables were half filled in.
+- **The tag is expired outright, not marked stale.** Next 16 requires an expiration profile alongside the tag, and `{ expire: 0 }` is the only one that means what this section says: a named profile such as `"max"` would go on serving the old page while regenerating behind the request, which the 60 second time to live already does for free.
 
 **Failure policy.** A non-200 response is logged and swallowed. It must never fail or roll back the CMS operation, because the 60 second time to live already guarantees eventual consistency. An editor should never see a save fail because the frontend was down.
+
+**One operation is one call.** `FrontendRevalidator` queues the call for the end of the current transaction rather than sending it inline, and coalesces the batch: a reorder saving twenty rows sends one POST, after the commit. Sending inside the transaction would have the frontend re-read the pre-write rows and cache those for another minute, which is worse than not revalidating at all.
 
 ---
 

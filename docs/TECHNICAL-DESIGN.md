@@ -142,15 +142,17 @@ Three rules keep both paths working:
 
 | Rule | Mechanism |
 | --- | --- |
-| `.env` is the single source for the database host | `.env.example` ships `DB_HOST=mysql`, the Compose service name, because Docker is the verified path. A reviewer using their own MySQL changes that one line to `127.0.0.1`. Nothing else differs between the two paths |
+| `.env` is the single source for every address that differs between the paths | `.env.example` ships `DB_HOST=mysql` and `FRONTEND_INTERNAL_URL=http://host.docker.internal:3000`, both Compose values, because Docker is the verified path. A reviewer running natively changes those two lines to `127.0.0.1` and `http://localhost:3000`. Nothing else differs |
 | A busy port does not block the Docker path | The published MySQL port is `${FORWARD_DB_PORT:-3306}:3306`, so a reviewer already running MySQL on 3306 sets one variable instead of debugging a bind failure |
 | Application code stays Docker-unaware | The compose file is environment, not architecture. Deleting it must leave a working Laravel application |
+
+`FRONTEND_INTERNAL_URL` is the second of those two lines and it exists for a reason worth stating on its own: it is not a duplicate of `FRONTEND_URL`. CORS compares `FRONTEND_URL` against the origin a browser presents, which is `http://localhost:3000` on both paths. The revalidation callback opens a socket, and inside the container `localhost` is the container. Collapsing them into one variable makes one of the two wrong, and which one depends on the path.
 
 ##### Why not set `DB_HOST` in the compose file
 
 The obvious design is to keep `.env.example` pointing at `127.0.0.1` for the native path and let Compose export `DB_HOST=mysql`, so neither reviewer edits anything. That was the original plan here, and **it does not work**.
 
-`artisan serve` does not hand its environment to the server it starts. `Illuminate\Foundation\Console\ServeCommand::$passthroughVariables` is an explicit allowlist of fourteen variables, and `DB_HOST` is not among them, so it is stripped from the subprocess. The subprocess then reads `.env`.
+`artisan serve` does not hand its environment to the server it starts. `Illuminate\Foundation\Console\ServeCommand::$passthroughVariables` is an explicit allowlist of fourteen variables, and `DB_HOST` is not among them, so it is stripped from the subprocess. The subprocess then reads `.env`. The same applies to `FRONTEND_INTERNAL_URL`, which is why that one is in `.env.example` too rather than in the compose file where a container hostname would otherwise belong.
 
 The failure mode is worse than a plain error, because it is inconsistent:
 
@@ -266,9 +268,15 @@ The words on its controls cross that boundary as data, so they must be serialisa
 
 ### 3.3 On-demand revalidation
 
-After a successful create, update, delete, or reorder, a Laravel service issues a `POST` to the frontend revalidation endpoint with a shared secret. The route handler calls `revalidateTag('properties')`, which drops the cached homepage so the next visitor sees fresh content immediately rather than waiting out the 60 second window.
+After a successful create, update, delete, reorder, or publish toggle, `FrontendRevalidator` issues a `POST` to the frontend revalidation endpoint with a shared secret. The route handler expires the `properties` tag, which drops the cached homepage so the next visitor sees fresh content immediately rather than waiting out the 60 second window. The payload, the statuses and the route handler's own decisions are in API-SPEC ch. 5.2.
+
+**`PropertyObserver` is the caller, not the controllers.** The five admin actions are two model events between them - `saved` covers create, update, reorder and the publish toggle, `deleted` covers the rest - so the record is fewer call sites than the screens, not more. It is also the seam that a Tinker session or a future bulk import arrives through, and those make the homepage exactly as stale as the edit form does.
+
+**The call is queued for the commit, and coalesced.** `DB::afterCommit`, already the discipline in that observer for the file lifecycle, runs the call inline when there is no transaction and on commit when there is. A reorder writes its batch inside one (ch. 5.6), so without coalescing it would send a POST per row, and without the commit boundary it would have the frontend re-read the pre-write rows and cache those for another minute. The state that collapses a batch into one call lives in the service, which is why `AppServiceProvider` binds it as a singleton: the observer is resolved fresh for every event.
 
 **Failure policy.** A failed revalidation must never fail the CMS operation. It is logged and swallowed, because the time to live already guarantees eventual consistency. An editor should never see a save fail because the frontend happened to be down.
+
+**An unset `REVALIDATE_SECRET` turns it off.** The CMS then sends nothing and the homepage catches up on its own cache window. `phpunit.xml` pins the value empty for that reason: without the pin, every test that saves a property would post to whatever is listening on port 3000.
 
 ### 3.4 Degradation
 
@@ -516,8 +524,8 @@ inivie-homepage-redesign/
 │   │   ├── Http/
 │   │   │   ├── Controllers/
 │   │   │   │   ├── Admin/PropertyController.php
-│   │   │   │   ├── Admin/PropertyOrderController.php
-│   │   │   │   ├── Admin/PropertyPublishController.php
+│   │   │   │   ├── Admin/ReorderPropertiesController.php
+│   │   │   │   ├── Admin/PublishPropertyController.php
 │   │   │   │   ├── Auth/LoginController.php
 │   │   │   │   ├── Api/V1/PropertyController.php
 │   │   │   │   └── Api/V1/HealthController.php

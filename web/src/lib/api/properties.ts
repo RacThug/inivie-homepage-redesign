@@ -20,7 +20,8 @@ const ENDPOINT = "/api/v1/properties";
 const TIMEOUT_MS = 5_000;
 
 /** Matches the `max-age=60` the API itself sends (API-SPEC ch. 5.1). The tag is
- *  what the CMS drops through `/api/revalidate`, built in #16. */
+ *  what the CMS drops through `app/api/revalidate/route.ts` after an edit, so
+ *  the 60 seconds is the ceiling on staleness rather than the usual wait. */
 const REVALIDATE_SECONDS = 60;
 const CACHE_TAG = "properties";
 

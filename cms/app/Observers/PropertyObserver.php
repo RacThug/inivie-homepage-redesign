@@ -3,25 +3,63 @@
 namespace App\Observers;
 
 use App\Models\Property;
+use App\Services\FrontendRevalidator;
 use App\Services\PropertyImageStore;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * The invariants of a property that hold on every save, whoever is saving:
- * D4's slug, D6's publish stamp, and D5's file lifecycle. All three are
- * documented in docs/DATA-MODEL.md ch. 2 and ch. 3, and the file half in
- * docs/TECHNICAL-DESIGN.md ch. 5.4.
+ * What is true of a property on every save, whoever is saving: D4's slug,
+ * D6's publish stamp, D5's file lifecycle, and the frontend cache the write
+ * has just made stale. The first three are documented in docs/DATA-MODEL.md
+ * ch. 2 and ch. 3, the file half in docs/TECHNICAL-DESIGN.md ch. 5.4, and the
+ * revalidation in ch. 3.3.
  *
  * The file rules live here rather than in `PropertyController` because they
  * are facts about the record, not steps in one screen's flow. A bulk import,
  * a Tinker session, or the reordering screen would each otherwise have to
  * remember them, and the one that forgets leaves either an orphaned file or
  * a row pointing at nothing.
+ *
+ * Revalidation is here for the same reason, and for one more. The five admin
+ * actions that invalidate the homepage - create, update, delete, reorder and
+ * the publish toggle - are two model events between them, so this is fewer
+ * call sites than the controllers, not more. And the reorder writes its batch
+ * inside a transaction: a call placed in the controller is correct only for
+ * as long as nobody wraps the others in one too, while `DB::afterCommit`,
+ * already the discipline here, is correct either way.
  */
 class PropertyObserver
 {
-    public function __construct(private readonly PropertyImageStore $images) {}
+    public function __construct(
+        private readonly PropertyImageStore $images,
+        private readonly FrontendRevalidator $revalidator,
+    ) {}
+
+    /**
+     * Every create and every update, which is four of the five actions:
+     * the publish toggle and the reorder are both saves of a column.
+     *
+     * Unconditional rather than filtered down to the writes that change what
+     * the API answers with. Working out whether an edit to a draft is visible
+     * to a guest means reimplementing the published scope here, and the cost
+     * of being wrong in the generous direction is one re-render.
+     */
+    public function saved(Property $property): void
+    {
+        $this->revalidator->properties();
+    }
+
+    /**
+     * The fifth. Both kinds of delete pass through here: a soft delete takes
+     * the row out of the API's scope (D5), and a force delete fires this as
+     * well as `forceDeleted`, which the revalidator's coalescing collapses
+     * back into one call.
+     */
+    public function deleted(Property $property): void
+    {
+        $this->revalidator->properties();
+    }
 
     public function saving(Property $property): void
     {

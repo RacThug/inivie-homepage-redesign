@@ -12,7 +12,7 @@ Submitted as a technical test. Deadline 27 August 2026.
 | --- | --- |
 | Planning and specification | **Complete** |
 | Laravel CMS and API | **Complete**: public API, admin panel, full CRUD |
-| Next.js frontend | Homepage complete, revalidation pending |
+| Next.js frontend | **Complete**: homepage, and the revalidation callback that closes the loop |
 
 Remaining work is tracked as [GitHub issues](../../issues), one per pull request, ordered by dependency rather than by date. [docs/PRD.md](./docs/PRD.md) ch. 10 has the shape of that order.
 
@@ -76,9 +76,11 @@ npm install && npm run build      # on your machine, not in the container
 
 **`storage:link` is not optional either.** `cms/public/storage` is gitignored, so a fresh clone has no symlink and the `public` disk is not reachable over HTTP. Skipping that line leaves every seeded picture a 403 with its alt text showing, in the CMS and on the homepage alike.
 
+**An edit in the CMS reaches the homepage straight away**, rather than after the 60 second cache window, because Laravel posts a cache invalidation callback to the frontend. That needs the same `REVALIDATE_SECRET` in `cms/.env` and in `web/.env.local`, and both `.env.example` files ship the same local default, so copying them is the whole setup. Leave it empty in either file and the callback turns off: the homepage then catches up on its own within a minute. [docs/API-SPEC.md](./docs/API-SPEC.md) ch. 5.2 has the contract.
+
 The eight seeded properties come with their pictures. They are drawings committed at `cms/database/seeders/images/`, not photographs: this repository is public, and the photography on the live site is licensed stock that may not be redistributed. `migrate --seed` copies them onto the storage disk, so there is nothing to download. [docs/DATA-MODEL.md](./docs/DATA-MODEL.md) ch. 4 has the reasoning.
 
-Using your own PHP and MySQL instead of Docker? Change `DB_HOST` in `cms/.env` from `mysql` to `127.0.0.1`. That is the only line that differs between the two paths.
+Using your own PHP and MySQL instead of Docker? Two lines in `cms/.env` differ, and nothing else does. `DB_HOST` goes from `mysql` to `127.0.0.1`, and `FRONTEND_INTERNAL_URL` from `http://host.docker.internal:3000` to `http://localhost:3000`: inside a container, the frontend running on your machine is not on localhost. [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4 has the reasoning.
 
 ### Looking at the database
 

@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    /*
+     * The Next.js frontend, as something this application calls rather than
+     * as something that calls it. `FrontendRevalidator` posts the cache
+     * invalidation callback of docs/API-SPEC.md ch. 5.2 here.
+     *
+     * Not `FRONTEND_URL`, which `config/cors.php` reads, and the difference
+     * is the point. That one is the origin a browser presents, compared as a
+     * string. This one is an address this process has to open a socket to,
+     * and inside Compose the two are not the same: the frontend runs on the
+     * host, which the container reaches under another name. They default to
+     * the same value, because everywhere else they are.
+     *
+     * An unset secret turns revalidation off. See `FrontendRevalidator`.
+     */
+    'frontend' => [
+        'internal_url' => env('FRONTEND_INTERNAL_URL', env('FRONTEND_URL')),
+        'revalidate_secret' => env('REVALIDATE_SECRET'),
+    ],
+
 ];

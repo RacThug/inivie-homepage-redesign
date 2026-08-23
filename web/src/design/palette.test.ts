@@ -38,6 +38,7 @@ describe("palette", () => {
       "ink-muted",
       "muted",
       "on-accent",
+      "on-ink-muted",
       "surface",
       "surface-alt",
     ]);
@@ -58,6 +59,7 @@ describe("text pairings meet WCAG AA", () => {
     ["ink-muted", "surface-alt"],
     ["surface", "ink"],
     ["gold", "ink"],
+    ["on-ink-muted", "ink"],
     ["gold-dark", "surface"],
     ["gold-dark", "surface-alt"],
     ["on-accent", "accent"],
@@ -94,6 +96,27 @@ describe("the accent foreground decision", () => {
   it("keeps the hover fill above AA as well as the resting fill", () => {
     expect(ratio("on-accent", "accent-hover")).toBeCloseTo(4.85, 2);
     expect(contrastRatio("#1c2434", "#e45826")).toBeLessThan(AA_BODY);
+  });
+});
+
+describe("secondary text on a dark ground", () => {
+  /**
+   * The footer is the first dark surface on the site, and it needs two levels
+   * of text the way a light section does. The obvious shortcut is `surface` at
+   * 70 per cent opacity, which composites to #bbbdc2 at 8.27 to 1. That works,
+   * but it is a value nothing declares and nothing can check: change the ground
+   * and the text silently changes with it. A real token is measurable.
+   */
+  it("clears AA against ink by a wide margin", () => {
+    expect(ratio("on-ink-muted", "ink")).toBeCloseTo(7.7, 1);
+  });
+
+  it("stays clearly quieter than surface, or it would not be a second level", () => {
+    expect(ratio("on-ink-muted", "ink")).toBeLessThan(ratio("surface", "ink"));
+  });
+
+  it("is a dark ground colour only, and fails on light as ink-muted's mirror", () => {
+    expect(ratio("on-ink-muted", "surface")).toBeLessThan(AA_BODY);
   });
 });
 

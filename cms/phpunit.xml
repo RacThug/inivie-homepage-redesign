@@ -24,6 +24,13 @@
         <env name="APP_URL" value="http://localhost:8000"/>
         <env name="FILESYSTEM_DISK" value="public"/>
         <env name="FRONTEND_URL" value="http://localhost:3000"/>
+        <env name="FRONTEND_INTERNAL_URL" value="http://localhost:3000"/>
+        <!-- Empty on purpose, which turns revalidation off for the suite. A
+             developer's .env carries the working local secret, and without
+             this pin every test that saves a property would post to whatever
+             is listening on port 3000. The cases that cover the callback set
+             it for themselves and fake the client. -->
+        <env name="REVALIDATE_SECRET" value=""/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

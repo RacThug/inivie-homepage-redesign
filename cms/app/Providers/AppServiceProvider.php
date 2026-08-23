@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\FrontendRevalidator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +15,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // One instance for the whole request. `FrontendRevalidator` collapses
+        // a batch of saves into a single call by remembering that one is
+        // already queued, and `PropertyObserver` is resolved fresh for every
+        // model event, so a per-injection instance would forget between the
+        // first row of a reorder and the twentieth.
+        $this->app->singleton(FrontendRevalidator::class);
     }
 
     /**

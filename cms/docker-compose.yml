@@ -18,6 +18,16 @@ services:
     # $passthroughVariables) and DB_HOST is not on it, so a container
     # variable would apply to artisan commands but silently not to
     # requests. .env is the single source instead.
+    # The frontend runs on the host, not in this network, and the CMS posts
+    # the revalidation callback of docs/API-SPEC.md ch. 5.2 to it. Docker
+    # Desktop resolves `host.docker.internal` on its own; the Docker Engine on
+    # Linux does not, so it is mapped here rather than left to be discovered
+    # by a reviewer whose saves quietly stop reaching the homepage.
+    #
+    # This is a name, not a value: `FRONTEND_INTERNAL_URL` stays in `.env`
+    # with the rest of the addresses, per the note above.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy

@@ -23,7 +23,8 @@ export interface Article {
 export const JOURNAL = {
   eyebrow: "Journal",
   heading: "What's New",
-  intro: "Guides to the island, written by the people who live on it.",
+  /* No intro, for the reason `offers.ts` gives: neither production nor the
+     design pass writes one, and the three titles say what the section is. */
   action: { label: "All articles", href: "/blog" },
   articles: [
     {

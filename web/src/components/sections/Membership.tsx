@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/Button";
+import { GoldRule } from "@/components/ui/GoldRule";
 import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MEMBERSHIP } from "@/content/membership";
@@ -11,6 +12,11 @@ import { MEMBERSHIP } from "@/content/membership";
  * the section that needs the most emphasis takes it from `ink` instead. The
  * brief ch. 4.6 asks that this not be "corrected" back towards production.
  *
+ * Full bleed, like production's block and unlike a card. A contained panel
+ * leaves the page's ground running down both sides of the one section that is
+ * supposed to interrupt it, which reads as a large card rather than as a
+ * change of register.
+ *
  * Two columns from the desktop breakpoint, copy left and benefits right. One
  * column with the benefits strung along the bottom leaves the top right of the
  * panel empty, which is what makes the section read as unfinished at 1440.
@@ -20,7 +26,7 @@ const HEADING_ID = "membership";
 export function Membership({ tone }: { tone?: SectionTone }) {
   return (
     <Section labelledBy={HEADING_ID} tone={tone}>
-      <div className="rounded-card bg-ink p-8 lg:p-14">
+      <div className="py-2 lg:py-6">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <SectionHeading
@@ -39,7 +45,12 @@ export function Membership({ tone }: { tone?: SectionTone }) {
               {MEMBERSHIP.body}
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            {/* `items-start` so the pair keeps its own width on a phone. A
+                stretched column would centre the text link under a full width
+                button, which reads as a caption rather than as a control, and
+                every other section on the page sets its controls at their own
+                width too. */}
+            <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
               <Button href={MEMBERSHIP.primary.href}>
                 {MEMBERSHIP.primary.label}
               </Button>
@@ -62,42 +73,18 @@ export function Membership({ tone }: { tone?: SectionTone }) {
               leaves a hole through the middle and reads as two pairs.
 
               A list, so the count is announced before the first benefit. */}
-          <ul className="grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:gap-y-10 lg:self-center">
+          <ul className="grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:gap-y-12 lg:self-center">
             {MEMBERSHIP.benefits.map((benefit) => (
-              <li className="flex gap-3" key={benefit.title}>
-                <MarkerIcon />
-                <span className="text-body text-surface lg:text-body-lg">
+              <li key={benefit.title}>
+                <GoldRule />
+                <p className="mt-3 text-body font-medium text-surface lg:text-body-lg">
                   {benefit.title}
-                </span>
+                </p>
               </li>
             ))}
           </ul>
         </div>
       </div>
     </Section>
-  );
-}
-
-/**
- * One marker, repeated. Four drawn icons would be four decisions about what a
- * "celebration setup" looks like, and DESIGN-SYSTEM ch. 5 has no budget for
- * decoration. Gold is a marker colour by ch. 2.1, which is exactly this.
- */
-function MarkerIcon() {
-  return (
-    <svg
-      aria-hidden
-      className="mt-1 flex-none text-gold"
-      fill="none"
-      height="18"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.75"
-      viewBox="0 0 18 18"
-      width="18"
-    >
-      <path d="m3.5 9.5 3.5 3.5 7.5-8" />
-    </svg>
   );
 }

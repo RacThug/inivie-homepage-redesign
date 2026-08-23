@@ -301,7 +301,9 @@ The skeleton does not animate. Ch. 5 lists what motion is for on this site, and 
 
 Implemented in #15 as `ui/Section`. It owns the 64px and 96px vertical padding of ch. 4.1 and carries the `Container`, so the number that sets the page's rhythm exists once rather than in eleven files that agree today.
 
-**The grounds alternate strictly**, `surface-alt` and `surface` turn and turn about down the page. Every section takes its ground as a prop and none of them chooses one, and `app/page.tsx` derives it from position over an ordered list. That is stronger than writing the ground on each section: inserting or reordering one cannot leave two neighbours on the same ground, and nobody has to remember to flip every section below the one they moved. PRD ch. 6.3 asks for that rhythm before it asks for anything else about spacing.
+**The grounds alternate**, `surface-alt` and `surface` turn and turn about down the page, with one `ink` band interrupting them at the membership section. Every section takes its ground as a prop and none of them chooses one: `app/page.tsx` holds the order and the ground together, and `page.test.ts` checks that no two neighbours share one. PRD ch. 6.3 asks for that rhythm before it asks for anything else about spacing.
+
+The rule under test is "no two neighbours the same" rather than "odd and even", because `ink` is not a third step in an alternation. It is the one section that steps out of it, and a rule expressed as a position could not say that.
 
 One case the rule cannot cover: Featured Properties disappears outright when nothing is published (F4), and the sections below it then alternate from a different starting point. That is a state a live site passes through once, and correcting it would mean measuring the page in the browser.
 
@@ -352,9 +354,11 @@ Restaurants and spas. Deliberately lighter than the property card, and **the wei
 
 The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other.
 
-### 6.11 Membership panel
+### 6.11 Membership band
 
-An `ink` panel inside the container, 12px radius, on a `surface-alt` section. Production makes this section a full bleed **orange** block, which is exactly the large decorative accent fill ch. 2.3 forbids, and white on accent measures 2.39 to 1. The section that needs the most emphasis on the page takes it from ink instead. Do not "correct" this back towards production.
+A full bleed `ink` band. Production makes this section a full bleed **orange** block, which is exactly the large decorative accent fill ch. 2.3 forbids, and white on accent measures 2.39 to 1. The section that needs the most emphasis on the page takes it from ink instead. Do not "correct" this back towards production.
+
+**Full bleed rather than a contained panel**, which is the one thing production's treatment gets right. A rounded card leaves the page's own ground running down both sides of the section that is supposed to interrupt it, and the result reads as a large card rather than as a change of register.
 
 **Two columns from the desktop breakpoint.** Copy, tagline and controls left; the four benefits as a two by two grid right, vertically centred against the copy. Pinned to the top the benefits leave the empty corner the single column layout would have left; spread to the full height they leave a hole through the middle and read as two pairs.
 
@@ -364,9 +368,11 @@ An `ink` panel inside the container, 12px radius, on a `surface-alt` section. Pr
 | Heading | `surface`, title case. Production sets it in all caps, which ch. 7.3 rules out |
 | Tagline | Body scale, medium weight, `surface` |
 | Body | Body scale, `on-ink-muted` |
-| Benefit marker | One `gold` check, repeated. Four drawn icons would be four decisions about what a "celebration setup" looks like |
+| Benefit marker | A short `gold` rule above each label, per ch. 6.16. Four drawn icons would be four decisions about what a "celebration setup" looks like |
 | Primary | `accent` fill with `ink` text. The only accent on the panel |
-| Secondary | `gold` label, underline on hover. The `ghost` variant is `ink` text, which disappears here |
+| Secondary | `ghost` on a dark tone, which resolves to `gold` (ch. 6.3) |
+
+The two controls sit at their own width rather than stretching, on every breakpoint. A column that stretches them centres the text link under a full width button, where it reads as a caption rather than as a control.
 
 ### 6.12 Offer banner
 
@@ -396,6 +402,8 @@ Two columns mobile, four from the tablet breakpoint, which lands eight marks as 
 
 **Every mark is named.** Production serves nine logo files with no alternative text at all, so a screen reader is handed nine images and told nothing. Eight are named here and the ninth is not shown, because its owner could not be established and an unnamed logo in a "featured in" row is a claim nobody can check. The marks are not links, on production either.
 
+**The header is one label, at the eyebrow scale, and that label is the section's heading.** Production and the design pass both set this line and write nothing under it. A sentence invented to fill that gap would be placeholder copy wearing a design system's clothes, and a landmark still has to be named by something a reader can see. This is the one section whose header does not use `SectionHeading`.
+
 ### 6.15 FAQ accordion
 
 `details` and `summary`. The browser supplies the role, the expanded state, Enter and Space, and it all works before hydration and with script switched off, which is what issue #15 means by keyboard operable without custom JavaScript. A `div` with an `onClick` and a hand written `aria-expanded` is the same component with more ways to be wrong, and an `aria-expanded` written here would be a second source of truth for a fact `details` already publishes.
@@ -410,6 +418,15 @@ Two columns mobile, four from the tablet breakpoint, which lands eight marks as 
 | Marker | A plus whose vertical stroke fades out when the row opens, `ink-muted`, right aligned on the row |
 | Hover | The row ground shifts to `surface-alt` |
 | Answer | Body scale, `ink-muted`, capped at the measure |
+
+
+### 6.16 The gold rule
+
+A 32 by 2 pixel `gold` rule, set above a heading with 12px beneath it. It marks the start of the membership benefits and of each Our Story chapter, and nothing else.
+
+ch. 2.1 gives gold exactly this job: rules, dividers and markers, never text on a light surface. It is what this palette has in place of an accent that could be used decoratively, and it is the one mark on the page that carries the brand's warmth without a photograph doing it.
+
+Decorative, so it is hidden from assistive technology. The block it opens already announces itself with a heading, and a rule that announced itself as well would be read out four times in a row for no gain.
 
 ---
 

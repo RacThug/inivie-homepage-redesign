@@ -22,7 +22,6 @@ export function WhatsNew({ tone }: { tone?: SectionTone }) {
         eyebrow={JOURNAL.eyebrow}
         heading={JOURNAL.heading}
         headingId={HEADING_ID}
-        intro={JOURNAL.intro}
       >
         <CardGrid>
           {JOURNAL.articles.map((article) => (

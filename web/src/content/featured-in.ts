@@ -20,8 +20,17 @@ export interface Publication {
 }
 
 export const FEATURED_IN = {
-  eyebrow: "Featured In",
-  heading: "Written about across the island and beyond",
+  /**
+   * The section's whole header, and the only words in it. Production and the
+   * design pass both set this label and nothing else, so there is no heading
+   * beneath it to write: a sentence invented to fill that gap would be the
+   * placeholder copy the brief ch. 7 rules out.
+   *
+   * It is still the section's heading in the document, set at the eyebrow
+   * scale. A landmark has to be named by something a reader can see, and this
+   * is the something.
+   */
+  heading: "Featured In",
   publications: [
     { name: "Honeycombers", logo: "/home/media/honeycombers.png" },
     { name: "The Bali Bible", logo: "/home/media/the-bali-bible.png" },

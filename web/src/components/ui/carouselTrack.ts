@@ -1,12 +1,13 @@
 /**
- * The geometry of the Featured Properties carousel, written once.
+ * The geometry every carousel on the page shares, written once.
  *
- * Three things have to agree on it: the carousel, the skeleton that holds its
- * place while the CMS is read, and the `sizes` each card's image is fetched
- * at. Written out three times they agree today and disagree after the first
- * breakpoint change, and both failures are silent ones - a skeleton that
- * shifts the page it exists to hold still, and a phone that downloads a
- * desktop asset, which is requirement RS4.
+ * Four things have to agree on it: the carousel itself, the two kinds of card
+ * that ride it, the skeleton that holds Featured Properties open while the CMS
+ * is read, and the `sizes` each card's image is fetched at. Written out four
+ * times they agree today and disagree after the first breakpoint change, and
+ * both failures are silent ones - a skeleton that shifts the page it exists to
+ * hold still, and a phone that downloads a desktop asset, which is requirement
+ * RS4.
  */
 
 /**

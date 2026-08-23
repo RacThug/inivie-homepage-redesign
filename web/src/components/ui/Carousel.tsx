@@ -9,33 +9,37 @@ import {
   CAROUSEL_CONTROLS,
   CAROUSEL_SLIDE,
   CAROUSEL_VIEWPORT,
-} from "@/components/property/track";
-import { FEATURED_PROPERTIES_CAROUSEL } from "@/content/featured-properties";
+} from "@/components/ui/carouselTrack";
+import type { CarouselLabels } from "@/content/carousel";
 
 export interface CarouselSlide {
-  /** The property id, so re-ordering moves a card rather than rebuilding it. */
-  id: number;
   /**
-   * The property name. It is what a control says it will scroll to, so six
-   * dots are told apart by a screen reader rather than counted.
+   * Stable across a re-order, so moving a card moves it rather than rebuilding
+   * it. A CMS id where there is one, and the name where the content is static.
    */
+  id: string | number;
+  /** What a control says it will scroll to. */
   label: string;
   card: ReactNode;
 }
 
-interface PropertyCarouselProps {
+interface CarouselProps {
   slides: CarouselSlide[];
+  labels: CarouselLabels;
 }
 
 /**
- * Featured Properties as a centre mode carousel: the selected card sits in the
- * middle of the track at full size, with its neighbours showing at both edges
- * and standing slightly smaller. DESIGN-SYSTEM ch. 6.17.
+ * A centre mode carousel: the selected card sits in the middle of the track at
+ * full size, with its neighbours showing at both edges and standing slightly
+ * smaller. DESIGN-SYSTEM ch. 6.17.
  *
- * This is the only client component the section has, and it holds no property
- * data. The cards arrive already rendered, as `card`, so `PropertyCard` and
- * `next/image` stay on the server and what ships to a browser is the carousel
- * and nothing else.
+ * Three sections use it, and it knows about none of them. It holds no data of
+ * any kind: the cards arrive already rendered, as `card`, and a Server
+ * Component passed as a prop is not part of a client component's module graph.
+ * So `PropertyCard`, `VenueCard`, `next/image` and every payload behind them
+ * stay on the server, and what ships to a browser is this file alone. Its
+ * words arrive the same way, as `labels`, which is what lets one control say
+ * "Next property" and another "Next spa".
  *
  * There is no auto-rotation, deliberately. PRD ch. 2 catalogues three Swiper
  * carousels on the production site that move on their own with no
@@ -49,8 +53,8 @@ interface PropertyCarouselProps {
  * which needs the track to be able to cover the viewport twice over. At the
  * narrowest slide width, 36% of the viewport, six slides is where that becomes
  * true, and below it the loop leaves a gap at the seam. F3 permits as few as
- * three, so the option is read from the data rather than assumed, and a short
- * track stops at its ends instead.
+ * three properties, so the option is read from the data rather than assumed,
+ * and a short track stops at its ends instead.
  */
 const LOOP_MINIMUM_SLIDES = 6;
 
@@ -68,7 +72,7 @@ function jumps(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export function PropertyCarousel({ slides }: PropertyCarouselProps) {
+export function Carousel({ slides, labels }: CarouselProps) {
   const [emblaRef, embla] = useEmblaCarousel({
     align: "center",
     /**
@@ -161,11 +165,7 @@ export function PropertyCarousel({ slides }: PropertyCarouselProps) {
      * label omits the word carousel, which `aria-roledescription` already
      * supplies and which would otherwise be announced twice.
      */
-    <div
-      aria-label={FEATURED_PROPERTIES_CAROUSEL.label}
-      aria-roledescription="carousel"
-      role="group"
-    >
+    <div aria-label={labels.label} aria-roledescription="carousel" role="group">
       <div className={CAROUSEL_VIEWPORT} ref={setViewport}>
         <ul className={CAROUSEL_CONTAINER}>
           {slides.map((slide, index) => (
@@ -196,7 +196,7 @@ export function PropertyCarousel({ slides }: PropertyCarouselProps) {
       <div className={CAROUSEL_CONTROLS}>
         <Step
           disabled={!canScrollPrev}
-          label={FEATURED_PROPERTIES_CAROUSEL.previous}
+          label={labels.previous}
           onClick={scrollPrev}
         />
 
@@ -208,7 +208,7 @@ export function PropertyCarousel({ slides }: PropertyCarouselProps) {
           {slides.map((slide, index) => (
             <li key={slide.id}>
               <Dot
-                label={FEATURED_PROPERTIES_CAROUSEL.goTo(slide.label)}
+                label={labels.goTo.replace("{name}", slide.label)}
                 onClick={() => scrollTo(index)}
                 selected={index === selected}
               />
@@ -218,7 +218,7 @@ export function PropertyCarousel({ slides }: PropertyCarouselProps) {
 
         <Step
           disabled={!canScrollNext}
-          label={FEATURED_PROPERTIES_CAROUSEL.next}
+          label={labels.next}
           next
           onClick={scrollNext}
         />

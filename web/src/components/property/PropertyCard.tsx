@@ -1,9 +1,9 @@
 import Image from "next/image";
 
-import { CAROUSEL_IMAGE_SIZES } from "@/components/property/track";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { CAROUSEL_IMAGE_SIZES } from "@/components/ui/carouselTrack";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { PROPERTY_CARD_ACTION } from "@/content/featured-properties";
 import type { Property } from "@/types/property";

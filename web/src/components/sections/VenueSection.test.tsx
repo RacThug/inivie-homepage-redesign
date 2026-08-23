@@ -2,6 +2,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { CULINARY, WELLNESS } from "@/content/venues";
+
 import { CulinaryJourney } from "./CulinaryJourney";
 import { WellnessEscape } from "./WellnessEscape";
 
@@ -22,10 +24,18 @@ describe("the venue sections", () => {
     expect(screen.getByRole("link", { name: action })).toBeInTheDocument();
   });
 
-  it("each shows three venues", () => {
-    render(<CulinaryJourney />);
+  /** Counted by card rather than by list item: both sections ride the
+   *  carousel of DESIGN-SYSTEM ch. 6.17, which carries a second list of its
+   *  own with one dot per card, and counting both would pass at twelve. */
+  it.each([
+    [CulinaryJourney, CULINARY],
+    [WellnessEscape, WELLNESS],
+  ])("shows every venue its content module names", (Component, content) => {
+    render(<Component />);
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+    expect(
+      screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent),
+    ).toEqual(content.venues.map((venue) => venue.name));
   });
 
   /** Every heading on the page is an h2 for the section and an h3 for its
@@ -33,8 +43,23 @@ describe("the venue sections", () => {
   it("puts venue names a level below the section heading", () => {
     render(<WellnessEscape />);
 
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(
+      WELLNESS.venues.length,
+    );
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
+  });
+
+  /** A page with three carousels on it needs three sets of words, or a
+   *  screen reader is handed three controls it cannot tell apart. */
+  it("gives each section's track its own controls", () => {
+    render(<CulinaryJourney />);
+
+    expect(
+      screen.getByRole("group", { name: "Restaurants" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Next restaurant" }),
+    ).toBeInTheDocument();
   });
 
   /** The ground is the page's decision, not the section's (DESIGN-SYSTEM

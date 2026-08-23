@@ -1,14 +1,14 @@
 import { Suspense } from "react";
 
 import { PropertyCardSkeleton } from "@/components/property/PropertyCardSkeleton";
+import { FeaturedPropertiesContent } from "@/components/sections/FeaturedPropertiesContent";
+import { FeaturedPropertiesFrame } from "@/components/sections/FeaturedPropertiesFrame";
 import {
   CAROUSEL_CONTAINER,
   CAROUSEL_CONTROLS,
   CAROUSEL_SLIDE,
   CAROUSEL_VIEWPORT,
-} from "@/components/property/track";
-import { FeaturedPropertiesContent } from "@/components/sections/FeaturedPropertiesContent";
-import { FeaturedPropertiesFrame } from "@/components/sections/FeaturedPropertiesFrame";
+} from "@/components/ui/carouselTrack";
 import type { SectionTone } from "@/components/ui/Section";
 import { FEATURED_PROPERTY_COUNT } from "@/content/featured-properties";
 

@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/Badge";
-import { CARD_IMAGE_SIZES } from "@/components/ui/CardGrid";
+import { CAROUSEL_IMAGE_SIZES } from "@/components/ui/carouselTrack";
 import { PinIcon } from "@/components/ui/PinIcon";
 import type { Venue } from "@/content/venues";
 
@@ -32,7 +32,7 @@ export function VenueCard({ venue }: VenueCardProps) {
           alt={venue.imageAlt}
           className="object-cover"
           fill
-          sizes={CARD_IMAGE_SIZES}
+          sizes={CAROUSEL_IMAGE_SIZES}
           src={venue.image}
         />
         <div className="absolute left-3 top-3">

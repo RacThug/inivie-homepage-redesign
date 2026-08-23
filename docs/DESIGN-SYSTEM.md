@@ -484,7 +484,7 @@ Restaurants and spas. Deliberately lighter than the property card, and **the wei
 
 **Nothing here is pressable and nothing moves on hover.** These venues are not bookable objects on this page, so the section's own control is the one way out of it, which is the one primary action per section of PRD ch. 6.3. The property card scales its image because the whole card is a link and the motion says so; repeating that on something inert would be decoration, and ch. 5 lists what motion is for.
 
-The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other.
+The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other. Both ride the carousel of ch. 6.17, and each names its own controls: "Next restaurant" and "Next spa", never "Next".
 
 ### 6.11 Membership band
 
@@ -562,7 +562,11 @@ Decorative, so it is hidden from assistive technology. The block it opens alread
 
 ### 6.17 Featured properties carousel
 
-The cards of ch. 6.1 sit on a centre mode track rather than in a grid: the selected card is centred at full size, and the cards either side of it show at both edges and stand slightly smaller. Featured Properties is the only section that carries one. PRD ch. 6.2 asks for it there and nowhere else, and a page that scrolls sideways in four places is a page that has stopped meaning anything by it.
+Cards sit on a centre mode track rather than in a grid: the selected card is centred at full size, and the cards either side of it show at both edges and stand slightly smaller.
+
+Three sections carry one, and they are the three whose content is a portfolio a visitor browses rather than a page they read: Featured Properties, The Culinary Journey and Wellness Harmony Escape. Special Offers and What's New keep the grid of ch. 4.1, and so does anything added later that is a list rather than a portfolio. A page that scrolls sideways everywhere has stopped meaning anything by it.
+
+One component draws all three. It holds no data and no words of its own: the cards arrive already rendered and the labels arrive as content, which is what lets one track say "Next property" and the next "Next spa".
 
 | Property | Value |
 | --- | --- |
@@ -572,7 +576,7 @@ The cards of ch. 6.1 sit on a centre mode track rather than in a grid: the selec
 | Selected card | Scale 1 |
 | Every other card | Scale 0.94, at the standard 200ms of ch. 5 |
 | Edges | The track fades out over the last 12px, 48px from `lg` |
-| Controls | A step either side of one dot per property, centred beneath the track. The steps appear from `sm` |
+| Controls | A step either side of one dot per card, centred beneath the track. The steps appear from `sm` |
 | Auto-rotation | None |
 
 **Why the slide width decides everything.** A slide narrower than the track is the whole of the effect: it is what leaves the neighbouring cards showing, and centring is what puts the selected one between them. The two follow each other exactly, so the peek cannot be tuned separately: at 36% the track shows a little over two and a half cards and clips about a ninth off each edge card, and any narrower peek means a wider card.
@@ -583,9 +587,9 @@ The cards of ch. 6.1 sit on a centre mode track rather than in a grid: the selec
 
 **Motion.** Nothing moves on its own. PRD ch. 2 records three auto-rotating carousels on the production site with no `prefers-reduced-motion` query behind any of them, and reproducing a catalogued defect is worse than never having had the feature. Under `prefers-reduced-motion: reduce` the scale transition collapses with every other transition through `globals.css`, and the track's own animation is skipped so a step arrives instantly.
 
-**Looping.** The track loops only when there are at least six cards. Below that it cannot cover its own width twice over, which is what looping without cloning needs, and it stops at its ends instead with the step controls disabled where they lead nowhere. F3 permits as few as three, so this is read from the data rather than assumed.
+**Looping.** The track loops only when there are at least six cards. Below that it cannot cover its own width twice over, which is what looping without cloning needs, and it stops at its ends instead with the step controls disabled where they lead nowhere. F3 permits as few as three properties, so this is read from the data rather than assumed. The two venue sections carry six each, which is also why they carry six: three cards on a looping track show the same restaurant twice within one turn of the wheel.
 
-**Announced as one thing.** The track is a labelled carousel holding a list. Every card is in the document, visible and reachable by tab, so a screen reader says how many properties there are before reading the first, and a card reached by keyboard is scrolled into view rather than left clipped. The steps and dots carry no visible text, so each is named by what it reaches: "Next property", "Go to Ajowa Resort". Dots hold the 44 by 44 of RS2 on mobile and narrow from `sm`, where the requirement no longer applies and six full-size targets read as six separate controls rather than as one scale.
+**Announced as one thing.** Each track is a labelled carousel holding a list, and no two of the three share a control: three sections offering a button called "Next" is three buttons a screen reader cannot tell apart. Every card is in the document, visible and reachable by tab, so a screen reader says how many properties there are before reading the first, and a card reached by keyboard is scrolled into view rather than left clipped. The steps and dots carry no visible text, so each is named by what it reaches: "Next restaurant", "Go to Ajowa Resort". Dots hold the 44 by 44 of RS2 on mobile and narrow from `sm`, where the requirement no longer applies and six full-size targets read as six separate controls rather than as one scale.
 
 ---
 

@@ -1,9 +1,10 @@
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { PropertyCarousel } from "@/components/property/PropertyCarousel";
 import { FeaturedPropertiesFrame } from "@/components/sections/FeaturedPropertiesFrame";
+import { Carousel } from "@/components/ui/Carousel";
 import type { SectionTone } from "@/components/ui/Section";
 import {
   FEATURED_PROPERTIES,
+  FEATURED_PROPERTIES_CAROUSEL,
   FEATURED_PROPERTY_COUNT,
 } from "@/content/featured-properties";
 import { fetchProperties } from "@/lib/api/properties";
@@ -53,7 +54,8 @@ export async function FeaturedPropertiesContent({
           </p>
         </div>
       ) : (
-        <PropertyCarousel
+        <Carousel
+          labels={FEATURED_PROPERTIES_CAROUSEL}
           slides={properties.map((property) => ({
             id: property.id,
             label: property.title,

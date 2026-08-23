@@ -12,6 +12,7 @@
  */
 
 import type { Action } from "./action";
+import type { CarouselLabels } from "./carousel";
 
 export const FEATURED_PROPERTIES = {
   eyebrow: "Stay With Us",
@@ -47,12 +48,12 @@ export const FEATURED_PROPERTIES_ACTION: Action = {
  * steps and the dots are icons and marks, so each of these is the whole of
  * what the control says when it is read out.
  */
-export const FEATURED_PROPERTIES_CAROUSEL = {
+export const FEATURED_PROPERTIES_CAROUSEL: CarouselLabels = {
   /** Without the word carousel, which `aria-roledescription` already says. */
   label: "Featured properties",
   previous: "Previous property",
   next: "Next property",
-  goTo: (title: string) => `Go to ${title}`,
+  goTo: "Go to {name}",
 } as const;
 
 /**

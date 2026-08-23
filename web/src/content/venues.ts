@@ -17,6 +17,13 @@ import type { CarouselLabels } from "./carousel";
 
 export interface Venue {
   readonly name: string;
+  /**
+   * The venue's own page, on the sub-brand site that runs it. These are the
+   * destinations production itself gives them, and they are what makes the
+   * card a link rather than a picture: a visitor who has just read about six
+   * restaurants wants one of them, not the index of all of them.
+   */
+  readonly url: string;
   /** What kind of place it is, at a glance. Production's own words. */
   readonly category: string;
   readonly location: string;
@@ -58,6 +65,7 @@ export const CULINARY: VenueSectionContent = {
   venues: [
     {
       name: "Norii Seminyak",
+      url: "https://thewonderspace.com/noriiseminyak",
       category: "Japanese",
       location: "Seminyak, Bali",
       image: "/home/culinary/norii-seminyak.webp",
@@ -66,6 +74,7 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Riserva Steakhouse",
+      url: "https://thewonderspace.com/riserva",
       category: "Immersive dining",
       location: "Ubud, Bali",
       image: "/home/culinary/riserva-steakhouse.webp",
@@ -74,6 +83,7 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Terra Verte",
+      url: "https://thewonderspace.com/terraverte",
       category: "Mediterranean",
       location: "Ubud, Bali",
       image: "/home/culinary/terra-verte.webp",
@@ -82,6 +92,7 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Paed Thai Sanur",
+      url: "https://thewonderspace.com/paedthaisanur",
       category: "Thai",
       location: "Sanur, Bali",
       image: "/home/culinary/paed-thai-sanur.webp",
@@ -90,6 +101,7 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Sans Indian",
+      url: "https://thewonderspace.com/sansindian",
       category: "Indian",
       location: "Ubud, Bali",
       image: "/home/culinary/sans-indian.webp",
@@ -98,6 +110,7 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Aura Bar & Lounge",
+      url: "https://thewonderspace.com/aurabar",
       category: "Bar and lounge",
       location: "Ubud, Bali",
       image: "/home/culinary/aura-bar-lounge.webp",
@@ -121,6 +134,7 @@ export const WELLNESS: VenueSectionContent = {
   venues: [
     {
       name: "Svaha Spa Ajowa",
+      url: "https://svahawellness.com/svahaspaajowa",
       category: "Spa",
       location: "Seminyak, Bali",
       image: "/home/wellness/svaha-spa-ajowa.webp",
@@ -129,6 +143,7 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa La Mewali",
+      url: "https://svahawellness.com/svahaspalamewali",
       category: "Spa",
       location: "Canggu, Bali",
       image: "/home/wellness/svaha-spa-la-mewali.webp",
@@ -137,6 +152,7 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa Bisma",
+      url: "https://svahawellness.com/svahaspabisma",
       category: "Spa",
       location: "Ubud, Bali",
       image: "/home/wellness/svaha-spa-bisma.webp",
@@ -145,6 +161,7 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa Arden",
+      url: "https://svahawellness.com/svahaspaarden",
       category: "Spa",
       location: "Uluwatu, Bali",
       image: "/home/wellness/svaha-spa-arden.webp",
@@ -153,6 +170,7 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa Sanora",
+      url: "https://svahawellness.com/svahaspasanora",
       category: "Spa",
       location: "Sanur, Bali",
       image: "/home/wellness/svaha-spa-sanora.webp",
@@ -161,6 +179,7 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa Berawa",
+      url: "https://svahawellness.com/svahaspaberawa",
       category: "Spa",
       location: "Canggu, Bali",
       image: "/home/wellness/svaha-spa-berawa.webp",

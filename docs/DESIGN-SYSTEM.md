@@ -482,7 +482,9 @@ Restaurants and spas. Deliberately lighter than the property card, and **the wei
 | Name | H3 scale, `ink` |
 | Location | Small size, `ink-muted`, preceded by the 16px pin of ch. 6.1 |
 
-**Nothing here is pressable and nothing moves on hover.** These venues are not bookable objects on this page, so the section's own control is the one way out of it, which is the one primary action per section of PRD ch. 6.3. The property card scales its image because the whole card is a link and the motion says so; repeating that on something inert would be decoration, and ch. 5 lists what motion is for.
+**The whole card is one link**, to the venue's own page on the sub-brand site that runs it, which is where production sends it too. The image scales on hover exactly as the property card's does, because the card leads somewhere and the motion says so.
+
+This reverses what this chapter said until the carousel arrived. The card was inert, on the argument that these venues are not bookable objects and the section's own control is the one way out of it. That argument was sound for three cards a visitor could take in at a glance and holds no longer for six on a track: a visitor shown six restaurants wants one of them, not the index of all of them. PRD ch. 6.3 is untouched by this. One primary action per section is about competing calls to action, and the card carries no control at all - it is the link, and the section's pill remains its only button.
 
 The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other. Both ride the carousel of ch. 6.17, and each names its own controls: "Next restaurant" and "Next spa", never "Next".
 
@@ -492,6 +494,10 @@ A full bleed `ink` band. Production makes this section a full bleed **orange** b
 
 **Full bleed rather than a contained panel**, which is the one thing production's treatment gets right. A rounded card leaves the page's own ground running down both sides of the section that is supposed to interrupt it, and the result reads as a large card rather than as a change of register.
 
+**The four marks.** Production draws four filled accent discs here. These are the same four ideas in this page's register: 28px, single stroke at 1.5px, `currentColor`, from one set, with nothing written inside them. They are `gold`, which is the job ch. 2.1 gives gold - rules, dividers and markers - and which reads on ink at 6.87 to 1. Accent is ruled out by ch. 2.3 rather than by contrast: it belongs to controls, and this panel already carries the one that matters.
+
+A short gold rule stood here until they replaced it. The objection recorded against icons was that four of them are four decisions about what a "celebration setup" looks like. That is true, and it is the work rather than a reason to avoid it: the live site had already made all four, and each is legible at 28px. They are decorative and hidden from assistive technology, because the benefit is written out in full beneath every one.
+
 **Two columns from the desktop breakpoint.** Copy, tagline and controls left; the four benefits as a two by two grid right, vertically centred against the copy. Pinned to the top the benefits leave the empty corner the single column layout would have left; spread to the full height they leave a hole through the middle and read as two pairs.
 
 | Element | Treatment |
@@ -500,7 +506,7 @@ A full bleed `ink` band. Production makes this section a full bleed **orange** b
 | Heading | `surface`, title case. Production sets it in all caps, which ch. 7.3 rules out |
 | Tagline | Body scale, medium weight, `surface` |
 | Body | Body scale, `on-ink-muted` |
-| Benefit marker | A short `gold` rule above each label, per ch. 6.16. Four drawn icons would be four decisions about what a "celebration setup" looks like |
+| Benefit marker | One drawn `gold` mark above each label: a gem, a gift, a tag, a calendar |
 | Primary | `accent` fill with `ink` text. The only accent on the panel |
 | Secondary | `ghost` on a dark tone, which resolves to `gold` (ch. 6.3) |
 
@@ -554,7 +560,7 @@ Two columns mobile, four from the tablet breakpoint, which lands eight marks as 
 
 ### 6.16 The gold rule
 
-A 32 by 2 pixel `gold` rule, set above a heading with 12px beneath it. It marks the start of the membership benefits and of each Our Story chapter, and nothing else.
+A 32 by 2 pixel `gold` rule, set above a heading with 12px beneath it. It marks the start of each Our Story chapter, and nothing else. It opened the membership benefits too until the four marks of ch. 6.11 took that job.
 
 ch. 2.1 gives gold exactly this job: rules, dividers and markers, never text on a light surface. It is what this palette has in place of an accent that could be used decoratively, and it is the one mark on the page that carries the brand's warmth without a photograph doing it.
 

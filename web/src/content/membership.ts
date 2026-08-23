@@ -10,8 +10,16 @@
  * "corrected" back towards production.
  */
 
+/**
+ * Which of the four marks stands above a benefit. A name rather than a path,
+ * because what a benefit is stays here and how it is drawn stays in the
+ * component: swapping the drawing must not mean editing the copy.
+ */
+export type BenefitIcon = "gem" | "gift" | "tag" | "calendar";
+
 export interface Benefit {
   readonly title: string;
+  readonly icon: BenefitIcon;
 }
 
 export const MEMBERSHIP = {
@@ -26,10 +34,13 @@ export const MEMBERSHIP = {
    *  the panel empty, which is what makes the section read as unfinished at
    *  1440 (brief ch. 4.6). */
   benefits: [
-    { title: "Priority VIP welcome" },
-    { title: "Special celebration setup" },
-    { title: "Exclusive savings at restaurants, spa and club outlets" },
-    { title: "Access to monthly member promotions" },
+    { title: "Priority VIP welcome", icon: "gem" },
+    { title: "Special celebration setup", icon: "gift" },
+    {
+      title: "Exclusive savings at restaurants, spa and club outlets",
+      icon: "tag",
+    },
+    { title: "Access to monthly member promotions", icon: "calendar" },
   ] as readonly Benefit[],
   primary: {
     label: "Become a Member",

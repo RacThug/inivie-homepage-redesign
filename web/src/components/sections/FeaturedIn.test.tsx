@@ -16,12 +16,29 @@ describe("FeaturedIn", () => {
   it("names every mark it shows", () => {
     render(<FeaturedIn />);
 
+    expect(
+      screen.getAllByRole("img").map((mark) => mark.getAttribute("alt")),
+    ).toEqual(FEATURED_IN.publications.map((p) => p.name));
+  });
+
+  /**
+   * The ribbon holds the eight marks twice, because a track translated by half
+   * its own width is a loop with no seam. Only the first copy is in the
+   * accessibility tree: read both and the row claims sixteen publications.
+   *
+   * Asserted through `getAllByRole`, which honours `aria-hidden`, against the
+   * raw `alt` attributes, which do not. The gap between those two numbers is
+   * the whole of the mechanism.
+   */
+  it("does not read the copy that carries the loop", () => {
+    const { container } = render(<FeaturedIn />);
+
+    expect(container.querySelectorAll("img")).toHaveLength(
+      FEATURED_IN.publications.length * 2,
+    );
     expect(screen.getAllByRole("img")).toHaveLength(
       FEATURED_IN.publications.length,
     );
-    for (const publication of FEATURED_IN.publications) {
-      expect(screen.getByAltText(publication.name)).toBeInTheDocument();
-    }
   });
 
   it("shows no unnamed mark", () => {

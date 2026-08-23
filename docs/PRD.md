@@ -198,7 +198,7 @@ Scored 1 to 5, higher is better.
 | 7 | Our Story | Static | Narrative with four subsections |
 | 8 | Our Special Offers | Static | Promotional banner grid |
 | 9 | What's New | Static | Three latest article cards, trimmed from six so the page does not run too long |
-| 10 | Featured In | Static | A row of media logos in greyscale |
+| 10 | Featured In | Static | A ribbon of media logos in greyscale, sliding on its own and stopping under `prefers-reduced-motion`. See DESIGN-SYSTEM ch. 6.14 for what that costs |
 | 11 | FAQ | Static | Accordion, keyboard operable |
 | 12 | Footer | Static | Contacts, department links, social media, legal |
 

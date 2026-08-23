@@ -31,6 +31,16 @@ export const FEATURED_IN = {
    * is the something.
    */
   heading: "Featured In",
+  /**
+   * The ribbon's one control. Neither word is ever seen: the button is a pair
+   * of bars or a triangle, so the label is the whole of what it says when it
+   * is read out. Each names what pressing it will do rather than what the
+   * ribbon is doing, which is the question a visitor actually has.
+   */
+  marquee: {
+    pause: "Pause the moving logos",
+    resume: "Resume the moving logos",
+  },
   publications: [
     { name: "Honeycombers", logo: "/home/media/honeycombers.png" },
     { name: "The Bali Bible", logo: "/home/media/the-bali-bible.png" },

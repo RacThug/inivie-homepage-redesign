@@ -42,51 +42,15 @@ describe("FeaturedPropertiesFrame", () => {
   });
 
   /**
-   * The pill follows the cards in the document and is pulled back onto the
-   * heading row only from the desktop breakpoint. On a phone that puts the way
-   * out of the section under the last card, where somebody who has just
-   * scrolled past all of them is already looking, instead of back above the
-   * first one.
+   * Where that pill sits, and the fact that there is only one of it in the
+   * document, is `SectionLayout`'s behaviour and is tested there. What is
+   * asserted here is only what this section decides.
    */
-  describe("where the pill sits", () => {
-    function placement() {
-      const { container } = render(
-        <FeaturedPropertiesFrame>Grid</FeaturedPropertiesFrame>,
-      );
-      const pill = screen.getByRole("link", { name: "View All Family" });
-      const cell = pill.parentElement!;
-      const grid = cell.parentElement!;
+  it("sits in the page's shared vertical rhythm", () => {
+    const { container } = render(
+      <FeaturedPropertiesFrame>Grid</FeaturedPropertiesFrame>,
+    );
 
-      return { cell, cells: Array.from(grid.children), container };
-    }
-
-    it("follows the content on mobile and returns to the heading row on desktop", () => {
-      const { cell } = placement();
-
-      expect(cell).toHaveClass("order-last", "lg:order-none");
-      expect(cell).toHaveClass("lg:col-start-2", "lg:row-start-1");
-    });
-
-    it("is one control in the document, not one per breakpoint", () => {
-      placement();
-
-      expect(
-        screen.getAllByRole("link", { name: "View All Family" }),
-      ).toHaveLength(1);
-    });
-
-    /** A grid cell stretches its child, and a full width ink pill would
-     *  out-shout the accent button on every card below it. */
-    it("keeps its own width rather than filling the phone", () => {
-      const { cell } = placement();
-
-      expect(cell).toHaveClass("justify-self-start");
-    });
-
-    it("sits between the header and the content in the document", () => {
-      const { cell, cells } = placement();
-
-      expect(cells.indexOf(cell)).toBe(1);
-    });
+    expect(container.firstElementChild).toHaveClass("py-16", "lg:py-24");
   });
 });

@@ -11,8 +11,8 @@ Submitted as a technical test. Deadline 27 August 2026.
 | Phase | State |
 | --- | --- |
 | Planning and specification | **Complete** |
-| Laravel CMS and API | Scaffolded, feature work in progress |
-| Next.js frontend | Not started |
+| Laravel CMS and API | **Complete**: public API, admin panel, full CRUD |
+| Next.js frontend | Homepage complete, revalidation pending |
 
 Remaining work is tracked as [GitHub issues](../../issues), one per pull request, ordered by dependency rather than by date. [docs/PRD.md](./docs/PRD.md) ch. 10 has the shape of that order.
 
@@ -98,8 +98,8 @@ A demo account on a local database, seeded by `AdminUserSeeder` and published he
 ```
 .
 ├── docs/     specification, see the table above
-├── cms/      Laravel application  (pending)
-└── web/      Next.js application  (pending)
+├── cms/      Laravel application
+└── web/      Next.js application
 ```
 
 Full structure with file level detail is in [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 8.

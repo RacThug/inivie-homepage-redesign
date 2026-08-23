@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { PinIcon } from "@/components/ui/PinIcon";
 import { PROPERTY_CARD_ACTION } from "@/content/featured-properties";
 import type { Property } from "@/types/property";
 
@@ -133,25 +134,5 @@ function Rating({ value }: { value: number }) {
           as one word, "4.8out of 5". */}
       <span className="sr-only"> out of 5</span>
     </p>
-  );
-}
-
-function PinIcon() {
-  return (
-    <svg
-      aria-hidden
-      className="flex-none"
-      fill="none"
-      height="16"
-      stroke="currentColor"
-      viewBox="0 0 16 16"
-      width="16"
-    >
-      <path
-        d="M8 1.5a4.7 4.7 0 0 0-4.7 4.7c0 3.5 4.7 8.3 4.7 8.3s4.7-4.8 4.7-8.3A4.7 4.7 0 0 0 8 1.5z"
-        strokeWidth="1.3"
-      />
-      <circle cx="8" cy="6.2" fill="currentColor" r="1.6" stroke="none" />
-    </svg>
   );
 }

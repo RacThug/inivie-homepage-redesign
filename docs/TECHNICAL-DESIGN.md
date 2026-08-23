@@ -291,7 +291,25 @@ The boundary sits above the read and the section's own chrome sits below it, so 
 
 ### 4.2 Static content modules
 
-Every static section reads from a typed module in `content/`. For example `content/culinary.ts` exports a typed array consumed by the culinary section. Promoting a section to dynamic later means replacing that import with a fetch, without touching the component's markup.
+Every static section reads from a typed module in `content/`, never from markup. Promoting a section to dynamic later means replacing that import with a fetch, without touching the component.
+
+| Module | Feeds |
+| --- | --- |
+| `content/navigation.ts` | The header and the mobile drawer |
+| `content/hero.ts` | The hero image, the search panel, and the welcome block |
+| `content/featured-properties.ts` | The words around the dynamic section, not the properties |
+| `content/venues.ts` | The Culinary Journey and Wellness Harmony Escape, one shape for both |
+| `content/membership.ts` | The WeInivie panel |
+| `content/story.ts` | Our Story, four chapters over the eight mantras |
+| `content/offers.ts` | Our Special Offers |
+| `content/journal.ts` | What's New |
+| `content/featured-in.ts` | The media row |
+| `content/faq.ts` | The accordion |
+| `content/footer.ts` | The footer |
+
+The two most likely next candidates for the CMS are `journal.ts` and `offers.ts`, which is why both are shaped as arrays of a named record rather than as a bag of strings.
+
+`content/actions.test.ts` is the one test that reads across all of them. Brief ch. 4A asks that every control name its destination and that no label appear twice, and that is a property of the page rather than of any section, so it cannot be checked from inside one.
 
 ### 4.3 Images
 
@@ -300,6 +318,12 @@ Every static section reads from a typed module in `content/`. For example `conte
 The media host is allowlisted in `next.config.ts` under `images.remotePatterns`, built from `NEXT_PUBLIC_MEDIA_HOST` rather than written as a literal. This keeps the frontend half of the storage seam in ch. 5.5 honest: `next/image` refuses to load a host that is not allowlisted, so a hardcoded pattern would turn a one-line storage change into every property image silently failing to render.
 
 `next/image` also does the work a transformation CDN would otherwise be bought for, converting to modern formats and emitting per breakpoint sizes on demand. That is why the local disk choice costs the homepage nothing in image quality or weight.
+
+**Where the two sets of imagery come from, and why they differ.** Property images belong to the CMS and are seeded from the six drawn WebP files committed beside the seeder, for the licensing and reproducibility reasons in DATA-MODEL ch. 4. The static sections are not seeded and are not the CMS's business: their photography under `web/public/home/` is the client's own, taken from the live site at the repository owner's instruction, because these eleven sections are a redesign of that site's own pages and placeholder scenery would have made the visual result untestable.
+
+The two rules DATA-MODEL ch. 4 gives still hold where they apply. Nothing here is licensed stock pulled from a third party, and nothing in the CMS changed. What is no longer true for `web/` is reproducibility from the repository alone: these files can be recovered from `inivie.com`, not regenerated from a script. That is a real cost and it is recorded rather than hidden.
+
+The eight media logos are third party marks, trimmed and downscaled from print resolution to the size the row actually renders. `content/featured-in.ts` says why a ninth is not among them.
 
 ---
 

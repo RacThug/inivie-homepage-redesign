@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { Button } from "@/components/ui/Button";
+import { GoldRule } from "@/components/ui/GoldRule";
 import { Section, type SectionTone } from "@/components/ui/Section";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { STORY } from "@/content/story";
@@ -54,7 +55,8 @@ export function OurStory({ tone }: { tone?: SectionTone }) {
       <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:mt-14 lg:gap-x-12 lg:gap-y-12">
         {STORY.chapters.map((chapter) => (
           <div key={chapter.heading}>
-            <h3 className="font-heading text-h3 text-ink lg:text-h3-lg">
+            <GoldRule />
+            <h3 className="mt-4 font-heading text-h3 text-ink lg:text-h3-lg">
               {chapter.heading}
             </h3>
             {/* The mantras are the subject line of the paragraph below, so

@@ -13,42 +13,38 @@ import { WellnessEscape } from "@/components/sections/WellnessEscape";
 import { WhatsNew } from "@/components/sections/WhatsNew";
 import type { SectionTone } from "@/components/ui/Section";
 
+type Section = ComponentType<{ tone: SectionTone }>;
+
 /**
- * The order PRD ch. 6.1 fixes, minus the hero, which is not a `Section`: it is
- * full bleed and runs under the header rather than inside the container.
+ * The order PRD ch. 6.1 fixes, with the ground each section sits on. The hero
+ * is not here: it is not a `Section`, being full bleed and running under the
+ * header rather than inside the container.
  *
  * Ten of the eleven read from a typed module in `content/`. Featured
  * Properties reads the Laravel API. That is the only difference between them,
  * and it is a one line difference by design: promoting a second section to the
  * CMS means swapping an import for a fetch, not rewriting a component.
- */
-const SECTIONS: readonly ComponentType<{ tone: SectionTone }>[] = [
-  WelcomeBlock,
-  FeaturedProperties,
-  CulinaryJourney,
-  WellnessEscape,
-  Membership,
-  OurStory,
-  SpecialOffers,
-  WhatsNew,
-  FeaturedIn,
-  Faq,
-];
-
-/**
- * The grounds alternate, `surface-alt` and `surface` turn and turn about,
- * which is what makes ten stacked sections read as one page rather than ten
- * (DESIGN-SYSTEM ch. 6.7).
  *
- * Derived from position rather than written on each section, so inserting or
- * reordering one cannot leave two neighbours on the same ground. A section
- * that chose its own would have to be edited along with every section below it
- * every time the order moved, which is exactly the drift the rule exists to
- * stop.
+ * **The ground is written here and nowhere else.** A section that chose its
+ * own would have to be edited along with every section below it every time the
+ * order moved, which is exactly the drift DESIGN-SYSTEM ch. 6.7 exists to
+ * stop. `page.test.ts` checks that no two neighbours share one, which is the
+ * property that actually matters and the one an index alone cannot express:
+ * `ink` is not a step in the alternation, it is the one section that
+ * interrupts it.
  */
-function groundFor(index: number): SectionTone {
-  return index % 2 === 0 ? "alt" : "surface";
-}
+export const SECTIONS: readonly (readonly [Section, SectionTone])[] = [
+  [WelcomeBlock, "alt"],
+  [FeaturedProperties, "surface"],
+  [CulinaryJourney, "alt"],
+  [WellnessEscape, "surface"],
+  [Membership, "ink"],
+  [OurStory, "surface"],
+  [SpecialOffers, "alt"],
+  [WhatsNew, "surface"],
+  [FeaturedIn, "alt"],
+  [Faq, "surface"],
+];
 
 /**
  * The homepage. It composes sections in order and holds no logic of its own,
@@ -60,10 +56,9 @@ export default function Home() {
     <>
       <Hero />
       {/* The index is the key because it is also the identity: this list is
-          fixed at build time and nothing reorders it at runtime. A component's
-          `name` would have done, until a minifier renamed it. */}
-      {SECTIONS.map((Section, index) => (
-        <Section key={index} tone={groundFor(index)} />
+          fixed at build time and nothing reorders it at runtime. */}
+      {SECTIONS.map(([Section, tone], index) => (
+        <Section key={index} tone={tone} />
       ))}
     </>
   );

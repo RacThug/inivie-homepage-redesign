@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 
+import { NewTabHint } from "@/components/ui/NewTabHint";
 import {
   BRAND_LOGO,
   BRAND_NAME,
@@ -202,6 +203,7 @@ function DrawerLink({ children, href }: { children: string; href: string }) {
       target="_blank"
     >
       {children}
+      <NewTabHint />
     </a>
   );
 }

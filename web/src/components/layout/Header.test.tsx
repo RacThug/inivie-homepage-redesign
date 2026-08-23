@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { Header } from "./Header";
+import { visibleText } from "./visibleText";
 
 function openMenu() {
   return userEvent.click(screen.getByRole("button", { name: "Open menu" }));
@@ -20,7 +21,7 @@ describe("Header", () => {
     const entries = within(desktopNav())
       .getAllByRole("listitem")
       .filter((item) => item.parentElement === desktopNav().firstElementChild)
-      .map((item) => item.textContent);
+      .map(visibleText);
 
     expect(entries).toEqual([
       "Resort & Villa",
@@ -71,7 +72,7 @@ describe("Header", () => {
 
       expect(trigger).toHaveAttribute("aria-expanded", "false");
       expect(
-        within(desktopNav()).queryByRole("link", { name: "SOLO" }),
+        within(desktopNav()).queryByRole("link", { name: /^SOLO/ }),
       ).not.toBeInTheDocument();
     });
 
@@ -122,10 +123,15 @@ describe("Header", () => {
         within(desktopNav()).getByRole("button", { name: "Resort & Villa" }),
       );
 
-      const solo = within(desktopNav()).getByRole("link", { name: "SOLO" });
+      const solo = within(desktopNav()).getByRole("link", { name: /^SOLO/ });
       expect(solo).toHaveAttribute("href", "https://stayatsolo.com");
       expect(solo).toHaveAttribute("target", "_blank");
       expect(solo).toHaveAttribute("rel", "noopener noreferrer");
+
+      // And it says so. A new tab takes the back button away, and a visitor
+      // who cannot see the tab strip has no other way of being told.
+      expect(solo).toHaveAccessibleName(/opens in a new tab/);
+      expect(visibleText(solo)).toBe("SOLO");
     });
 
     it("closes on Escape and hands focus back to the trigger", async () => {
@@ -152,7 +158,9 @@ describe("Header", () => {
 
       expect(trigger).toHaveAttribute("aria-expanded", "true");
       await expect
-        .poll(() => document.activeElement?.textContent)
+        .poll(() =>
+          document.activeElement ? visibleText(document.activeElement) : null,
+        )
         .toBe("We Inivie");
     });
   });
@@ -161,7 +169,7 @@ describe("Header", () => {
     render(<Header />);
 
     const souljourn = within(desktopNav()).getByRole("link", {
-      name: "Souljourn",
+      name: /^Souljourn/,
     });
 
     expect(souljourn).toHaveAttribute("href", "https://inivie.com/souljourn");

@@ -260,7 +260,12 @@ be the only place a colour is decided.
 groups over a brand family and open a panel; one is a plain link. The
 structure is production's, and so is every destination: this project redesigns
 the homepage and nothing else, so each link is an absolute URL to the live
-property that owns it and opens in a new tab.
+property that owns it and opens in a new tab. Each one says so, in four words
+read out and never seen. A new tab takes the back button away, and a visitor
+who cannot see the tab strip has no other way of being told before they try it;
+a sighted visitor is told by the browser itself, which is why this is the only
+part of the affordance written down. The same hint ends every venue card in
+ch. 6.10, and it is one component so the two cannot drift.
 
 A hovered or open entry is marked with a 2px `accent` rule under a label that
 keeps its own colour, the same marker as ch. 6.4's earlier active state. Accent

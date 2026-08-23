@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 
+import { NewTabHint } from "@/components/ui/NewTabHint";
 import type { NavGroup } from "@/content/navigation";
 
 const FOCUS_RING =
@@ -145,6 +146,7 @@ export function NavDropdown({ group, labelColour }: NavDropdownProps) {
                     target="_blank"
                   >
                     {child.label}
+                    <NewTabHint />
                   </a>
                 </li>
               ))}

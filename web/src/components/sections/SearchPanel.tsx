@@ -1,75 +1,49 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 
+import { DateRangeField } from "@/components/search/DateRangeField";
+import { DestinationField } from "@/components/search/DestinationField";
+import { GuestsField } from "@/components/search/GuestsField";
 import { Button } from "@/components/ui/Button";
 import { PinIcon } from "@/components/ui/PinIcon";
-import {
-  DEFAULT_ADULTS,
-  DESTINATIONS,
-  SEARCH_ACTION,
-  SEARCH_PANEL,
-} from "@/content/hero";
+import { SEARCH_ACTION, SEARCH_PANEL } from "@/content/hero";
+import { startOfToday } from "@/lib/dates";
 
 /**
  * The search panel that sits on the hero. Brief ch. 4.2.1.
  *
- * It is a real form and nothing more: a GET to the booking system with the
- * three things a visitor picked. Booking runs on a separate application, which
- * PRD ch. 3.2 puts out of scope, so this hands over and stops.
+ * It is a real form and nothing more: a GET to the booking system with what
+ * the visitor picked. Booking runs on a separate application, which PRD
+ * ch. 3.2 puts out of scope, so this hands over and stops. Every control below
+ * writes to a hidden input for that reason: the fields are this project's, the
+ * query string is production's.
  *
- * Below the tablet breakpoint it collapses to one tappable row, because three
- * fields side by side do not fit 375px. That collapse is the only React state
- * here, and it is one boolean.
+ * Three fields, not four. The stay used to be two `date` inputs and is now one
+ * range, which is both the honest shape of the decision and where the column
+ * for the guest count came from.
+ *
+ * Below the tablet breakpoint it collapses to one tappable row, because the
+ * fields side by side do not fit 375px.
  */
 
 const FOCUS_RING =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface";
 
-/** One height for the select and both date inputs. A `date` input is taller
- *  than a `select` at the same padding, because the browser draws a picker
- *  inside it, and three fields in a row that disagree by three pixels put
- *  their labels on three different lines. */
-const FIELD =
-  "h-12 w-full rounded-control border border-surface/25 bg-transparent px-3 text-body text-surface";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-/** ISO, because that is what a `date` input reads and writes. */
-function isoDate(from: number | string, offsetDays = 0): string {
-  return new Date(new Date(from).getTime() + offsetDays * DAY_MS)
-    .toISOString()
-    .slice(0, 10);
-}
-
-/**
- * Tonight and tomorrow, written straight to the input on mount rather than
- * rendered.
- *
- * The homepage is prerendered, so a default computed while rendering would be
- * the date the build ran and would still be that date a month later. Putting
- * it in React state instead would mean the server rendering one value and the
- * client another, which is a hydration mismatch. The date fields are therefore
- * uncontrolled and the browser owns them, which is what they are for.
- */
-function fillEmptyDate(node: HTMLInputElement | null, offsetDays: number) {
-  if (node && !node.value) node.value = isoDate(Date.now(), offsetDays);
-}
-
 export function SearchPanel() {
   const fieldId = useId();
   const [open, setOpen] = useState(false);
-  const checkOutRef = useRef<HTMLInputElement>(null);
 
-  /** A stay that ends before it starts is not a stay. Moving the floor is the
-   *  browser's own validation, so no message has to be written here. */
-  function onCheckInChange(checkIn: string) {
-    const checkOut = checkOutRef.current;
-    if (!checkOut || !checkIn) return;
-
-    checkOut.min = isoDate(checkIn, 1);
-    if (checkOut.value <= checkIn) checkOut.value = isoDate(checkIn, 1);
-  }
+  /**
+   * Midnight today, read once on the client and held.
+   *
+   * The homepage is prerendered, so a date computed while rendering would be
+   * the date the build ran and would still be that date a month later. The
+   * lazy initialiser runs on the server too, but only the client's value ever
+   * reaches the calendar, and holding it in state stops the floor moving under
+   * an open panel at midnight.
+   */
+  const [today] = useState(() => startOfToday(Date.now()));
 
   return (
     <form
@@ -78,8 +52,6 @@ export function SearchPanel() {
       className="rounded-card bg-ink/95 p-4 shadow-raised lg:p-5"
       method="get"
     >
-      <input name="adults" type="hidden" value={DEFAULT_ADULTS} />
-
       {/*
         The summary row is the panel on a phone, and is not rendered at all
         from the tablet breakpoint, where the fields fit. Leaving it in place
@@ -104,66 +76,17 @@ export function SearchPanel() {
       </button>
 
       <div
-        /*
-          Three fields and a button do not fit 375px, so a phone gets the
-          summary row above and this stack behind it. A tablet has room for
-          two columns and a desktop for one row, and neither of those needs to
-          be opened first.
-        */
-        className={`gap-3 sm:mt-0 sm:grid sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_auto] lg:items-end ${
+        className={`gap-3 sm:mt-0 sm:grid sm:grid-cols-2 lg:grid-cols-[1.3fr_1.4fr_1fr_auto] lg:items-end ${
           open ? "mt-4 grid" : "hidden"
         }`}
         id={`${fieldId}-fields`}
       >
-        <Field
-          className="sm:col-span-2 lg:col-span-1"
-          id={`${fieldId}-destination`}
-          label={SEARCH_PANEL.destination}
-        >
-          <select
-            className={`${FIELD} ${FOCUS_RING}`}
-            defaultValue={DESTINATIONS[0].value}
-            id={`${fieldId}-destination`}
-            name="city"
-          >
-            {DESTINATIONS.map((destination) => (
-              <option key={destination.value} value={destination.value}>
-                {destination.label}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <DestinationField />
+        <DateRangeField today={today} />
+        <GuestsField />
 
-        <Field id={`${fieldId}-checkin`} label={SEARCH_PANEL.checkIn}>
-          <input
-            className={`${FIELD} ${FOCUS_RING}`}
-            id={`${fieldId}-checkin`}
-            name="checkin"
-            onChange={(event) => onCheckInChange(event.target.value)}
-            ref={(node) => {
-              fillEmptyDate(node, 0);
-            }}
-            required
-            type="date"
-          />
-        </Field>
-
-        <Field id={`${fieldId}-checkout`} label={SEARCH_PANEL.checkOut}>
-          <input
-            className={`${FIELD} ${FOCUS_RING}`}
-            id={`${fieldId}-checkout`}
-            name="checkout"
-            ref={(node) => {
-              checkOutRef.current = node;
-              fillEmptyDate(node, 1);
-            }}
-            required
-            type="date"
-          />
-        </Field>
-
-        {/* `field` size, so the control ends level with the inputs beside
-            it rather than 4px short of them. */}
+        {/* `field` size, so the control ends level with the fields beside it
+            rather than 4px short of them. */}
         <div
           className={`sm:col-span-2 sm:mt-1 lg:col-span-1 lg:mt-0 ${
             open ? "mt-1" : ""
@@ -175,29 +98,6 @@ export function SearchPanel() {
         </div>
       </div>
     </form>
-  );
-}
-
-interface FieldProps {
-  id: string;
-  label: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
-/** Eyebrow scale in `gold`, which carries text on an ink ground at 6.87 to 1
- *  (DESIGN-SYSTEM ch. 2.2). */
-function Field({ id, label, children, className }: FieldProps) {
-  return (
-    <div className={className}>
-      <label
-        className="block pb-1.5 text-eyebrow font-medium uppercase text-gold"
-        htmlFor={id}
-      >
-        {label}
-      </label>
-      {children}
-    </div>
   );
 }
 

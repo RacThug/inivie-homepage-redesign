@@ -21,27 +21,21 @@ import { Container } from "@/components/ui/Container";
  */
 export function Hero() {
   return (
-    <section aria-label="iNi ViE Hospitality" className="relative">
-      {/*
-        Full viewport at every breakpoint, which is production's. The 480px
-        floor stays underneath it for a short landscape window, where 100vh is
-        a strip rather than a hero.
+    /*
+      Film and panel are one 100vh unit, rather than a 100vh film with the
+      panel hung off its bottom edge on a negative margin.
 
-        `vh` rather than `dvh`: `dvh` follows a mobile browser's chrome as it
-        hides and shows, so the hero would resize under the visitor mid scroll
-        and take the layout shift score with it.
-      */}
-      <div className="relative h-screen min-h-120 w-full">
-        <HeroMedia />
-      </div>
+      The old arrangement put the Search button 30px below the fold on every
+      desktop and tablet size once the hero grew to the full viewport, and
+      Baymard's travel accommodations testing is blunt about that: a visitor
+      must not have to scroll while entering search criteria. Positioning the
+      panel inside the section makes that true by construction instead of by a
+      margin that has to be re-tuned every time the panel's height changes.
+    */
+    <section aria-label="iNi ViE Hospitality" className="relative h-screen min-h-120">
+      <HeroMedia />
 
-      {/*
-        The panel overlaps the foot of the image rather than sitting inside it.
-        On a phone the film fills the viewport and the panel is one row below
-        its edge, which keeps both whole; from the tablet breakpoint it lifts
-        onto the film.
-      */}
-      <div className="relative -mt-8 sm:-mt-14 lg:-mt-20">
+      <div className="absolute inset-x-0 bottom-0 pb-6 sm:pb-8 lg:pb-12">
         <Container>
           <SearchPanel />
         </Container>

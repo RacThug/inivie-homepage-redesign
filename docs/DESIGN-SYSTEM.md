@@ -394,17 +394,37 @@ The overlay is what makes it survivable, and it is production's: `ink` solid at 
 
 The cost is the one production pays too: the picture is never seen undimmed. That is the trade the overlay buys, and it is the reason production's hero reads slightly murky in every state.
 
-**The panel overlaps the foot of the hero** rather than sitting inside it, by 32px on mobile and 80px on desktop. On a phone that keeps the viewport of film whole and puts the panel one row below its edge. Production instead docks its widget into the header at the top of the hero; the foot is kept here because PRD ch. 6 section 2a describes this arrangement and because a panel at the top competes with the navigation for the same 90 pixels.
+**The panel sits inside the hero**, pinned to its foot with 24px of clearance on mobile and 48px on desktop, and the section is one 100vh unit holding both. It used to hang off the hero's bottom edge on a negative margin, which put the Search control 30px below the fold at every desktop and tablet size once the hero grew to the full viewport. Baymard's travel accommodations testing is blunt about that failure: a visitor must not have to scroll while entering search criteria, and where the search sat below the fold, testers took up to 30 seconds to find it at all. Positioning inside the section makes it true by construction rather than by a margin that has to be re-tuned whenever the panel's height changes.
 
-| Element | Treatment |
-| --- | --- |
-| Ground | `ink` at 95 per cent, 12px radius, raised elevation |
-| Field labels | Eyebrow scale, `gold`, which carries text on ink at 6.87 to 1 |
-| Fields | 48px tall, 8px radius, a 1px `surface` border at 25 per cent, `surface` text |
-| Search button | `accent` fill with `ink` text, at the same 48px so the row is level |
-| Focus ring | `surface`, not `ink`: the ring inverts on a dark ground for the reason ch. 6.5 gives |
+Production docks its widget into the header at the top of the hero instead. The foot is kept here because a panel at the top competes with the navigation for the same 90 pixels, which is visible on production whenever its film reaches a bright frame.
 
-**One height for every field.** A date input is taller than a select at the same padding, because the browser draws a picker inside it, and three fields in a row that disagree by three pixels put their labels on three different lines.
+**Three fields, and none of them the browser's own.**
+
+| Field | Control | Sends |
+| --- | --- | --- |
+| Destination | Listbox of production's nine, in a `surface` panel | `city` |
+| Dates | One trigger, one range, a two month calendar | `checkin`, `checkout` |
+| Guests | Stepper, 1 to 8 | `adults` |
+
+Every one writes to a hidden input, so the panel stays a real GET form: the fields are this project's and the query string is production's.
+
+**Why none of them are native.** A `select` and two `date` inputs took almost no styling and took it differently per engine: in WebKit the destination rendered as a white pill with dark text on an ink panel, ignoring every token it was given, and the dates rendered as `2026-08-23` with no calendar control at all. Only a few WebKit and Chromium pseudo-elements accept CSS and Firefox exposes almost nothing.
+
+Appearance is the smaller half of it. A native `date` input cannot draw two months, cannot tint the nights between two days, and cannot show a check-out grid refusing the days before check-in. Two separate fields also made the visitor hold the first date in their head while choosing the second, when a stay is one decision. Consolidating them is where the column for the guest count came from.
+
+**The month is spelled.** `23 Aug 2026`, not `23/08/2026`. NN/G's date input guidance asks for this precisely because `10/11/2016` is two different days either side of the Atlantic, and the numeric form is what a native input gave us.
+
+**The calendar.** Two months from 640px and one below it, weeks starting Monday, everything before today disabled, and a range of at least two days so a stay always has a night in it. Range ends are `ink` filled with `surface` text and the nights between them are `surface-alt`; accent marks today as a ring and never fills a day, because accent reaches 2.39 to 1 on a light ground and a selected day has to stay readable.
+
+`react-day-picker` supplies the calendar, and it is the project's first runtime dependency in `web/`. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
+
+**What the calendar cannot say.** Availability. Baymard's research is direct that a date picker which does not communicate it sends people elsewhere to check and sometimes they do not come back. Booking is a separate application that PRD ch. 3.2 puts out of scope, so this calendar shows dates and stops. It is a known gap, not an oversight.
+
+**The panels open upward**, and on a phone they are a sheet pinned to the bottom of the window. The search panel lives at the foot of the hero, so a menu opening below its trigger opens off the bottom of the window: the two month calendar measured 418px tall against 60px of room.
+
+**The guest count is asked for rather than assumed.** It was a hidden `adults=2` until this field existed. A couple is not the same search as a family of five, and sending everyone to a two adult result set means the first thing a family does on the booking system is redo the search they already did here. `adults` is the only guest parameter production's query string carries, so it is the only one offered: a children field would be a control whose value is dropped at the seam.
+
+**One height for every field**, 48px, set here rather than inherited. This used to be a note about a `date` input standing taller than a `select` at the same padding; now that every control is this project's, the shared height is simply declared and three fields in a row cannot disagree by three pixels.
 
 **Where it collapses.** One tappable summary row below 640px, two columns from 640px, one row from 1024px. The brief put the collapse below the tablet breakpoint; 728px of usable width fits four controls comfortably, so a tablet gets the fields rather than a control it has to open first. The summary row is not rendered above 640px at all: a hidden toggle still reporting a collapsed state describes a panel that is permanently open.
 

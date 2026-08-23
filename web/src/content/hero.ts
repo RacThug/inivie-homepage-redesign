@@ -72,17 +72,35 @@ export const SEARCH_PANEL = {
    *  heading of its own: putting an H1 on it would fight the welcome block. */
   label: "Search for a stay",
   destination: "Destination",
-  checkIn: "Check in",
-  checkOut: "Check out",
+  /** One label for the stay, because it is one decision. The two dates are
+   *  still two values, and still cross the seam as `checkin` and `checkout`. */
+  dates: "Dates",
+  datesEmpty: "Add dates",
+  guests: "Guests",
   submit: "Search",
   /** The one tappable row the panel collapses into below the tablet
-   *  breakpoint, where three fields side by side do not fit 375px. */
+   *  breakpoint, where the fields side by side do not fit 375px. */
   summary: "Where and when",
 } as const;
 
-/** Two adults, production's own default, sent as a hidden field rather than
- *  asked for: a guest count picker is booking flow, not homepage. */
-export const DEFAULT_ADULTS = 2;
+/**
+ * The guest count, asked for rather than assumed.
+ *
+ * It was a hidden `adults=2` until the field existed, on the reasoning that a
+ * guest picker is booking flow. That was wrong in one direction that matters:
+ * a couple is not the same search as a family of five, and sending everybody
+ * to a two adult result set means the first thing a family does on the booking
+ * system is redo the search they already did here.
+ *
+ * `adults` is the only guest parameter production's query string carries, so
+ * it is the only one offered. A children field would be a control whose value
+ * is dropped at the seam.
+ */
+export const GUESTS = {
+  min: 1,
+  max: 8,
+  default: 2,
+} as const;
 
 export const WELCOME = {
   heading: "iNi ViE Hospitality",

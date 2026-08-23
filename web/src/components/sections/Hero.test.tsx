@@ -40,7 +40,7 @@ describe("Hero", () => {
   it("fills the viewport, with a floor under it", () => {
     const { container } = render(<Hero />);
 
-    expect(container.querySelector("section > div")).toHaveClass(
+    expect(container.querySelector("section")).toHaveClass(
       "h-screen",
       "min-h-120",
     );

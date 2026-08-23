@@ -49,6 +49,22 @@ describe("VenueCard", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
+  /**
+   * DESIGN-SYSTEM ch. 6.4's rule for every outbound link on this page: the
+   * project redesigns one page, so a visitor sent off it keeps the page they
+   * were reading. `rel` is asserted alongside `target` because a new tab
+   * without it hands the opened page a handle on this one.
+   */
+  it("opens the venue in a new tab, and says so to a screen reader", () => {
+    render(<VenueCard venue={VENUE} />);
+
+    const link = screen.getByRole("link");
+
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAccessibleName(/opens in a new tab/);
+  });
+
   /** DESIGN-SYSTEM ch. 6.10. The motion is the card saying it leads
    *  somewhere, which is why it arrived with the destination and not
    *  before it. */

@@ -482,7 +482,7 @@ Restaurants and spas. Deliberately lighter than the property card, and **the wei
 | Name | H3 scale, `ink` |
 | Location | Small size, `ink-muted`, preceded by the 16px pin of ch. 6.1 |
 
-**The whole card is one link**, to the venue's own page on the sub-brand site that runs it, which is where production sends it too. The image scales on hover exactly as the property card's does, because the card leads somewhere and the motion says so.
+**The whole card is one link**, to the venue's own page on the sub-brand site that runs it, which is where production sends it too. It opens in a new tab, under the rule ch. 6.4 sets for every outbound link on this page: the project redesigns one page, and a visitor sent off it keeps the page they were reading. `rel="noopener noreferrer"` travels with it, and the link ends in a hint that is read out and never seen, because a new tab takes away a back button that a visitor who cannot see the tab strip has no other way of being told about. The image scales on hover exactly as the property card's does, because the card leads somewhere and the motion says so.
 
 This reverses what this chapter said until the carousel arrived. The card was inert, on the argument that these venues are not bookable objects and the section's own control is the one way out of it. That argument was sound for three cards a visitor could take in at a glance and holds no longer for six on a track: a visitor shown six restaurants wants one of them, not the index of all of them. PRD ch. 6.3 is untouched by this. One primary action per section is about competing calls to action, and the card carries no control at all - it is the link, and the section's pill remains its only button.
 

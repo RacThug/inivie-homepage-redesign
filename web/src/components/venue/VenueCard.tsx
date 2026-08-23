@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { Badge } from "@/components/ui/Badge";
 import { CAROUSEL_IMAGE_SIZES } from "@/components/ui/carouselTrack";
+import { NewTabHint } from "@/components/ui/NewTabHint";
 import { PinIcon } from "@/components/ui/PinIcon";
 import type { Venue } from "@/content/venues";
 
@@ -30,6 +31,13 @@ interface VenueCardProps {
  * The image scales on hover for the same reason the property card's does: the
  * card leads somewhere and the motion says so. That was the exact argument for
  * leaving it out before, and it changed side when the destination arrived.
+ *
+ * A new tab, for the reason DESIGN-SYSTEM ch. 6.4 gives the header's own
+ * outbound links: this project redesigns one page, and a visitor sent off it
+ * should keep the page they were reading. `rel` travels with `target` rather
+ * than being left to a browser default, and the hint at the end of the link is
+ * what tells a visitor who cannot see the tab strip that their back button is
+ * about to stop working.
  */
 export function VenueCard({ venue }: VenueCardProps) {
   return (
@@ -37,6 +45,8 @@ export function VenueCard({ venue }: VenueCardProps) {
       <a
         className="group block h-full rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         href={venue.url}
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <div className="relative aspect-4/3 overflow-hidden rounded-card">
           <Image
@@ -58,6 +68,8 @@ export function VenueCard({ venue }: VenueCardProps) {
           <PinIcon />
           {venue.location}
         </p>
+
+        <NewTabHint />
       </a>
     </article>
   );

@@ -50,6 +50,22 @@ function fakeWorkingFrontend(): void
 }
 
 /**
+ * An operation that saves and then rolls back, leaving a queued call that
+ * will never run.
+ */
+function failingWrite(): void
+{
+    try {
+        DB::transaction(function () {
+            Property::factory()->create();
+
+            throw new RuntimeException('the write failed');
+        });
+    } catch (RuntimeException) {
+    }
+}
+
+/**
  * Whether the frontend was asked to drop the properties tag, in the shape
  * ch. 5.2 documents: the endpoint, the secret header, and the tag.
  */
@@ -135,6 +151,32 @@ describe('when it fires', function () {
 
             Http::assertNothingSent();
         });
+
+        assertRevalidated();
+    });
+
+    it('re-queues after a rolled back transaction rather than swallowing the next write', function () {
+        // A rollback discards the queued callback without running it. A plain
+        // "already queued" flag would be left set by that, and every write for
+        // the rest of the process would coalesce into a call that is never
+        // going to happen: revalidation would stop, silently.
+        failingWrite();
+
+        Http::assertNothingSent();
+
+        Property::factory()->create();
+
+        assertRevalidated();
+    });
+
+    it('re-queues for a retry at the same depth as the attempt that failed', function () {
+        // The reason the rollback is listened for rather than inferred from
+        // the transaction depth. A retry opens its own transaction at the
+        // depth the failed one used, so depth alone cannot tell the second
+        // attempt from the first.
+        failingWrite();
+
+        DB::transaction(fn () => Property::factory()->create());
 
         assertRevalidated();
     });

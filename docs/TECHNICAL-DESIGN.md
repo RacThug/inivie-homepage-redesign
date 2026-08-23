@@ -42,7 +42,7 @@ It deliberately does not own: the database schema ([DATA-MODEL.md](./DATA-MODEL.
                     └──────────────────────────────┘
 
    After an admin saves a change, Laravel calls
-   POST {NEXT_URL}/api/revalidate   → homepage cache is dropped
+   POST {FRONTEND_INTERNAL_URL}/api/revalidate  → homepage cache is dropped
 ```
 
 ### 1.2 Responsibility boundaries
@@ -519,7 +519,8 @@ inivie-homepage-redesign/
 ├── cms/                       Laravel application
 │   ├── docker-compose.yml     app + mysql, the only Docker in the repo
 │   ├── Dockerfile             php:8.5-cli + pdo_mysql + unzip + composer
-│   ├── .env.example           defaults to the native path; Compose overrides
+│   ├── .env.example           defaults to the Compose path; two lines differ
+│   │                          natively, see ch. 2.4
 │   ├── app/
 │   │   ├── Http/
 │   │   │   ├── Controllers/

@@ -199,7 +199,7 @@ Content-Type: application/json
 
 `FRONTEND_INTERNAL_URL` is deliberately not `FRONTEND_URL`. That one is the origin a browser presents, which CORS compares as a string; this one is an address the CMS process has to open a socket to. Everywhere else they are the same value, and it defaults to it, but inside Compose the frontend runs on the host and `localhost` from inside the container is the container. TECHNICAL-DESIGN ch. 2.4 has the rule both variables follow.
 
-`REVALIDATE_SECRET` is in both `.env` files, and both `.env.example` files ship the same local default so a fresh clone revalidates without a step.
+`REVALIDATE_SECRET` is in both `.env` files and in neither `.env.example`, per requirement S4: a default published in a public repository is not a secret. A fresh clone therefore has the callback off, which is a supported state rather than a broken one, and the CMS sends nothing until the same value is in both files.
 
 | Status | Body | Meaning |
 | --- | --- | --- |

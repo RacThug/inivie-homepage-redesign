@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Events\TransactionRolledBack;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +30,14 @@ use Throwable;
  *
  * **One operation is one call.** A reorder saves up to twenty rows inside a
  * single transaction, and twenty identical POSTs would drop the same tag
- * twenty times.
+ * twenty times, so the second and later saves of a batch coalesce into the
+ * first. That flag has one way to go wrong and it is worth stating: a
+ * rollback discards the queued callback without ever running it, and a flag
+ * left set would swallow every write for the rest of the process. Which is
+ * why the rollback is listened for rather than inferred. Inferring it from
+ * the transaction depth was tried and is not enough: a retried operation
+ * rolls back and starts again at the same depth, so the retry looks
+ * identical to the attempt that failed.
  */
 class FrontendRevalidator
 {
@@ -60,6 +69,23 @@ class FrontendRevalidator
      * to live in the collaborator rather than in the observer.
      */
     private bool $pending = false;
+
+    /**
+     * The rollback listener is registered here rather than in a service
+     * provider, so the whole state machine is one object: nothing outside
+     * has to know that `$pending` exists, or that it needs clearing.
+     *
+     * It fires on savepoint rollbacks too, which over-clears by design. The
+     * cost of clearing when the write is still going to commit is a second
+     * POST. The cost of not clearing is silence.
+     */
+    public function __construct(Dispatcher $events)
+    {
+        $events->listen(
+            TransactionRolledBack::class,
+            fn () => $this->pending = false,
+        );
+    }
 
     /**
      * Queue a drop of the properties tag for the end of the current

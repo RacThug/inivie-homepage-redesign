@@ -23,7 +23,11 @@ const TIMEOUT_MS = 5_000;
  *  what the CMS drops through `app/api/revalidate/route.ts` after an edit, so
  *  the 60 seconds is the ceiling on staleness rather than the usual wait. */
 const REVALIDATE_SECONDS = 60;
-const CACHE_TAG = "properties";
+
+/** Exported because the revalidation route has to drop the same tag this read
+ *  is filed under, and one of them holding its own copy of the string is how
+ *  they drift apart. */
+export const CACHE_TAG = "properties";
 
 export interface PropertiesResult {
   properties: Property[];

@@ -11,8 +11,8 @@ Submitted as a technical test. Deadline 27 August 2026.
 | Phase | State |
 | --- | --- |
 | Planning and specification | **Complete** |
-| Laravel CMS and API | Scaffolded, feature work in progress |
-| Next.js frontend | Not started |
+| Laravel CMS and API | **Complete**: public API, admin panel, full CRUD |
+| Next.js frontend | Homepage complete, revalidation pending |
 
 Remaining work is tracked as [GitHub issues](../../issues), one per pull request, ordered by dependency rather than by date. [docs/PRD.md](./docs/PRD.md) ch. 10 has the shape of that order.
 
@@ -80,6 +80,14 @@ The six seeded properties come with their pictures. They are drawings committed 
 
 Using your own PHP and MySQL instead of Docker? Change `DB_HOST` in `cms/.env` from `mysql` to `127.0.0.1`. That is the only line that differs between the two paths.
 
+### Looking at the database
+
+`docker compose up -d` also starts **phpMyAdmin at http://localhost:8080**, signed in with the `inivie` / `secret` pair from `cms/.env`. It is a browser for the database and no part of the application: deleting it from `cms/docker-compose.yml`, or deleting that file outright, leaves Laravel working.
+
+MySQL is published on `127.0.0.1:3306` as well, so any client will do. Set `FORWARD_PMA_PORT` or `FORWARD_DB_PORT` if either port is already taken on your machine.
+
+`docker compose down` keeps the data. `docker compose down -v` deletes the volume with it, and the way back is `migrate --seed`.
+
 ### Admin access
 
 The panel is at **http://localhost:8000/admin**.
@@ -98,8 +106,8 @@ A demo account on a local database, seeded by `AdminUserSeeder` and published he
 ```
 .
 ├── docs/     specification, see the table above
-├── cms/      Laravel application  (pending)
-└── web/      Next.js application  (pending)
+├── cms/      Laravel application
+└── web/      Next.js application
 ```
 
 Full structure with file level detail is in [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 8.

@@ -11,10 +11,7 @@
  * knowingly: the portfolio is the family.
  */
 
-interface SectionAction {
-  readonly label: string;
-  readonly href: string;
-}
+import type { Action } from "./action";
 
 export const FEATURED_PROPERTIES = {
   eyebrow: "Stay With Us",
@@ -40,7 +37,7 @@ export const PROPERTY_CARD_ACTION = "View property";
  * on mobile. Rendered as a filled `ink` pill rather than a text link, per PRD
  * ch. 6.2.
  */
-export const FEATURED_PROPERTIES_ACTION: SectionAction = {
+export const FEATURED_PROPERTIES_ACTION: Action = {
   label: "View All Family",
   href: "/stay",
 } as const;

@@ -2,15 +2,15 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { PropertyGrid } from "./PropertyGrid";
+import { CardGrid } from "./CardGrid";
 
-describe("PropertyGrid", () => {
-  it("announces itself as a list of however many properties there are", () => {
+describe("CardGrid", () => {
+  it("announces itself as a list of however many cards there are", () => {
     render(
-      <PropertyGrid>
+      <CardGrid>
         <li>One</li>
         <li>Two</li>
-      </PropertyGrid>,
+      </CardGrid>,
     );
 
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
@@ -19,9 +19,9 @@ describe("PropertyGrid", () => {
   /** DESIGN-SYSTEM ch. 7.2. Mobile first, so every rule is a minimum width. */
   it("goes one column, then two, then three", () => {
     render(
-      <PropertyGrid>
+      <CardGrid>
         <li>One</li>
-      </PropertyGrid>,
+      </CardGrid>,
     );
 
     expect(screen.getByRole("list")).toHaveClass(
@@ -33,9 +33,9 @@ describe("PropertyGrid", () => {
 
   it("carries the 20px and 32px card gaps of ch. 4.1", () => {
     render(
-      <PropertyGrid>
+      <CardGrid>
         <li>One</li>
-      </PropertyGrid>,
+      </CardGrid>,
     );
 
     expect(screen.getByRole("list")).toHaveClass("gap-5", "lg:gap-8");

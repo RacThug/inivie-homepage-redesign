@@ -172,6 +172,8 @@ No heavy or coloured shadows. Depth comes from imagery and spacing, not from dro
 
 All animation is disabled under `prefers-reduced-motion: reduce`. This is a hard requirement, not a nicety, because vestibular sensitivity is an accessibility concern rather than a preference.
 
+**Scroll entrance is specified and is not built.** `globals.css` defines the `enter` keyframes and the token that drives them, and nothing on the site consumes either: not the header, not the footer, not Featured Properties, and not the eleven sections of #15. Recording the gap rather than quietly widening the specification, because building it is a real decision rather than an oversight. It needs an `IntersectionObserver`, which makes every section that uses it a client boundary, and it needs the hidden starting state to sit behind `@media (scripting: enabled)` so that a visitor without JavaScript is not served a blank page. Neither is in the scope of #15, whose subject is typed content.
+
 ---
 
 ## 6. Component Specifications
@@ -216,7 +218,13 @@ That is why `SectionHeading` does not place the link and takes no `action`. The 
 
 The ink variant is a section's own secondary control, one step below the accent fill so that a "View All Family" pill never competes with the call to action on the cards beneath it. PRD ch. 6.2 asks for it by name on Featured Properties. Its hover fill is `ink-muted` rather than an unnamed shade, because `ink-muted` is the one declared colour between ink and the page and `surface` on it is measured at AA in `palette.test.ts` rather than assumed.
 
+The ghost variant carries no horizontal padding, because it is a text link: a button's inset would push it out of line with the paragraph it follows, and there is no fill there for the inset to be inside of.
+
 The disabled and inert treatments **replace** the variant rather than layering over it. Combining them leaves two backgrounds and two text colours on one element, and which renders comes down to the order the utilities happen to be emitted in.
+
+**Tone.** A control on a dark ground takes `tone="dark"`, which changes two things and only two: the focus ring inverts to `surface`, for the reason ch. 6.5 gives about the footer, and ghost resolves to `gold`, the one colour that carries text on ink. A filled variant is unchanged, because its own fill is already what it is read against.
+
+**Size.** `size="field"` sets the 48px of a form control, so a submit button ends level with the inputs beside it rather than 4px short of them (ch. 6.8). It is named for the row it belongs to rather than for its height, because the height belongs to ch. 6.8 and not to this chapter.
 
 Minimum hit area 44 by 44 pixels on mobile, per requirement RS2. Both axes, not height alone: horizontal padding leaves a short label under 44 pixels wide.
 
@@ -283,11 +291,125 @@ reservations team, which is a redesign of the business rather than of the page.
 
 The loading skeleton for the property grid renders three placeholder cards whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
 
-Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same `PropertyGrid` the real cards land in, with the same padding and the same button box, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
+Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same `CardGrid` the real cards land in, with the same padding and the same button box, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
 
 **What "exactly" cannot cover.** The two title lines and three excerpt lines are the clamps above, and a clamp is a ceiling rather than a shape. Measured against the seed data at 1440, the skeleton card stands 28 pixels taller than the real one, because every seeded title fits on one of its two permitted lines. Reserving one line instead would move the same 28 pixels onto the first property an editor names at length, so the clamp is what is reserved. This is bounded rather than solved, and it is worth knowing that on the homepage as it ships the skeleton is never painted at all: the page is prerendered, so the read resolves before the document exists.
 
 The skeleton does not animate. Ch. 5 lists what motion is for on this site, and a pulsing placeholder is not on it. It is also hidden from assistive technology: there is nothing there to read.
+
+### 6.7 Section rhythm and grounds
+
+Implemented in #15 as `ui/Section`. It owns the 64px and 96px vertical padding of ch. 4.1 and carries the `Container`, so the number that sets the page's rhythm exists once rather than in eleven files that agree today.
+
+**The grounds alternate strictly**, `surface-alt` and `surface` turn and turn about down the page. Every section takes its ground as a prop and none of them chooses one, and `app/page.tsx` derives it from position over an ordered list. That is stronger than writing the ground on each section: inserting or reordering one cannot leave two neighbours on the same ground, and nobody has to remember to flip every section below the one they moved. PRD ch. 6.3 asks for that rhythm before it asks for anything else about spacing.
+
+One case the rule cannot cover: Featured Properties disappears outright when nothing is published (F4), and the sections below it then alternate from a different starting point. That is a state a live site passes through once, and correcting it would mean measuring the page in the browser.
+
+A section that is not `Container` wide is a hero, and a hero is not a `Section`.
+
+`ui/SectionLayout` sits inside it and owns the header, the one secondary control, and the content, with the control placement of ch. 6.2. `FeaturedPropertiesFrame` was that markup until five sections needed it.
+
+### 6.8 Hero and search panel
+
+Height 70vh mobile, 75vh tablet, 85vh desktop, with a 480px floor so a short landscape window still gets a photograph rather than a strip. One image, `priority`, and nothing composited over it.
+
+A scrim runs across the lower half only, `ink` at 45 per cent fading up to nothing. The header carries its own scrim at the top (ch. 6.4) and the panel carries its own contrast, so this one is for the join between them: without it the panel appears to float on whatever the picture happens to be doing at its edge.
+
+**The panel overlaps the foot of the image** rather than sitting inside it, by 32px on mobile and 80px on desktop. On a phone that keeps 70vh of photograph whole and puts the panel one row below its edge.
+
+| Element | Treatment |
+| --- | --- |
+| Ground | `ink` at 95 per cent, 12px radius, raised elevation |
+| Field labels | Eyebrow scale, `gold`, which carries text on ink at 6.87 to 1 |
+| Fields | 48px tall, 8px radius, a 1px `surface` border at 25 per cent, `surface` text |
+| Search button | `accent` fill with `ink` text, at the same 48px so the row is level |
+| Focus ring | `surface`, not `ink`: the ring inverts on a dark ground for the reason ch. 6.5 gives |
+
+**One height for every field.** A date input is taller than a select at the same padding, because the browser draws a picker inside it, and three fields in a row that disagree by three pixels put their labels on three different lines.
+
+**Where it collapses.** One tappable summary row below 640px, two columns from 640px, one row from 1024px. The brief put the collapse below the tablet breakpoint; 728px of usable width fits four controls comfortably, so a tablet gets the fields rather than a control it has to open first. The summary row is not rendered above 640px at all: a hidden toggle still reporting a collapsed state describes a panel that is permanently open.
+
+**The dates are uncontrolled.** The homepage is prerendered, so a default computed while rendering would be the date the build ran and would still be that date a month later. They are written once on mount, and the check-out floor moves with the check-in.
+
+### 6.9 Welcome block
+
+A centred column below the hero on `surface-alt`, carrying the page's one H1, the company paragraph capped at the measure, and a single primary control.
+
+Centred, which ch. 7.3 otherwise treats as a smell. It is correct here for the same reason it is correct on the FAQ: there is no second column to pair with, and a left aligned block would leave the right half of a 1280px container empty.
+
+### 6.10 Venue card
+
+Restaurants and spas. Deliberately lighter than the property card, and **the weight comes off the chrome rather than the information**: no border, no elevation, no button.
+
+| Element | Treatment |
+| --- | --- |
+| Image | 4:3, `object-cover`, 12px radius |
+| Category badge | Top left over the image, the same `Badge` the property card uses |
+| Name | H3 scale, `ink` |
+| Location | Small size, `ink-muted`, preceded by the 16px pin of ch. 6.1 |
+
+**Nothing here is pressable and nothing moves on hover.** These venues are not bookable objects on this page, so the section's own control is the one way out of it, which is the one primary action per section of PRD ch. 6.3. The property card scales its image because the whole card is a link and the motion says so; repeating that on something inert would be decoration, and ch. 5 lists what motion is for.
+
+The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other.
+
+### 6.11 Membership panel
+
+An `ink` panel inside the container, 12px radius, on a `surface-alt` section. Production makes this section a full bleed **orange** block, which is exactly the large decorative accent fill ch. 2.3 forbids, and white on accent measures 2.39 to 1. The section that needs the most emphasis on the page takes it from ink instead. Do not "correct" this back towards production.
+
+**Two columns from the desktop breakpoint.** Copy, tagline and controls left; the four benefits as a two by two grid right, vertically centred against the copy. Pinned to the top the benefits leave the empty corner the single column layout would have left; spread to the full height they leave a hole through the middle and read as two pairs.
+
+| Element | Treatment |
+| --- | --- |
+| Eyebrow | `gold` |
+| Heading | `surface`, title case. Production sets it in all caps, which ch. 7.3 rules out |
+| Tagline | Body scale, medium weight, `surface` |
+| Body | Body scale, `on-ink-muted` |
+| Benefit marker | One `gold` check, repeated. Four drawn icons would be four decisions about what a "celebration setup" looks like |
+| Primary | `accent` fill with `ink` text. The only accent on the panel |
+| Secondary | `gold` label, underline on hover. The `ghost` variant is `ink` text, which disappears here |
+
+### 6.12 Offer banner
+
+Five banners: one column mobile, two tablet, three desktop with the first spanning two. Five fills that grid exactly, a wide one plus one on the first row and three on the second; four leaves a hole in the bottom right corner.
+
+Square until the desktop breakpoint, where a 352px floor replaces the ratio so the spanning tile and its neighbour end the row level. An aspect ratio cannot do that job for two tiles of different widths in one row.
+
+**No title is rendered.** Production sets the offer name into the artwork, and these are production's own banners, so printing it again underneath would be the title twice ch. 7.3 rules out. The name is the link's accessible name instead, which fixes production's real defect here: all five of its banners carry an alt of "promo".
+
+The photograph inside that link carries an empty `alt`. It is mood rather than information once the link says which offer it leads to, and a second string there would either be swallowed by the link's own name or make every tile announce itself twice.
+
+A soft **even** `ink` scrim at 20 per cent buys back the contrast that white type over an arbitrary photograph has no guarantee of. It does not move on hover; the image scales to 1.04 under it.
+
+The brief ch. 4.8 asks for the header's top down gradient here. That gradient exists to protect type sitting at the top of a frame, which is where the header's labels are. These titles are set into the middle of the artwork, where a top down gradient has already faded to nothing, so an even scrim is the same idea applied to where the type actually is.
+
+One departure is worth naming. Four of the five banners set that baked in title in all caps, which ch. 7.3 rules out for type this project sets. It is not type this project sets, and re-lettering a client's artwork is further than a homepage redesign reaches.
+
+### 6.13 Journal card
+
+Three articles, in the shared card grid. Image 4:3 with a 1.04 hover scale, then the section label in the eyebrow scale, then the title at H3 **clamped to three lines**: these are long editorial titles and cards in a row have to end level.
+
+**The whole card is the link.** Production ships a title link and a "Read More" button that lead to the same place, which makes a keyboard user tab twice for one destination.
+
+### 6.14 Media row
+
+Two columns mobile, four from the tablet breakpoint, which lands eight marks as two clean rows at every width. Each mark sits in a fixed 40px or 48px box with `object-contain`, greyscaled, at 70 per cent opacity: a wordmark six times as wide as a monogram cannot share a width, and a fixed box plus `object-contain` is what keeps them optically level. The greyscale is set in CSS rather than left to the files, which all happen to be monochrome already, so a coloured mark added later cannot quietly break the row.
+
+**Every mark is named.** Production serves nine logo files with no alternative text at all, so a screen reader is handed nine images and told nothing. Eight are named here and the ninth is not shown, because its owner could not be established and an unnamed logo in a "featured in" row is a claim nobody can check. The marks are not links, on production either.
+
+### 6.15 FAQ accordion
+
+`details` and `summary`. The browser supplies the role, the expanded state, Enter and Space, and it all works before hydration and with script switched off, which is what issue #15 means by keyboard operable without custom JavaScript. A `div` with an `onClick` and a hand written `aria-expanded` is the same component with more ways to be wrong, and an `aria-expanded` written here would be a second source of truth for a fact `details` already publishes.
+
+**The rows are independent, not exclusive.** Closing somebody's answer because they opened a second one is a behaviour nobody asked for, and it is the only thing here that would need script.
+
+| Element | Treatment |
+| --- | --- |
+| Column | Centred, capped at 896px. The one section on the page with no second column to pair with |
+| Row | A 1px `border` rule between rows, 56px minimum height |
+| Question | Body scale, medium weight, `ink`, left aligned inside the centred column |
+| Marker | A plus whose vertical stroke fades out when the row opens, `ink-muted`, right aligned on the row |
+| Hover | The row ground shifts to `surface-alt` |
+| Answer | Body scale, `ink-muted`, capped at the measure |
 
 ---
 

@@ -2,9 +2,26 @@ import type { ReactNode } from "react";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "ink";
 
+/**
+ * The ground the control sits on. It changes the focus ring and the one
+ * variant that carries no fill of its own, for the reason DESIGN-SYSTEM
+ * ch. 6.5 gives about the footer: an `ink` ring is invisible on ink, and the
+ * ring has to stay legible against what is behind it.
+ */
+export type ButtonTone = "light" | "dark";
+
+/**
+ * `field` matches the 48px of a form control, so a submit button ends level
+ * with the inputs beside it. It is named for the row it belongs to rather
+ * than for its height, because the height is ch. 6.8's, not this file's.
+ */
+export type ButtonSize = "default" | "field";
+
 interface ButtonProps {
   children: ReactNode;
   variant?: ButtonVariant;
+  tone?: ButtonTone;
+  size?: ButtonSize;
   /**
    * Where the control leads.
    *
@@ -28,12 +45,34 @@ interface ButtonProps {
  * it is set on both axes instead of being left to the horizontal padding.
  */
 const BASE =
-  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-control px-5 text-small font-medium transition-colors";
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-control text-small font-medium transition-colors";
 
-const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-on-accent hover:bg-accent-hover",
-  secondary: "border border-ink text-ink hover:bg-surface-alt",
-  ghost: "text-ink underline-offset-4 hover:underline",
+const SIZES: Record<ButtonSize, string> = {
+  default: "",
+  field: "h-12",
+};
+
+const VARIANTS: Record<ButtonVariant, Record<ButtonTone, string>> = {
+  primary: {
+    light: "px-5 bg-accent text-on-accent hover:bg-accent-hover",
+    dark: "px-5 bg-accent text-on-accent hover:bg-accent-hover",
+  },
+  secondary: {
+    light: "px-5 border border-ink text-ink hover:bg-surface-alt",
+    dark: "px-5 border border-surface text-surface hover:bg-surface/10",
+  },
+  /**
+   * A text link, so it carries no horizontal padding: a button's inset would
+   * push it out of line with the paragraph it follows, and there is no fill
+   * here for that inset to be inside of.
+   *
+   * On ink it is `gold`, the one colour that carries text on that ground at
+   * 6.87 to 1. `ink` there would disappear.
+   */
+  ghost: {
+    light: "text-ink underline-offset-4 hover:underline",
+    dark: "text-gold underline-offset-4 hover:underline",
+  },
   /**
    * A filled ink pill, for a section's own secondary control. PRD ch. 6.2 asks
    * for one on Featured Properties, deliberately quieter than the accent fill
@@ -43,25 +82,34 @@ const VARIANTS: Record<ButtonVariant, string> = {
    * one declared colour between ink and the page, and `surface` on it is
    * measured at AA in palette.test.ts rather than assumed.
    */
-  ink: "bg-ink text-surface hover:bg-ink-muted",
+  ink: {
+    light: "px-5 bg-ink text-surface hover:bg-ink-muted",
+    dark: "px-5 bg-ink text-surface hover:bg-ink-muted",
+  },
 };
 
 /** Replaces the variant outright. Appending it instead would leave two
  *  backgrounds and two text colours on one element, with stylesheet order
  *  deciding the winner rather than the code. */
-const UNAVAILABLE = "bg-border text-muted pointer-events-none";
+const UNAVAILABLE = "px-5 bg-border text-muted pointer-events-none";
 
-const FOCUS =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
+const FOCUS: Record<ButtonTone, string> = {
+  light:
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink",
+  dark: "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface",
+};
 
 function classes(
   variant: ButtonVariant,
+  tone: ButtonTone,
+  size: ButtonSize,
   fullWidth: boolean,
   available: boolean,
 ): string {
   return [
     BASE,
-    available ? `${VARIANTS[variant]} ${FOCUS}` : UNAVAILABLE,
+    SIZES[size],
+    available ? `${VARIANTS[variant][tone]} ${FOCUS[tone]}` : UNAVAILABLE,
     fullWidth ? "w-full" : "",
   ]
     .filter(Boolean)
@@ -71,6 +119,8 @@ function classes(
 export function Button({
   children,
   variant = "primary",
+  tone = "light",
+  size = "default",
   href,
   fullWidth = false,
   disabled = false,
@@ -79,7 +129,13 @@ export function Button({
   "aria-label": ariaLabel,
 }: ButtonProps) {
   const inert = href === null && !disabled;
-  const className = classes(variant, fullWidth, !disabled && !inert);
+  const className = classes(
+    variant,
+    tone,
+    size,
+    fullWidth,
+    !disabled && !inert,
+  );
 
   /**
    * An explicitly absent destination. DESIGN-SYSTEM ch. 6.1 asks for muted and

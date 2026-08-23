@@ -84,4 +84,55 @@ describe("SectionHeading", () => {
 
     expect(screen.getByRole("heading")).not.toHaveAttribute("id");
   });
+
+  /**
+   * Centred is the exception, not a preference. Only the welcome block and the
+   * FAQ take it, because neither has a second column to pair with.
+   */
+  describe("alignment", () => {
+    it("starts at the left edge by default", () => {
+      const { container } = render(
+        <SectionHeading eyebrow="Stay" heading="Featured" intro="Copy." />,
+      );
+
+      expect(container.firstElementChild).not.toHaveClass("text-center");
+    });
+
+    it("centres the block and its measure when asked", () => {
+      const { container } = render(
+        <SectionHeading
+          align="center"
+          eyebrow="Stay"
+          heading="Featured"
+          intro="Copy."
+        />,
+      );
+
+      expect(container.firstElementChild).toHaveClass("text-center");
+      // Without this the capped paragraph sits left inside a centred block.
+      expect(screen.getByText("Copy.")).toHaveClass("mx-auto");
+    });
+  });
+
+  /**
+   * On the membership panel the ground is `ink`. Gold carries text there at
+   * 6.87 to 1, which is the one surface on the site where it may, and the
+   * darkened eyebrow token would be the unreadable one.
+   */
+  describe("on a dark ground", () => {
+    it("inverts every colour it sets", () => {
+      render(
+        <SectionHeading
+          eyebrow="Membership"
+          heading="Join"
+          intro="Copy."
+          tone="dark"
+        />,
+      );
+
+      expect(screen.getByText("Membership")).toHaveClass("text-gold");
+      expect(screen.getByRole("heading")).toHaveClass("text-surface");
+      expect(screen.getByText("Copy.")).toHaveClass("text-on-ink-muted");
+    });
+  });
 });

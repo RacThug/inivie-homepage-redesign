@@ -1,6 +1,5 @@
+import { SearchDock } from "@/components/search/SearchDock";
 import { HeroMedia } from "@/components/sections/HeroMedia";
-import { SearchPanel } from "@/components/sections/SearchPanel";
-import { Container } from "@/components/ui/Container";
 
 /**
  * The hero: production's film behind the search panel, and no type of our own.
@@ -35,11 +34,7 @@ export function Hero() {
     <section aria-label="iNi ViE Hospitality" className="relative h-screen min-h-120">
       <HeroMedia />
 
-      <div className="absolute inset-x-0 bottom-0 pb-6 sm:pb-8 lg:pb-12">
-        <Container>
-          <SearchPanel />
-        </Container>
-      </div>
+      <SearchDock />
     </section>
   );
 }

@@ -12,7 +12,27 @@ import {
 const FOCUS_RING =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface";
 
+/**
+ * How a search field is dressed, which depends on where the panel is.
+ *
+ * At rest the panel sits at the foot of the hero, so its menus open upward or
+ * there is no room for them. Docked under the header the same menus have to
+ * open downward for the same reason. `compact` drops the eyebrow to a screen
+ * reader only label, because a docked bar is a band across a page someone is
+ * reading rather than the main event.
+ */
+export interface FieldChrome {
+  compact: boolean;
+  placement: "top" | "bottom";
+}
+
+export const RESTING_CHROME: FieldChrome = {
+  compact: false,
+  placement: "top",
+};
+
 interface FieldPopoverProps {
+  chrome: FieldChrome;
   /** Eyebrow above the trigger, and the accessible name the panel takes. */
   label: string;
   /** What the trigger reads when something has been chosen. */
@@ -40,6 +60,7 @@ interface FieldPopoverProps {
  * `ink` on `ink` would be a shape with no edge.
  */
 export function FieldPopover({
+  chrome,
   label,
   value,
   detail,
@@ -103,7 +124,11 @@ export function FieldPopover({
       ref={rootRef}
     >
       <span
-        className="block pb-1.5 text-eyebrow font-medium uppercase text-gold"
+        className={
+          chrome.compact
+            ? "sr-only"
+            : "block pb-1.5 text-eyebrow font-medium uppercase text-gold"
+        }
         id={labelId}
       >
         {label}
@@ -146,7 +171,17 @@ export function FieldPopover({
         */
         <div
           aria-label={label}
-          className={`fixed inset-x-3 bottom-3 z-50 max-h-[80vh] animate-enter overflow-y-auto rounded-card border border-border bg-surface p-3 text-ink shadow-raised sm:absolute sm:inset-x-auto sm:bottom-full sm:left-0 sm:mb-2 sm:max-h-none ${panelClassName ?? ""}`}
+          /*
+            The sheet's own `bottom-3` has to be released by whichever
+            placement wins, not merely competed with. Left in force alongside
+            `sm:top-full` it pins both edges of the panel and the two month
+            calendar collapses to the 26px between them.
+          */
+          className={`fixed inset-x-3 bottom-3 z-50 max-h-[80vh] animate-enter overflow-y-auto rounded-card border border-border bg-surface p-3 text-ink shadow-raised sm:absolute sm:inset-x-auto sm:left-0 sm:max-h-none sm:overflow-visible ${
+            chrome.placement === "top"
+              ? "sm:bottom-full sm:top-auto sm:mb-2"
+              : "sm:bottom-auto sm:top-full sm:mt-2"
+          } ${panelClassName ?? ""}`}
           id={panelId}
           ref={panelRef}
           role="dialog"

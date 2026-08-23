@@ -6,6 +6,7 @@ import { DateRangeField } from "@/components/search/DateRangeField";
 import { DestinationField } from "@/components/search/DestinationField";
 import { GuestsField } from "@/components/search/GuestsField";
 import { Button } from "@/components/ui/Button";
+import type { FieldChrome } from "@/components/ui/FieldPopover";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { SEARCH_ACTION, SEARCH_PANEL } from "@/content/hero";
 import { startOfToday } from "@/lib/dates";
@@ -30,8 +31,24 @@ import { startOfToday } from "@/lib/dates";
 const FOCUS_RING =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface";
 
-export function SearchPanel() {
+interface SearchPanelProps {
+  /**
+   * Docked under the header rather than resting on the hero.
+   *
+   * The same panel and the same state either way. It is one component and one
+   * form because two would be two sets of fields to keep in step, and a
+   * visitor who picked their dates on the hero would find them missing from
+   * the bar that replaced it.
+   */
+  docked?: boolean;
+}
+
+export function SearchPanel({ docked = false }: SearchPanelProps) {
   const fieldId = useId();
+  const chrome: FieldChrome = {
+    compact: docked,
+    placement: docked ? "bottom" : "top",
+  };
   const [open, setOpen] = useState(false);
 
   /**
@@ -49,7 +66,15 @@ export function SearchPanel() {
     <form
       action={SEARCH_ACTION}
       aria-label={SEARCH_PANEL.label}
-      className="rounded-card bg-ink/95 p-4 shadow-raised lg:p-5"
+      /*
+        Solid ink once docked, 95 per cent at rest. The five per cent lets the
+        film show through behind the panel on the hero, which is the point of
+        it; over a page of cards it stops reading as depth and starts reading
+        as a card's price bleeding through the bar.
+      */
+      className={`rounded-card shadow-raised ${
+        docked ? "bg-ink px-4 py-3 lg:px-5" : "bg-ink/95 p-4 lg:p-5"
+      }`}
       method="get"
     >
       {/*
@@ -81,9 +106,9 @@ export function SearchPanel() {
         }`}
         id={`${fieldId}-fields`}
       >
-        <DestinationField />
-        <DateRangeField today={today} />
-        <GuestsField />
+        <DestinationField chrome={chrome} />
+        <DateRangeField chrome={chrome} today={today} />
+        <GuestsField chrome={chrome} />
 
         {/* `field` size, so the control ends level with the fields beside it
             rather than 4px short of them. */}

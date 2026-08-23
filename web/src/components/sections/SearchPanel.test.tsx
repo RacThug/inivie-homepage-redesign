@@ -197,3 +197,53 @@ describe("SearchPanel", () => {
     });
   });
 });
+
+/**
+ * The panel does not leave with the hero. `SearchDock` swaps its position on
+ * an `IntersectionObserver`; what is checked here is the presentation it
+ * takes when it lands, because that is this component's half of the deal.
+ */
+describe("docked under the header", () => {
+  it("keeps its labels for assistive technology while hiding them", () => {
+    render(<SearchPanel docked />);
+
+    const dates = screen.getByRole("button", {
+      name: new RegExp(SEARCH_PANEL.dates, "i"),
+    });
+
+    // Still named, still not drawn: a bar across a page someone is reading
+    // has no room for three eyebrows.
+    expect(dates).toBeInTheDocument();
+    expect(screen.getByText(SEARCH_PANEL.dates)).toHaveClass("sr-only");
+  });
+
+  it("opens its menus downward, because upward is off the top of the window", async () => {
+    const user = userEvent.setup();
+    render(<SearchPanel docked />);
+
+    await user.click(trigger(SEARCH_PANEL.dates));
+
+    expect(screen.getByRole("dialog", { name: SEARCH_PANEL.dates })).toHaveClass(
+      "sm:top-full",
+    );
+  });
+
+  it("opens them upward at rest, where the panel sits on the hero's foot", async () => {
+    const user = userEvent.setup();
+    render(<SearchPanel />);
+
+    await user.click(trigger(SEARCH_PANEL.dates));
+
+    expect(screen.getByRole("dialog", { name: SEARCH_PANEL.dates })).toHaveClass(
+      "sm:bottom-full",
+    );
+  });
+
+  it("goes solid, so a card's price does not bleed through it", () => {
+    render(<SearchPanel docked />);
+
+    const form = screen.getByRole("form", { name: SEARCH_PANEL.label });
+    expect(form).toHaveClass("bg-ink");
+    expect(form).not.toHaveClass("bg-ink/95");
+  });
+});

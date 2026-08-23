@@ -398,6 +398,14 @@ The cost is the one production pays too: the picture is never seen undimmed. Tha
 
 Production docks its widget into the header at the top of the hero instead. The foot is kept here because a panel at the top competes with the navigation for the same 90 pixels, which is visible on production whenever its film reaches a bright frame.
 
+**It does not leave with the hero.** As the panel's top edge passes under the header it docks there, as a compact card 12px below it, and undocks on the way back up. The handoff is watched with an `IntersectionObserver` on a one pixel line at the panel's resting top edge, with the header's height as a negative root margin. Watching the hero's own bottom edge instead would leave the panel gone for the 160px of scroll between the two.
+
+It is the same panel moved, not a second one drawn. Two would be two sets of fields to keep in step, and a visitor who chose their dates on the hero would find them missing from the bar that replaced it. Because it is the same element in the same place in the component tree, its values and its focus survive the change of position.
+
+This is the other half of ch. 6.4's decision to carry no booking control. Removing the header's empty "Book Now" left nothing below the fold to book with; what follows the visitor down the page is now the panel they already filled in rather than a button that would discard it.
+
+Docked, the panel drops its eyebrows to screen reader only labels, tightens to a single 72px band, and goes solid `ink` rather than the 95 per cent it wears on the hero. The five per cent is there to let the film show through; over a page of cards it stops reading as depth and starts reading as a price bleeding through the bar. Its menus also open downward there, for the same reason they open upward on the hero: whichever direction has the window in it.
+
 **Three fields, and none of them the browser's own.**
 
 | Field | Control | Sends |

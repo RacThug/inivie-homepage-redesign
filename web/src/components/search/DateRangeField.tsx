@@ -4,12 +4,16 @@ import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/Calendar";
-import { FieldPopover } from "@/components/ui/FieldPopover";
+import {
+  FieldPopover,
+  type FieldChrome,
+} from "@/components/ui/FieldPopover";
 import { SEARCH_PANEL } from "@/content/hero";
 import { addDays, formatStay, nightsBetween, toIso } from "@/lib/dates";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 
 interface DateRangeFieldProps {
+  chrome: FieldChrome;
   /** Midnight today, passed in rather than read here: the homepage is
    *  prerendered, and a date computed while rendering would be the date the
    *  build ran and would still be that date a month later. */
@@ -29,7 +33,7 @@ interface DateRangeFieldProps {
  * booking system's query string is not ours to change. They are hidden inputs
  * so the panel stays a real GET form.
  */
-export function DateRangeField({ today }: DateRangeFieldProps) {
+export function DateRangeField({ chrome, today }: DateRangeFieldProps) {
   const [range, setRange] = useState<DateRange | undefined>({
     from: today,
     to: addDays(today, 1),
@@ -49,6 +53,7 @@ export function DateRangeField({ today }: DateRangeFieldProps) {
       <input name="checkout" type="hidden" value={to ? toIso(to) : ""} />
 
       <FieldPopover
+        chrome={chrome}
         detail={nights ? `${nights} ${nights === 1 ? "night" : "nights"}` : undefined}
         label={SEARCH_PANEL.dates}
         panelClassName="sm:w-max sm:max-w-[calc(100vw-2.5rem)]"

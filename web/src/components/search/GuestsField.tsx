@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 
-import { FieldPopover } from "@/components/ui/FieldPopover";
+import {
+  FieldPopover,
+  type FieldChrome,
+} from "@/components/ui/FieldPopover";
 import { GUESTS, SEARCH_PANEL } from "@/content/hero";
 
 /**
@@ -18,7 +21,7 @@ import { GUESTS, SEARCH_PANEL } from "@/content/hero";
  *  plus and reads as a dash rather than as the operation's other half. */
 const MINUS = "−";
 
-export function GuestsField() {
+export function GuestsField({ chrome }: { chrome: FieldChrome }) {
   const [guests, setGuests] = useState<number>(GUESTS.default);
 
   return (
@@ -26,6 +29,7 @@ export function GuestsField() {
       <input name="adults" type="hidden" value={guests} />
 
       <FieldPopover
+        chrome={chrome}
         icon={<GuestIcon />}
         label={SEARCH_PANEL.guests}
         panelClassName="sm:w-full sm:min-w-56"

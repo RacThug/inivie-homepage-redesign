@@ -67,14 +67,18 @@ export function SearchPanel({ docked = false }: SearchPanelProps) {
       action={SEARCH_ACTION}
       aria-label={SEARCH_PANEL.label}
       /*
-        Solid ink once docked, 95 per cent at rest. The five per cent lets the
-        film show through behind the panel on the hero, which is the point of
-        it; over a page of cards it stops reading as depth and starts reading
-        as a card's price bleeding through the bar.
+        On the hero this is a card: `ink` at 95 per cent so the film shows
+        through it, rounded, raised. Docked it is not a card at all, and
+        carries no ground of its own: `SearchDock` puts the ink on the band
+        around it so that band can run edge to edge while these fields stay on
+        the page's container. A card there floated over the property cards
+        with their titles cut off behind its edge.
       */
-      className={`rounded-card shadow-raised ${
-        docked ? "bg-ink px-4 py-3 lg:px-5" : "bg-ink/95 p-4 lg:p-5"
-      }`}
+      className={
+        docked
+          ? "py-3"
+          : "rounded-card bg-ink/95 p-4 shadow-raised lg:p-5"
+      }
       method="get"
     >
       {/*

@@ -239,11 +239,14 @@ describe("docked under the header", () => {
     );
   });
 
-  it("goes solid, so a card's price does not bleed through it", () => {
+  it("stops being a card and carries no ground of its own", () => {
     render(<SearchPanel docked />);
 
+    // The ink belongs to the band around it, so that band can run edge to
+    // edge while these fields stay on the page's container.
     const form = screen.getByRole("form", { name: SEARCH_PANEL.label });
-    expect(form).toHaveClass("bg-ink");
+    expect(form).not.toHaveClass("rounded-card");
     expect(form).not.toHaveClass("bg-ink/95");
+    expect(form).not.toHaveClass("shadow-raised");
   });
 });

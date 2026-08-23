@@ -404,7 +404,13 @@ It is the same panel moved, not a second one drawn. Two would be two sets of fie
 
 This is the other half of ch. 6.4's decision to carry no booking control. Removing the header's empty "Book Now" left nothing below the fold to book with; what follows the visitor down the page is now the panel they already filled in rather than a button that would discard it.
 
-Docked, the panel drops its eyebrows to screen reader only labels, tightens to a single 72px band, and goes solid `ink` rather than the 95 per cent it wears on the hero. The five per cent is there to let the film show through; over a page of cards it stops reading as depth and starts reading as a price bleeding through the bar. Its menus also open downward there, for the same reason they open upward on the hero: whichever direction has the window in it.
+Docked, the panel drops its eyebrows to screen reader only labels and tightens to a single 72px band. Its menus open downward there, for the same reason they open upward on the hero: whichever direction has the window in it.
+
+**Docked it is a band, not a card.** Flush against the header at that header's own height, `ink` edge to edge, with the ground on the wrapper so the band can run the full width while its fields stay on the page's container. It carries no radius, no shadow and no gap.
+
+Floating it as a card was tried first and is worse in a way that only rendering shows: the 12px between it and the header showed the page through, and the card stood on top of the property grid with the cards' titles cut off behind its top edge. It read as a foreign object dropped on the page rather than as chrome.
+
+Matching the scrolled header's `surface` instead was also tried, and is the natural suggestion, since two bands of different colour is what raises the question. It does not work. The band, the header and the white cards behind become one mass with no edge between them, and the booking control ends up the quietest thing on the screen, which is the opposite of what ch. 6.8's own research asks for. It would also need a light tone for the fields, which this document does not define: `border` on `surface` is nearly invisible at a field's size, so it would take `muted` and a new decision. `ink` needs none. Two bands of different colour is the point rather than the problem, as long as neither is floating.
 
 **Three fields, and none of them the browser's own.**
 

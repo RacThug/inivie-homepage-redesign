@@ -127,7 +127,9 @@ Paragraphs are capped at roughly 65 characters, applied as a max width on the te
 
 ### 4.1 Spacing
 
-A 4px scale, using Tailwind's default steps. Arbitrary values are not permitted for spacing.
+Tailwind's default spacing steps, and only those. Arbitrary values are not permitted for spacing.
+
+The steps are a 4px scale with half steps at 2, 6, 10 and 14 pixels, and the half steps are in play: the design pass measured the inside of the property card at 6, 10 and 14 (`docs/briefs/homepage-design-brief.md` ch. 4.3), which is finer than a card's outer rhythm because it is setting one block of type against another rather than one section against the next. The rule being enforced is that every value is a named step, not that every value is a multiple of four.
 
 | Context | Mobile | Desktop |
 | --- | --- | --- |
@@ -182,11 +184,11 @@ Implements the information requirements in PRD ch. 6.2. This section covers only
 | --- | --- |
 | Image | 4:3 aspect ratio, `object-cover`, 12px radius, scales to 1.04 on card hover with the overflow clipped |
 | Category badge | Overlaid at the top left of the image, `surface` background at high opacity, `ink` text, small label size |
-| Rating | Top right of the content area. A `gold` star icon and a one decimal value in small size |
+| Rating | Top right of the content area. A `gold` star icon and a one decimal value in small size. The star is decorative and the value is named to assistive technology, because "4.8" beside an icon says nothing when it is read aloud |
 | Title | H3 scale, `ink`, clamped to 2 lines |
 | Location | Small size, `ink-muted`, preceded by a pin icon at 16px |
 | Description | Body size, `ink-muted`, clamped to 3 lines |
-| Price | Body size. The amount in `ink` medium weight, the "per night" qualifier in `ink-muted` |
+| Price | Body size, prefixed with "From". The amount in `ink` medium weight, the "From" and "per night" qualifiers in `ink-muted`. Reads "From IDR 3,200,000 per night" |
 | Button | Full width on mobile, auto width on desktop. `accent` background with text colour resolved per ch. 2.2 |
 | Card | `surface` background, 1px `border`, 12px radius, rest elevation, raised on hover |
 
@@ -198,14 +200,21 @@ Implements the information requirements in PRD ch. 6.2. This section covers only
 
 Eyebrow label, then heading, then optional intro paragraph. On desktop a secondary link may sit right aligned on the heading row. On mobile that link moves below the content, because a right aligned link next to a wrapped heading looks broken at narrow widths.
 
+**"The content" means the section's, not the header's.** The link goes below the cards, not between the intro and the cards. A visitor on a phone reaches it having already been through everything the section had to offer, which is the moment they might want more of it; put it above the grid instead and somebody who has just scrolled past three cards has to scroll back up to leave. The desktop placement is the exception the narrow one makes room for, not the other way round.
+
+That is why `SectionHeading` does not place the link and takes no `action`. The two positions have two different parents, and no prop on a heading component can put a child after markup that component does not own. The section owns the placement: one control in the document, moved by `order` inside a grid that spans header, link and content, rather than two copies toggled by `hidden` and `lg:hidden`. `FeaturedPropertiesFrame` is the worked example.
+
 ### 6.3 Button
 
 | Variant | Treatment |
 | --- | --- |
 | Primary | `accent` background, text per ch. 2.2, 8px radius, `accent-hover` on hover |
 | Secondary | Transparent background, 1px `ink` border, `ink` text |
+| Ink | `ink` background, `surface` text, lightening to `ink-muted` on hover |
 | Ghost | Text only in `ink`, underline on hover |
 | Disabled | `muted` text on `border` background, no pointer events |
+
+The ink variant is a section's own secondary control, one step below the accent fill so that a "View All Family" pill never competes with the call to action on the cards beneath it. PRD ch. 6.2 asks for it by name on Featured Properties. Its hover fill is `ink-muted` rather than an unnamed shade, because `ink-muted` is the one declared colour between ink and the page and `surface` on it is measured at AA in `palette.test.ts` rather than assumed.
 
 The disabled and inert treatments **replace** the variant rather than layering over it. Combining them leaves two backgrounds and two text colours on one element, and which renders comes down to the order the utilities happen to be emitted in.
 
@@ -273,6 +282,12 @@ reservations team, which is a redesign of the business rather than of the page.
 ### 6.6 Skeleton
 
 The loading skeleton for the property grid renders three placeholder cards whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
+
+Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same `PropertyGrid` the real cards land in, with the same padding and the same button box, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
+
+**What "exactly" cannot cover.** The two title lines and three excerpt lines are the clamps above, and a clamp is a ceiling rather than a shape. Measured against the seed data at 1440, the skeleton card stands 28 pixels taller than the real one, because every seeded title fits on one of its two permitted lines. Reserving one line instead would move the same 28 pixels onto the first property an editor names at length, so the clamp is what is reserved. This is bounded rather than solved, and it is worth knowing that on the homepage as it ships the skeleton is never painted at all: the page is prerendered, so the read resolves before the document exists.
+
+The skeleton does not animate. Ch. 5 lists what motion is for on this site, and a pulsing placeholder is not on it. It is also hidden from assistive technology: there is nothing there to read.
 
 ---
 

@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 
-import {
-  FieldPopover,
-  type FieldChrome,
-} from "@/components/ui/FieldPopover";
+import { FieldPopover, type FieldChrome } from "@/components/ui/FieldPopover";
 import { GUESTS, SEARCH_PANEL } from "@/content/hero";
 
 /**

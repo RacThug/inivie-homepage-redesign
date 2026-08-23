@@ -60,7 +60,9 @@ describe("HeroMedia", () => {
   });
 
   it("requests no film at all under reduced motion", async () => {
-    const { container } = await renderWith(["(prefers-reduced-motion: reduce)"]);
+    const { container } = await renderWith([
+      "(prefers-reduced-motion: reduce)",
+    ]);
 
     // DESIGN-SYSTEM ch. 5 calls this a hard requirement, so the file is never
     // asked for rather than fetched and paused. This is the one place the hero

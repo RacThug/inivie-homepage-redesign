@@ -8,9 +8,7 @@ import { MobileDrawer } from "./MobileDrawer";
 function renderDrawer(overrides: { onClose?: () => void } = {}) {
   const onClose = overrides.onClose ?? vi.fn();
 
-  const view = render(
-    <MobileDrawer id="site-menu" onClose={onClose} open />,
-  );
+  const view = render(<MobileDrawer id="site-menu" onClose={onClose} open />);
 
   return { ...view, onClose };
 }

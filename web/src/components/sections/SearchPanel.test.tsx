@@ -3,7 +3,12 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DESTINATIONS, GUESTS, SEARCH_ACTION, SEARCH_PANEL } from "@/content/hero";
+import {
+  DESTINATIONS,
+  GUESTS,
+  SEARCH_ACTION,
+  SEARCH_PANEL,
+} from "@/content/hero";
 
 import { SearchPanel } from "./SearchPanel";
 
@@ -75,7 +80,9 @@ describe("SearchPanel", () => {
       const { container } = render(<SearchPanel />);
 
       await user.click(trigger(DESTINATIONS[0].label));
-      await user.click(screen.getByRole("button", { name: DESTINATIONS[6].label }));
+      await user.click(
+        screen.getByRole("button", { name: DESTINATIONS[6].label }),
+      );
 
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
       expect(hidden(container, "city")).toHaveValue(DESTINATIONS[6].value);
@@ -223,9 +230,9 @@ describe("docked under the header", () => {
 
     await user.click(trigger(SEARCH_PANEL.dates));
 
-    expect(screen.getByRole("dialog", { name: SEARCH_PANEL.dates })).toHaveClass(
-      "sm:top-full",
-    );
+    expect(
+      screen.getByRole("dialog", { name: SEARCH_PANEL.dates }),
+    ).toHaveClass("sm:top-full");
   });
 
   it("opens them upward at rest, where the panel sits on the hero's foot", async () => {
@@ -234,9 +241,9 @@ describe("docked under the header", () => {
 
     await user.click(trigger(SEARCH_PANEL.dates));
 
-    expect(screen.getByRole("dialog", { name: SEARCH_PANEL.dates })).toHaveClass(
-      "sm:bottom-full",
-    );
+    expect(
+      screen.getByRole("dialog", { name: SEARCH_PANEL.dates }),
+    ).toHaveClass("sm:bottom-full");
   });
 
   it("stops being a card and carries no ground of its own", () => {

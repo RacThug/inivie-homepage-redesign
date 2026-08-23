@@ -109,7 +109,9 @@ export function NavDropdown({ group, labelColour }: NavDropdownProps) {
         */}
         <span
           className={`border-b-2 pb-1 transition-colors ${
-            open ? "border-accent" : "border-transparent group-hover:border-accent"
+            open
+              ? "border-accent"
+              : "border-transparent group-hover:border-accent"
           }`}
         >
           {group.label}

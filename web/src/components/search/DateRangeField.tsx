@@ -4,10 +4,7 @@ import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/Calendar";
-import {
-  FieldPopover,
-  type FieldChrome,
-} from "@/components/ui/FieldPopover";
+import { FieldPopover, type FieldChrome } from "@/components/ui/FieldPopover";
 import { SEARCH_PANEL } from "@/content/hero";
 import { addDays, formatStay, nightsBetween, toIso } from "@/lib/dates";
 import { useMediaQuery } from "@/lib/useMediaQuery";
@@ -54,7 +51,9 @@ export function DateRangeField({ chrome, today }: DateRangeFieldProps) {
 
       <FieldPopover
         chrome={chrome}
-        detail={nights ? `${nights} ${nights === 1 ? "night" : "nights"}` : undefined}
+        detail={
+          nights ? `${nights} ${nights === 1 ? "night" : "nights"}` : undefined
+        }
         label={SEARCH_PANEL.dates}
         panelClassName="sm:w-max sm:max-w-[calc(100vw-2.5rem)]"
         value={from ? formatStay(from, to) : SEARCH_PANEL.datesEmpty}

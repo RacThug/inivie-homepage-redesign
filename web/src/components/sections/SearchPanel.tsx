@@ -76,9 +76,7 @@ export function SearchPanel({ docked = false }: SearchPanelProps) {
         with their titles cut off behind its edge.
       */
       className={
-        docked
-          ? "py-3"
-          : "rounded-card bg-ink/95 p-4 shadow-raised lg:p-5"
+        docked ? "py-3" : "rounded-card bg-ink/95 p-4 shadow-raised lg:p-5"
       }
       method="get"
     >

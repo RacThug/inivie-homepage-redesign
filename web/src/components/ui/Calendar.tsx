@@ -65,8 +65,10 @@ export function Calendar({
         day: CELL,
         day_button: `${DAY} hover:bg-surface-alt`,
         // A stay is a span, so its ends are square where they meet the middle.
-        range_start: "[&>button]:rounded-r-none [&>button]:bg-ink [&>button]:text-surface [&>button]:hover:bg-ink",
-        range_end: "[&>button]:rounded-l-none [&>button]:bg-ink [&>button]:text-surface [&>button]:hover:bg-ink",
+        range_start:
+          "[&>button]:rounded-r-none [&>button]:bg-ink [&>button]:text-surface [&>button]:hover:bg-ink",
+        range_end:
+          "[&>button]:rounded-l-none [&>button]:bg-ink [&>button]:text-surface [&>button]:hover:bg-ink",
         range_middle:
           "[&>button]:rounded-none [&>button]:bg-surface-alt [&>button]:text-ink",
         selected: "",

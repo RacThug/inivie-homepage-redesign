@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { MobileDrawer } from "@/components/layout/MobileDrawer";
 import { NavDropdown } from "@/components/layout/NavDropdown";
+import { NewTabHint } from "@/components/ui/NewTabHint";
 import { Container } from "@/components/ui/Container";
 import {
   BRAND_LOGO,
@@ -134,6 +135,7 @@ export function Header() {
                         <span className="border-b-2 border-transparent pb-1 transition-colors group-hover:border-accent">
                           {entry.label}
                         </span>
+                        <NewTabHint />
                       </a>
                     )}
                   </li>

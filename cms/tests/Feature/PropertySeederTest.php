@@ -16,9 +16,9 @@ beforeEach(function () {
     $this->seed(PropertySeeder::class);
 });
 
-it('seeds six properties, four of them published', function () {
-    expect(Property::count())->toBe(6)
-        ->and(Property::published()->count())->toBe(4);
+it('seeds eight properties, six of them published', function () {
+    expect(Property::count())->toBe(8)
+        ->and(Property::published()->count())->toBe(6);
 });
 
 it('seeds the titles the data model names', function () {
@@ -27,6 +27,8 @@ it('seeds the titles the data model names', function () {
         'Ajowa Resort',
         'La Mewali Resort',
         'Astera Canggu',
+        'Ini Vie Villa Legian',
+        'Aeera Villa Canggu',
         'Seascape Sanur',
         'Svaha Retreat Ubud',
     ]);
@@ -100,7 +102,7 @@ it('leaves the drafts without a published_at', function () {
 it('is idempotent, so re-seeding does not duplicate rows', function () {
     $this->seed(PropertySeeder::class);
 
-    expect(Property::count())->toBe(6);
+    expect(Property::count())->toBe(8);
 });
 
 it('leaves a soft deleted property deleted when the seeder runs again', function () {

@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 
-import {
-  FieldPopover,
-  type FieldChrome,
-} from "@/components/ui/FieldPopover";
+import { FieldPopover, type FieldChrome } from "@/components/ui/FieldPopover";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { DESTINATIONS, SEARCH_PANEL } from "@/content/hero";
 

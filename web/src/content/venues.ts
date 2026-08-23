@@ -13,9 +13,17 @@
  */
 
 import type { Action } from "./action";
+import type { CarouselLabels } from "./carousel";
 
 export interface Venue {
   readonly name: string;
+  /**
+   * The venue's own page, on the sub-brand site that runs it. These are the
+   * destinations production itself gives them, and they are what makes the
+   * card a link rather than a picture: a visitor who has just read about six
+   * restaurants wants one of them, not the index of all of them.
+   */
+  readonly url: string;
   /** What kind of place it is, at a glance. Production's own words. */
   readonly category: string;
   readonly location: string;
@@ -28,6 +36,12 @@ export interface VenueSectionContent {
   readonly heading: string;
   readonly intro: string;
   readonly action: Action;
+  /**
+   * Both sections ride the carousel of DESIGN-SYSTEM ch. 6.17, and each names
+   * what its own controls move. A restaurant is not a spa, and a page with
+   * three carousels on it should not offer three controls that all say "Next".
+   */
+  readonly carousel: CarouselLabels;
   readonly venues: readonly Venue[];
 }
 
@@ -42,9 +56,16 @@ export const CULINARY: VenueSectionContent = {
   heading: "The Culinary Journey",
   intro: "Opening a new chapter in refined dining experience.",
   action: { label: "All restaurants", href: "/dine" },
+  carousel: {
+    label: "Restaurants",
+    previous: "Previous restaurant",
+    next: "Next restaurant",
+    goTo: "Go to {name}",
+  },
   venues: [
     {
       name: "Norii Seminyak",
+      url: "https://thewonderspace.com/noriiseminyak",
       category: "Japanese",
       location: "Seminyak, Bali",
       image: "/home/culinary/norii-seminyak.webp",
@@ -53,6 +74,7 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Riserva Steakhouse",
+      url: "https://thewonderspace.com/riserva",
       category: "Immersive dining",
       location: "Ubud, Bali",
       image: "/home/culinary/riserva-steakhouse.webp",
@@ -61,11 +83,39 @@ export const CULINARY: VenueSectionContent = {
     },
     {
       name: "Terra Verte",
+      url: "https://thewonderspace.com/terraverte",
       category: "Mediterranean",
       location: "Ubud, Bali",
       image: "/home/culinary/terra-verte.webp",
       imageAlt:
         "A table at Terra Verte laid with bread, mezze bowls, salads and a burger, seen from above.",
+    },
+    {
+      name: "Paed Thai Sanur",
+      url: "https://thewonderspace.com/paedthaisanur",
+      category: "Thai",
+      location: "Sanur, Bali",
+      image: "/home/culinary/paed-thai-sanur.webp",
+      imageAlt:
+        "Tom yum, green curry, a prawn salad and pad thai laid out from above on a sand coloured table at Paed Thai Sanur.",
+    },
+    {
+      name: "Sans Indian",
+      url: "https://thewonderspace.com/sansindian",
+      category: "Indian",
+      location: "Ubud, Bali",
+      image: "/home/culinary/sans-indian.webp",
+      imageAlt:
+        "Biryani in a copper pan, seekh kebabs and a curry with papadum, set among marigolds at Sans Indian.",
+    },
+    {
+      name: "Aura Bar & Lounge",
+      url: "https://thewonderspace.com/aurabar",
+      category: "Bar and lounge",
+      location: "Ubud, Bali",
+      image: "/home/culinary/aura-bar-lounge.webp",
+      imageAlt:
+        "A bartender mixing a drink behind the curved bar at Aura Bar & Lounge, under a woven rattan ceiling.",
     },
   ],
 } as const;
@@ -75,9 +125,16 @@ export const WELLNESS: VenueSectionContent = {
   heading: "Wellness Harmony Escape",
   intro: "Find serenity in soulful rituals made to restore.",
   action: { label: "All spas", href: "/wellness" },
+  carousel: {
+    label: "Spas",
+    previous: "Previous spa",
+    next: "Next spa",
+    goTo: "Go to {name}",
+  },
   venues: [
     {
       name: "Svaha Spa Ajowa",
+      url: "https://svahawellness.com/svahaspaajowa",
       category: "Spa",
       location: "Seminyak, Bali",
       image: "/home/wellness/svaha-spa-ajowa.webp",
@@ -86,6 +143,7 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa La Mewali",
+      url: "https://svahawellness.com/svahaspalamewali",
       category: "Spa",
       location: "Canggu, Bali",
       image: "/home/wellness/svaha-spa-la-mewali.webp",
@@ -94,11 +152,39 @@ export const WELLNESS: VenueSectionContent = {
     },
     {
       name: "Svaha Spa Bisma",
+      url: "https://svahawellness.com/svahaspabisma",
       category: "Spa",
       location: "Ubud, Bali",
       image: "/home/wellness/svaha-spa-bisma.webp",
       imageAlt:
         "Two therapists in ikat working side by side on a couple against a carved stone wall at Svaha Spa Bisma.",
+    },
+    {
+      name: "Svaha Spa Arden",
+      url: "https://svahawellness.com/svahaspaarden",
+      category: "Spa",
+      location: "Uluwatu, Bali",
+      image: "/home/wellness/svaha-spa-arden.webp",
+      imageAlt:
+        "A therapist pouring warm oil beside two occupied treatment beds in a softly lit room at Svaha Spa Arden.",
+    },
+    {
+      name: "Svaha Spa Sanora",
+      url: "https://svahawellness.com/svahaspasanora",
+      category: "Spa",
+      location: "Sanur, Bali",
+      image: "/home/wellness/svaha-spa-sanora.webp",
+      imageAlt:
+        "Two teak treatment beds with folded towels and frangipani flowers in a bright room at Svaha Spa Sanora.",
+    },
+    {
+      name: "Svaha Spa Berawa",
+      url: "https://svahawellness.com/svahaspaberawa",
+      category: "Spa",
+      location: "Canggu, Bali",
+      image: "/home/wellness/svaha-spa-berawa.webp",
+      imageAlt:
+        "A couples treatment room at Svaha Spa Berawa, with two beds, hanging robes and a mirrored arch.",
     },
   ],
 } as const;

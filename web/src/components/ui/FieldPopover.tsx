@@ -105,9 +105,11 @@ export function FieldPopover({
     const trigger = triggerRef.current;
 
     // The first thing inside, so a keyboard is already where the panel is.
-    panel?.querySelector<HTMLElement>(
-      'button:not([disabled]), [tabindex]:not([tabindex="-1"]), input',
-    )?.focus();
+    panel
+      ?.querySelector<HTMLElement>(
+        'button:not([disabled]), [tabindex]:not([tabindex="-1"]), input',
+      )
+      ?.focus();
 
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);

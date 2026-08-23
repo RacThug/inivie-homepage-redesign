@@ -81,6 +81,7 @@ Versions verified against the npm registry, Packagist, the Laravel support polic
 | Admin UI | Blade + Tailwind CSS | - | - |
 | Image storage | Laravel filesystem, configured disk. `public` for this project, see ch. 5.5 | - | - |
 | Backend tests | Pest | 4.x | 4.7.8 |
+| Carousel | `embla-carousel-react` | 8.x | 8.6.0, verified 23 August 2026 |
 | Frontend tests | Vitest + Testing Library, Playwright | 4.x | 4.1.11 |
 | DOM for component tests | jsdom | 29.x | 30.0.1 |
 | PHP formatting | Laravel Pint | - | - |
@@ -100,6 +101,7 @@ The rule is: take the current stable major of each dependency, and never start a
 | **MySQL 8.4 LTS**, not 8.0 | MySQL 8.0 reached end of life on **30 April 2026**. 8.4 is LTS with support to 2032 and is what most local development stacks ship by default, which matters for acceptance criterion A15. MySQL 9.7 LTS also works if the reviewer already runs it |
 | **TypeScript unpinned** | The TypeScript major line moved quickly this year, with 6.0.3 in April 2026 and 7.0.2 current. Rather than hardcode a major that may shift again before submission, take whatever `create-next-app` scaffolds, which is the version the framework itself is tested against |
 | **ESLint 9**, not 10 | Tried and reverted on 22 August 2026. `eslint-config-next@16.3.2` bundles a copy of `eslint-plugin-react` that calls the pre-10 rule context API, so every lint run aborts with `contextOrFilename.getFilename is not a function`. ESLint 9 is on the maintenance line rather than out of support, and the reasoning from the TypeScript row applies unchanged: take the version the framework is actually tested against. Revisit when `eslint-config-next` ships a 10-compatible plugin |
+| **Embla 8**, not 9 | Checked 23 August 2026: `embla-carousel-react` publishes 8.6.0 on `latest` and 9.0.0-rc03 on `next`. A release candidate is not a stable major, and the rule above says take the current stable one. The SSR plugin exists only on the 9 line, which costs this project nothing: the slide widths are CSS rather than JavaScript, so the track is laid out correctly before the carousel initialises and there is no width for a plugin to supply |
 | **jsdom 29**, not 30 | jsdom 30 requires Node `^24.15.0`, which would refuse to run the component tests for any reviewer on an earlier Node 24 patch. 29.1.1 supports the whole of Node 24. Acceptance criterion A15 is about a setup that works from a fresh clone, and a test suite that depends on a specific patch release of the runtime works against it |
 
 Two of the versions originally drafted for this document, Laravel 12 and MySQL 8.0, were already out of support when checked. That is the reason this table records a verification date and a latest-stable column rather than a bare version number: a spec that states versions without saying when they were true silently rots.
@@ -246,7 +248,13 @@ The last row is the one worth keeping. A token can be declared in `globals.css`,
 
 ### 3.1 Rendering
 
-The homepage is a Server Component tree. `use client` appears in exactly two places: the mobile navigation drawer and the FAQ accordion. The Featured Properties section holds no client state, so it ships zero additional JavaScript.
+The homepage is a Server Component tree, and `use client` is reserved for what genuinely needs a browser: the header's navigation and its mobile drawer, the search panel with its three fields and the calendar behind them, the hero's film, and the carousel, which three sections share. The eleven static sections and every card on the page render on the server.
+
+The list is deliberately not a count. An earlier draft of this paragraph named two components and was four releases out of date before anyone read it again.
+
+Featured Properties is the one section that reads the CMS, and the read stays on the server with everything it touches. The cards are rendered there and handed to the carousel as output rather than as data, which keeps them out of the client's module graph: the property payload, `PropertyCard`, `VenueCard` and `next/image` never reach a browser, and what ships is the carousel and nothing else. One component for three sections means it ships once.
+
+The words on its controls cross that boundary as data, so they must be serialisable. `goTo` is a sentence with a `{name}` placeholder rather than the function it wants to be: React refuses a function at request time, which is a 500 on the homepage rather than a failing type check. `src/content/carousel.test.ts` is where that rule is enforced, because the component tests render the carousel on the client side of a boundary that is not there in a test.
 
 ### 3.2 Caching
 
@@ -319,9 +327,11 @@ The media host is allowlisted in `next.config.ts` under `images.remotePatterns`,
 
 `next/image` also does the work a transformation CDN would otherwise be bought for, converting to modern formats and emitting per breakpoint sizes on demand. That is why the local disk choice costs the homepage nothing in image quality or weight.
 
-**Where the two sets of imagery come from, and why they differ.** Property images belong to the CMS and are seeded from the six drawn WebP files committed beside the seeder, for the licensing and reproducibility reasons in DATA-MODEL ch. 4. The static sections are not seeded and are not the CMS's business: their photography under `web/public/home/` is the client's own, taken from the live site at the repository owner's instruction, because these eleven sections are a redesign of that site's own pages and placeholder scenery would have made the visual result untestable.
+**Where the two sets of imagery come from, and why they differ.** Property images belong to the CMS and are seeded from the eight drawn WebP files committed beside the seeder, for the licensing and reproducibility reasons in DATA-MODEL ch. 4. The static sections are not seeded and are not the CMS's business: their photography under `web/public/home/` is the client's own, taken from the live site at the repository owner's instruction, because these eleven sections are a redesign of that site's own pages and placeholder scenery would have made the visual result untestable.
 
-The two rules DATA-MODEL ch. 4 gives still hold where they apply. Nothing here is licensed stock pulled from a third party, and nothing in the CMS changed. What is no longer true for `web/` is reproducibility from the repository alone: these files can be recovered from `inivie.com`, not regenerated from a script. That is a real cost and it is recorded rather than hidden.
+The two rules DATA-MODEL ch. 4 gives still hold where they apply. Nothing here is licensed stock pulled from a third party, and nothing in the CMS changed. What is no longer true for `web/` is reproducibility from the repository alone: these files can be recovered from the group's own sites, not regenerated from a script. That is a real cost and it is recorded rather than hidden.
+
+The restaurant and spa pictures come from `thewonderspace.com` and `svahawellness.com` rather than from `inivie.com`. Those are the group's own sub-brand sites, the ones the homepage links out to, and they are where each venue's own photograph lives. `docs/DESIGN-SYSTEM.md` ch. 6.10 governs how the pictures are used; where they came from is recorded here.
 
 The eight media logos are third party marks, trimmed and downscaled from print resolution to the size the row actually renders. `content/featured-in.ts` says why a ninth is not among them.
 
@@ -464,7 +474,7 @@ Implements requirements S1 to S5 in PRD ch. 8.5.
 
 The targets are in PRD ch. 8.2. They are met by:
 
-- Server Components for everything except the two interactive widgets.
+- Server Components for everything except the interactive widgets ch. 3.1 lists.
 - ISR, so a visitor almost always hits a pre-rendered page.
 - WebP images, sized per breakpoint, with `priority` reserved for the hero.
 - Fonts loaded through `next/font/google` with `display: swap` and a latin subset, which removes both layout shift and any runtime third party request.

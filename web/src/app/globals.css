@@ -91,6 +91,16 @@
   /* Scroll entrance: a fade and a 12px rise, no further. */
   --animate-enter: enter 200ms var(--ease-out) both;
 
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
   @keyframes enter {
     from {
       opacity: 0;
@@ -101,6 +111,38 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/*
+ * The media row's ribbon (DESIGN-SYSTEM ch. 6.14). Linear, because a ribbon
+ * that eases is one that keeps arriving somewhere, and this one never does.
+ * The track holds the eight marks twice over, so translating it by exactly
+ * half its width returns it to where it began and the loop has no seam. 32
+ * seconds over that distance is about 55 pixels a second, against production's
+ * 79: slow enough to read a wordmark as it passes.
+ *
+ * The two ways it stops live in here with it rather than as separate classes
+ * on the element. `animation` is a shorthand and resets `animation-play-state`
+ * to running, so a `hover:` utility beside it wins or loses on the order
+ * Tailwind happens to emit them in. Nested, it always wins.
+ *
+ * Hover is not an accessibility feature and is not doing that job here: a
+ * keyboard has no hover, and this row has nothing in it to focus. It is there
+ * so a visitor can hold a mark still long enough to look at it. The reduced
+ * motion rule is the one that matters, and it is written out rather than left
+ * to the blanket rule below, which collapses the duration and would leave the
+ * ribbon frozen at the end of its travel instead of where it was authored.
+ */
+@utility marquee {
+  animation: marquee 32s linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-play-state: paused;
   }
 }
 

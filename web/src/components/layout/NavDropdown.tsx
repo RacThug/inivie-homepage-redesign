@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 
+import { NewTabHint } from "@/components/ui/NewTabHint";
 import type { NavGroup } from "@/content/navigation";
 
 const FOCUS_RING =
@@ -109,7 +110,9 @@ export function NavDropdown({ group, labelColour }: NavDropdownProps) {
         */}
         <span
           className={`border-b-2 pb-1 transition-colors ${
-            open ? "border-accent" : "border-transparent group-hover:border-accent"
+            open
+              ? "border-accent"
+              : "border-transparent group-hover:border-accent"
           }`}
         >
           {group.label}
@@ -143,6 +146,7 @@ export function NavDropdown({ group, labelColour }: NavDropdownProps) {
                     target="_blank"
                   >
                     {child.label}
+                    <NewTabHint />
                   </a>
                 </li>
               ))}

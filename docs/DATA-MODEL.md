@@ -126,7 +126,7 @@ Collapsing them into one number would tie a public safety limit to a layout choi
 
 ## 4. Seed Data
 
-The seeder creates 6 properties: **4 published and 2 draft**.
+The seeder creates 8 properties: **6 published and 2 draft**.
 
 | # | Title | Category | Published |
 | --- | --- | --- | --- |
@@ -134,12 +134,16 @@ The seeder creates 6 properties: **4 published and 2 draft**.
 | 2 | Ajowa Resort | resort | yes |
 | 3 | La Mewali Resort | resort | yes |
 | 4 | Astera Canggu | hotel | yes |
-| 5 | Seascape Sanur | resort | no (draft) |
-| 6 | Svaha Retreat Ubud | villa | no (draft) |
+| 5 | Ini Vie Villa Legian | villa | yes |
+| 6 | Aeera Villa Canggu | villa | yes |
+| 7 | Seascape Sanur | resort | no (draft) |
+| 8 | Svaha Retreat Ubud | villa | no (draft) |
+
+Six published rather than four because the homepage asks for six. F3 always permitted it, and the carousel of DESIGN-SYSTEM ch. 6.17 makes the difference visible: a looping track with four cards shows the same property twice within one turn of the wheel.
 
 Names reflect properties genuinely associated with the group, taken from the live site, so the homepage looks credible rather than filled with lorem ipsum.
 
-**The pictures.** Six WebP files committed at `cms/database/seeders/images/`, drawn rather than photographed, and placed on the configured disk by the seeder itself. `migrate --seed` therefore produces a populated homepage with no external downloads, which is the promise this section has always made and, until #27, did not keep: the paths were fixed here while nothing had ever committed the files behind them.
+**The pictures.** Eight WebP files committed at `cms/database/seeders/images/`, drawn rather than photographed, and placed on the configured disk by the seeder itself. `migrate --seed` therefore produces a populated homepage with no external downloads, which is the promise this section has always made and, until #27, did not keep: the paths were fixed here while nothing had ever committed the files behind them.
 
 They are drawings because this repository is public and the alternatives are not free. The photography on the live site is licensed stock, with filenames such as `manta-rays_envato.jpg` giving away an Envato Elements licence that is bound to the subscriber and forbids redistribution. Freely licensed photographs would clear that bar, but not the other one: seed data has to be reproducible from the repository alone, and a hand sourced set is reproducible only from whoever sourced it. `cms/database/seeders/images/generate.py` is the tool that drew them, committed so the answer to where these came from is a file rather than a memory.
 
@@ -147,7 +151,7 @@ Each is 1600 by 1200, the 4:3 of DESIGN-SYSTEM ch. 6.1, at twice the minimum the
 
 **Why they are not under `storage/`.** `storage/app/public/` is state the application writes, ignored by git for that reason, and D5 entitles a force delete to remove anything on it. Committing the originals somewhere the application never writes is what keeps a fresh clone reproducible after an editor has been through the panel. Moving them onto the disk is `PropertyImageStore::import()`, so the one-place-touches-storage rule of TECHNICAL-DESIGN ch. 5.5 still holds.
 
-**Why include drafts.** Two unpublished rows are not padding. They are the evidence that D1 works: a reviewer can see 6 rows in the CMS and exactly 4 on the homepage, which proves the publish filter is real rather than assumed.
+**Why include drafts.** Two unpublished rows are not padding. They are the evidence that D1 works: a reviewer can see 8 rows in the CMS and exactly 6 on the homepage, which proves the publish filter is real rather than assumed.
 
 A factory backs the seeder and is reused in tests, so test data and seed data cannot drift apart.
 

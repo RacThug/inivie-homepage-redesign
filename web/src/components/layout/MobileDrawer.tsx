@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 
+import { NewTabHint } from "@/components/ui/NewTabHint";
 import {
   BRAND_LOGO,
   BRAND_NAME,
@@ -193,13 +194,7 @@ export function MobileDrawer({ open, onClose, id }: MobileDrawerProps) {
  * 44px minimum is requirement RS2 and is set here rather than left to the
  * line height of whatever text ends up inside.
  */
-function DrawerLink({
-  children,
-  href,
-}: {
-  children: string;
-  href: string;
-}) {
+function DrawerLink({ children, href }: { children: string; href: string }) {
   return (
     <a
       className="flex min-h-11 items-center font-heading text-h3 text-ink transition-colors hover:text-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
@@ -208,6 +203,7 @@ function DrawerLink({
       target="_blank"
     >
       {children}
+      <NewTabHint />
     </a>
   );
 }

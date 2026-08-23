@@ -8,7 +8,7 @@ use App\Services\PropertyImageStore;
 use Illuminate\Database\Seeder;
 
 /**
- * The 6 properties of docs/DATA-MODEL.md ch. 4: 4 published, 2 draft.
+ * The 8 properties of docs/DATA-MODEL.md ch. 4: 6 published, 2 draft.
  */
 class PropertySeeder extends Seeder
 {
@@ -91,6 +91,34 @@ class PropertySeeder extends Seeder
             'published' => true,
         ],
         [
+            'title' => 'Ini Vie Villa Legian',
+            'slug' => 'ini-vie-villa-legian',
+            'image_path' => 'properties/ini-vie-villa-legian.webp',
+            'cta_url' => 'https://inivie.com/properties/ini-vie-villa-legian',
+            'category' => PropertyCategory::Villa,
+            'location' => 'Legian, Bali',
+            'excerpt' => 'One and two bedroom pool villas a lane back from Legian beach, where the group started.',
+            'image_alt' => 'The sea off Legian beach at blue hour, minutes after sunset.',
+            'price_from' => 2_100_000,
+            'rating' => 4.7,
+            'sort_order' => 50,
+            'published' => true,
+        ],
+        [
+            'title' => 'Aeera Villa Canggu',
+            'slug' => 'aeera-villa-canggu',
+            'image_path' => 'properties/aeera-villa-canggu.webp',
+            'cta_url' => 'https://inivie.com/properties/aeera-villa-canggu',
+            'category' => PropertyCategory::Villa,
+            'location' => 'Canggu, Bali',
+            'excerpt' => 'Private pool villas set back in the rice fields, ten minutes on foot from the Batu Bolong break.',
+            'image_alt' => 'An overcast afternoon over the surf break at Batu Bolong.',
+            'price_from' => 3_600_000,
+            'rating' => 4.8,
+            'sort_order' => 60,
+            'published' => true,
+        ],
+        [
             'title' => 'Seascape Sanur',
             'slug' => 'seascape-sanur',
             'image_path' => 'properties/seascape-sanur.webp',
@@ -101,7 +129,7 @@ class PropertySeeder extends Seeder
             'image_alt' => 'Beachfront pavilions at Seascape Sanur at sunrise.',
             'price_from' => 2_900_000,
             'rating' => null,
-            'sort_order' => 50,
+            'sort_order' => 70,
             'published' => false,
         ],
         [
@@ -115,13 +143,13 @@ class PropertySeeder extends Seeder
             'image_alt' => 'A villa terrace at Svaha Retreat Ubud above the river valley.',
             'price_from' => null,
             'rating' => null,
-            'sort_order' => 60,
+            'sort_order' => 80,
             'published' => false,
         ],
     ];
 
     /**
-     * Keyed on `slug` so re-seeding refreshes the 6 rows rather than
+     * Keyed on `slug` so re-seeding refreshes the 8 rows rather than
      * duplicating them, and so a soft deleted row is matched rather than
      * colliding with the unique constraint of D4.
      *
@@ -139,7 +167,7 @@ class PropertySeeder extends Seeder
      * absent here, is removing the file when the write that follows it
      * throws. There it prevents an orphan: an upload has a hashed name no
      * later row will ever name again, so nothing would collect it. These
-     * six have fixed names that this seeder writes on every run, so a
+     * eight have fixed names that this seeder writes on every run, so a
      * failed write leaves the next run's file, not litter. Unwinding it
      * would only delete something correct.
      */

@@ -31,7 +31,10 @@ export function Hero() {
       panel inside the section makes that true by construction instead of by a
       margin that has to be re-tuned every time the panel's height changes.
     */
-    <section aria-label="iNi ViE Hospitality" className="relative h-screen min-h-120">
+    <section
+      aria-label="iNi ViE Hospitality"
+      className="relative h-screen min-h-120"
+    >
       <HeroMedia />
 
       <SearchDock />

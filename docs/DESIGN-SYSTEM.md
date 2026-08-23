@@ -260,7 +260,12 @@ be the only place a colour is decided.
 groups over a brand family and open a panel; one is a plain link. The
 structure is production's, and so is every destination: this project redesigns
 the homepage and nothing else, so each link is an absolute URL to the live
-property that owns it and opens in a new tab.
+property that owns it and opens in a new tab. Each one says so, in four words
+read out and never seen. A new tab takes the back button away, and a visitor
+who cannot see the tab strip has no other way of being told before they try it;
+a sighted visitor is told by the browser itself, which is why this is the only
+part of the affordance written down. The same hint ends every venue card in
+ch. 6.10, and it is one component so the two cannot drift.
 
 A hovered or open entry is marked with a 2px `accent` rule under a label that
 keeps its own colour, the same marker as ch. 6.4's earlier active state. Accent
@@ -346,9 +351,11 @@ reservations team, which is a redesign of the business rather than of the page.
 
 ### 6.6 Skeleton
 
-The loading skeleton for the property grid renders three placeholder cards whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
+The loading skeleton for the property carousel renders one placeholder card per card to come, whose dimensions match the real card exactly, including image ratio and clamped line counts. A skeleton with different dimensions causes the layout shift it was meant to prevent.
 
-Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same `CardGrid` the real cards land in, with the same padding and the same button box, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
+Everything not decided by the content is matched by construction rather than by measurement. The skeleton lays out in the same track the real cards land in, at the same slide widths, with the same padding and the same button box, and holds the controls' row open beneath it, and each placeholder line carries the type scale of the line it stands in for and holds a non-breaking space, so its line box is the height of the text it replaces on both breakpoints and stays that way if the scale moves. A bar of some chosen height is only ever right by coincidence, and placeholder lines within one block sit flush, because the clamped paragraph they stand in for has nothing between its lines but leading.
+
+What it does not reproduce is where along the track the cards sit. A looping carousel decides that when it initialises, and there is no card here yet to centre. Height is the only axis a shift can happen on, and height is matched.
 
 **What "exactly" cannot cover.** The two title lines and three excerpt lines are the clamps above, and a clamp is a ceiling rather than a shape. Measured against the seed data at 1440, the skeleton card stands 28 pixels taller than the real one, because every seeded title fits on one of its two permitted lines. Reserving one line instead would move the same 28 pixels onto the first property an editor names at length, so the clamp is what is reserved. This is bounded rather than solved, and it is worth knowing that on the homepage as it ships the skeleton is never painted at all: the page is prerendered, so the read resolves before the document exists.
 
@@ -449,7 +456,7 @@ Appearance is the smaller half of it. A native `date` input cannot draw two mont
 
 **The calendar.** Two months from 640px and one below it, weeks starting Monday, everything before today disabled, and a range of at least two days so a stay always has a night in it. Range ends are `ink` filled with `surface` text and the nights between them are `surface-alt`; accent marks today as a ring and never fills a day, because accent reaches 2.39 to 1 on a light ground and a selected day has to stay readable.
 
-`react-day-picker` supplies the calendar, and it is the project's first runtime dependency in `web/`. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
+`react-day-picker` supplies the calendar, and it was the project's first runtime dependency in `web/`. `embla-carousel-react` is the second, for the track in ch. 6.17. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
 
 **What the calendar cannot say.** Availability. Baymard's research is direct that a date picker which does not communicate it sends people elsewhere to check and sometimes they do not come back. Booking is a separate application that PRD ch. 3.2 puts out of scope, so this calendar shows dates and stops. It is a known gap, not an oversight.
 
@@ -480,15 +487,21 @@ Restaurants and spas. Deliberately lighter than the property card, and **the wei
 | Name | H3 scale, `ink` |
 | Location | Small size, `ink-muted`, preceded by the 16px pin of ch. 6.1 |
 
-**Nothing here is pressable and nothing moves on hover.** These venues are not bookable objects on this page, so the section's own control is the one way out of it, which is the one primary action per section of PRD ch. 6.3. The property card scales its image because the whole card is a link and the motion says so; repeating that on something inert would be decoration, and ch. 5 lists what motion is for.
+**The whole card is one link**, to the venue's own page on the sub-brand site that runs it, which is where production sends it too. It opens in a new tab, under the rule ch. 6.4 sets for every outbound link on this page: the project redesigns one page, and a visitor sent off it keeps the page they were reading. `rel="noopener noreferrer"` travels with it, and the link ends in a hint that is read out and never seen, because a new tab takes away a back button that a visitor who cannot see the tab strip has no other way of being told about. The image scales on hover exactly as the property card's does, because the card leads somewhere and the motion says so.
 
-The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other.
+This reverses what this chapter said until the carousel arrived. The card was inert, on the argument that these venues are not bookable objects and the section's own control is the one way out of it. That argument was sound for three cards a visitor could take in at a glance and holds no longer for six on a track: a visitor shown six restaurants wants one of them, not the index of all of them. PRD ch. 6.3 is untouched by this. One primary action per section is about competing calls to action, and the card carries no control at all - it is the link, and the section's pill remains its only button.
+
+The Culinary and Wellness sections are one component with two content modules. That is what guarantees the pair reading the brief asks for: a change to one cannot miss the other. Both ride the carousel of ch. 6.17, and each names its own controls: "Next restaurant" and "Next spa", never "Next".
 
 ### 6.11 Membership band
 
 A full bleed `ink` band. Production makes this section a full bleed **orange** block, which is exactly the large decorative accent fill ch. 2.3 forbids, and white on accent measures 2.39 to 1. The section that needs the most emphasis on the page takes it from ink instead. Do not "correct" this back towards production.
 
 **Full bleed rather than a contained panel**, which is the one thing production's treatment gets right. A rounded card leaves the page's own ground running down both sides of the section that is supposed to interrupt it, and the result reads as a large card rather than as a change of register.
+
+**The four marks.** Production draws four filled accent discs here. These are the same four ideas in this page's register: 28px, single stroke at 1.5px, `currentColor`, from one set, with nothing written inside them. They are `gold`, which is the job ch. 2.1 gives gold - rules, dividers and markers - and which reads on ink at 6.87 to 1. Accent is ruled out by ch. 2.3 rather than by contrast: it belongs to controls, and this panel already carries the one that matters.
+
+A short gold rule stood here until they replaced it. The objection recorded against icons was that four of them are four decisions about what a "celebration setup" looks like. That is true, and it is the work rather than a reason to avoid it: the live site had already made all four, and each is legible at 28px. They are decorative and hidden from assistive technology, because the benefit is written out in full beneath every one.
 
 **Two columns from the desktop breakpoint.** Copy, tagline and controls left; the four benefits as a two by two grid right, vertically centred against the copy. Pinned to the top the benefits leave the empty corner the single column layout would have left; spread to the full height they leave a hole through the middle and read as two pairs.
 
@@ -498,7 +511,7 @@ A full bleed `ink` band. Production makes this section a full bleed **orange** b
 | Heading | `surface`, title case. Production sets it in all caps, which ch. 7.3 rules out |
 | Tagline | Body scale, medium weight, `surface` |
 | Body | Body scale, `on-ink-muted` |
-| Benefit marker | A short `gold` rule above each label, per ch. 6.16. Four drawn icons would be four decisions about what a "celebration setup" looks like |
+| Benefit marker | One drawn `gold` mark above each label: a gem, a gift, a tag, a calendar |
 | Primary | `accent` fill with `ink` text. The only accent on the panel |
 | Secondary | `ghost` on a dark tone, which resolves to `gold` (ch. 6.3) |
 
@@ -528,9 +541,17 @@ Three articles, in the shared card grid. Image 4:3 with a 1.04 hover scale, then
 
 ### 6.14 Media row
 
-Two columns mobile, four from the tablet breakpoint, which lands eight marks as two clean rows at every width. Each mark sits in a fixed 40px or 48px box with `object-contain`, greyscaled, at 70 per cent opacity: a wordmark six times as wide as a monogram cannot share a width, and a fixed box plus `object-contain` is what keeps them optically level. The greyscale is set in CSS rather than left to the files, which all happen to be monochrome already, so a coloured mark added later cannot quietly break the row.
+A ribbon, sliding left at about 55 pixels a second. Each mark sits in a fixed 40px or 48px box with `object-contain`, greyscaled, at 70 per cent opacity: a wordmark six times as wide as a monogram cannot share a width, and a fixed box plus `object-contain` is what keeps them optically level. The greyscale is set in CSS rather than left to the files, which all happen to be monochrome already, so a coloured mark added later cannot quietly break the row.
 
-**Every mark is named.** Production serves nine logo files with no alternative text at all, so a screen reader is handed nine images and told nothing. Eight are named here and the ninth is not shown, because its owner could not be established and an unnamed logo in a "featured in" row is a claim nobody can check. The marks are not links, on production either.
+**How it moves.** The track holds the eight marks twice over and translates by exactly half its own width, which returns it to where it began, so the loop has no seam and nothing has to be measured at runtime. It is a CSS animation and the section ships no JavaScript at all. The second copy is hidden from assistive technology; read both and the row would claim sixteen publications.
+
+**What stops it.** `prefers-reduced-motion: reduce` stops it before it has moved. Hovering anywhere over the ribbon stops it too, which is what makes the mark hover below usable: a mark that lifts while sliding away is a mark nobody can look at. The animation and both pauses are one utility rather than three classes, because `animation` is a shorthand that resets the play state and would win or lose on emission order.
+
+**A hovered mark lifts.** 4px, up to full strength, with a soft `drop-shadow`. The shadow is what makes it read as raised rather than merely brighter, because `drop-shadow` follows the glyph rather than a box. It is the answer to the question the greyscale asks: a row of faded marks invites a visitor to look closer at one.
+
+**What this costs, recorded rather than hidden.** There is no pause control, so a visitor using a keyboard cannot stop the ribbon: hover is not theirs, and there is nothing in the row to focus. WCAG 2.2.2 asks for a mechanism to pause anything that moves on its own for more than five seconds, and this section does not have one. `prefers-reduced-motion` is the protection that remains, and it covers the visitors the criterion exists for, once, globally, rather than per page. A pause button was built and removed as too loud for a row this quiet. Bringing it back is one component and the honest fix if this is ever graded against 2.2.2.
+
+**Every mark is named.** Production runs this row as a Swiper with autoplay and serves nine logo files with no alternative text at all, so a screen reader is handed nine images and told nothing. The movement is production's and is kept; the silence is not. Eight are named here and the ninth is not shown, because its owner could not be established and an unnamed logo in a "featured in" row is a claim nobody can check. The marks are not links, on production either.
 
 **The header is one label, at the eyebrow scale, and that label is the section's heading.** Production and the design pass both set this line and write nothing under it. A sentence invented to fill that gap would be placeholder copy wearing a design system's clothes, and a landmark still has to be named by something a reader can see. This is the one section whose header does not use `SectionHeading`.
 
@@ -552,11 +573,42 @@ Two columns mobile, four from the tablet breakpoint, which lands eight marks as 
 
 ### 6.16 The gold rule
 
-A 32 by 2 pixel `gold` rule, set above a heading with 12px beneath it. It marks the start of the membership benefits and of each Our Story chapter, and nothing else.
+A 32 by 2 pixel `gold` rule, set above a heading with 12px beneath it. It marks the start of each Our Story chapter, and nothing else. It opened the membership benefits too until the four marks of ch. 6.11 took that job.
 
 ch. 2.1 gives gold exactly this job: rules, dividers and markers, never text on a light surface. It is what this palette has in place of an accent that could be used decoratively, and it is the one mark on the page that carries the brand's warmth without a photograph doing it.
 
 Decorative, so it is hidden from assistive technology. The block it opens already announces itself with a heading, and a rule that announced itself as well would be read out four times in a row for no gain.
+
+### 6.17 Featured properties carousel
+
+Cards sit on a centre mode track rather than in a grid: the selected card is centred at full size, and the cards either side of it show at both edges and stand slightly smaller.
+
+Three sections carry one, and they are the three whose content is a portfolio a visitor browses rather than a page they read: Featured Properties, The Culinary Journey and Wellness Harmony Escape. Special Offers and What's New keep the grid of ch. 4.1, and so does anything added later that is a list rather than a portfolio. A page that scrolls sideways everywhere has stopped meaning anything by it.
+
+One component draws all three. It holds no data and no words of its own: the cards arrive already rendered and the labels arrive as content, which is what lets one track say "Next property" and the next "Next spa".
+
+| Property | Value |
+| --- | --- |
+| Slide width | 72% of the track on mobile, 56% from `sm`, 36% from `lg` |
+| Gutter | The grid's own: 20px, 32px from `lg` (ch. 4.1). Padding inside the slide, not a `gap` |
+| Alignment | The selected card centred, including the first and the last |
+| Selected card | Scale 1 |
+| Every other card | Scale 0.94, at the standard 200ms of ch. 5 |
+| Edges | The track fades out over the last 12px, 48px from `lg` |
+| Controls | A step either side of one dot per card, centred beneath the track. The steps appear from `sm` |
+| Auto-rotation | None |
+
+**Why the slide width decides everything.** A slide narrower than the track is the whole of the effect: it is what leaves the neighbouring cards showing, and centring is what puts the selected one between them. The two follow each other exactly, so the peek cannot be tuned separately: at 36% the track shows a little over two and a half cards and clips about a ninth off each edge card, and any narrower peek means a wider card.
+
+**Why the edges fade.** That clipped ninth ends mid word. Cut square it reads as a fault; faded out it reads as a card carrying on past the edge of the page. The fade is short on a phone, where the peek is 42px wide and a long one would swallow it whole, leaving a single card centred in white space, which is not a carousel.
+
+**Scale without dimming.** Fading the unselected cards is the usual other half of this effect and it is deliberately absent: it puts `ink-muted` body copy below the AA contrast ch. 2.2 measures it at. A card a visitor can read is worth more than a card that looks further away.
+
+**Motion.** Nothing moves on its own. PRD ch. 2 records three auto-rotating carousels on the production site with no `prefers-reduced-motion` query behind any of them, and reproducing a catalogued defect is worse than never having had the feature. Under `prefers-reduced-motion: reduce` the scale transition collapses with every other transition through `globals.css`, and the track's own animation is skipped so a step arrives instantly.
+
+**Looping.** The track loops only when there are at least six cards. Below that it cannot cover its own width twice over, which is what looping without cloning needs, and it stops at its ends instead with the step controls disabled where they lead nowhere. F3 permits as few as three properties, so this is read from the data rather than assumed. The two venue sections carry six each, which is also why they carry six: three cards on a looping track show the same restaurant twice within one turn of the wheel.
+
+**Announced as one thing.** Each track is a labelled carousel holding a list, and no two of the three share a control: three sections offering a button called "Next" is three buttons a screen reader cannot tell apart. Every card is in the document, visible and reachable by tab, so a screen reader says how many properties there are before reading the first, and a card reached by keyboard is scrolled into view rather than left clipped. The steps and dots carry no visible text, so each is named by what it reaches: "Next restaurant", "Go to Ajowa Resort". Dots hold the 44 by 44 of RS2 on mobile and narrow from `sm`, where the requirement no longer applies and six full-size targets read as six separate controls rather than as one scale.
 
 ---
 

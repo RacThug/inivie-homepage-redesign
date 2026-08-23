@@ -4,13 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { MobileDrawer } from "./MobileDrawer";
+import { visibleText } from "./visibleText";
 
 function renderDrawer(overrides: { onClose?: () => void } = {}) {
   const onClose = overrides.onClose ?? vi.fn();
 
-  const view = render(
-    <MobileDrawer id="site-menu" onClose={onClose} open />,
-  );
+  const view = render(<MobileDrawer id="site-menu" onClose={onClose} open />);
 
   return { ...view, onClose };
 }
@@ -63,7 +62,7 @@ describe("MobileDrawer", () => {
 
       const panel = screen.getByRole("dialog");
       const close = screen.getByRole("button", { name: "Close menu" });
-      const last = within(panel).getByRole("link", { name: "Sign Up" });
+      const last = within(panel).getByRole("link", { name: /^Sign Up/ });
 
       last.focus();
       await userEvent.tab();
@@ -76,7 +75,7 @@ describe("MobileDrawer", () => {
 
       const panel = screen.getByRole("dialog");
       const close = screen.getByRole("button", { name: "Close menu" });
-      const last = within(panel).getByRole("link", { name: "Sign Up" });
+      const last = within(panel).getByRole("link", { name: /^Sign Up/ });
 
       close.focus();
       await userEvent.tab({ shift: true });
@@ -90,11 +89,7 @@ describe("MobileDrawer", () => {
 
     const nav = screen.getByRole("navigation", { name: "Primary" });
 
-    expect(
-      within(nav)
-        .getAllByRole("link")
-        .map((link) => link.textContent),
-    ).toEqual([
+    expect(within(nav).getAllByRole("link").map(visibleText)).toEqual([
       "iNi ViE",
       "SOLO",
       "Restaurant",
@@ -114,7 +109,7 @@ describe("MobileDrawer", () => {
     const nav = screen.getByRole("navigation", { name: "Primary" });
 
     expect(
-      within(nav).queryByRole("link", { name: "Resort & Villa" }),
+      within(nav).queryByRole("link", { name: /^Resort & Villa/ }),
     ).not.toBeInTheDocument();
     expect(within(nav).getByText("Resort & Villa").tagName).toBe("P");
   });
@@ -127,6 +122,9 @@ describe("MobileDrawer", () => {
     ).getAllByRole("link")) {
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      // And every one of them says so, rather than moving a visitor who
+      // cannot see the tab strip somewhere they cannot come back from.
+      expect(link).toHaveAccessibleName(/opens in a new tab/);
     }
   });
 

@@ -192,13 +192,13 @@ Scored 1 to 5, higher is better.
 | 2a | Search panel | Static | Destination selector, stay date range, guest count, and a Search button. Leads to the separate booking system, does not implement it. Collapses to one tappable summary row below the tablet breakpoint. Sits inside the hero rather than below it, so every field clears the fold |
 | 2b | Welcome block | Static | On a light ground below the hero: a centred H1, the company paragraph, and a single primary CTA |
 | 3 | **Featured Properties** | **Dynamic, via the Laravel API** | The centrepiece of the test. Detailed in ch. 6.2 |
-| 4 | The Culinary Journey | Static | Three restaurant cards |
-| 5 | Wellness Harmony Escape | Static | Three spa cards |
+| 4 | The Culinary Journey | Static | Six restaurant cards on the carousel of DESIGN-SYSTEM ch. 6.17, the same track Featured Properties rides |
+| 5 | Wellness Harmony Escape | Static | Six spa cards, on the same track. The pair of ch. 4.5 holds: one component, two content modules |
 | 6 | WeInivie Membership | Static | A dark contrasting panel with four benefits and a CTA |
 | 7 | Our Story | Static | Narrative with four subsections |
 | 8 | Our Special Offers | Static | Promotional banner grid |
 | 9 | What's New | Static | Three latest article cards, trimmed from six so the page does not run too long |
-| 10 | Featured In | Static | A row of media logos in greyscale |
+| 10 | Featured In | Static | A ribbon of media logos in greyscale, sliding on its own and stopping under `prefers-reduced-motion`. See DESIGN-SYSTEM ch. 6.14 for what that costs |
 | 11 | FAQ | Static | Accordion, keyboard operable |
 | 12 | Footer | Static | Contacts, department links, social media, legal |
 
@@ -211,7 +211,7 @@ All static content must be stored as typed structured data, never inline in mark
 - A small eyebrow label, for example "Stay With Us".
 - A section heading, "Featured property for you".
 - A one to two sentence intro paragraph.
-- The property card grid.
+- The property cards, on a centre mode carousel rather than in a grid. Visual specification in [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) ch. 6.17.
 - A secondary "View All Family" control, rendered as a filled `ink` pill rather than a text link. Production's wording, kept as brand voice: the portfolio is the family. It is less immediately obvious to a first time visitor than "properties" would be, and that cost is accepted knowingly.
 
 **Information each card must communicate**
@@ -235,7 +235,7 @@ Visual treatment of these elements is specified in [DESIGN-SYSTEM.md](./DESIGN-S
 | --- | --- |
 | F1 | Only published properties appear. Drafts must never leak to the public homepage |
 | F2 | Card order is controlled from the CMS, not by insertion order |
-| F3 | The section shows 3 cards by default and must tolerate up to 6 without layout damage |
+| F3 | The section shows 6 cards by default and must tolerate as few as 3 without layout damage. The carousel loops only above a threshold it reads from the data, so a short track stops at its ends rather than repeating itself |
 | F4 | When no published properties exist, the whole section is hidden including its heading, leaving no empty gap |
 | F5 | When the API is unavailable, the section degrades to a quiet fallback and the rest of the homepage still renders. A single failing section must never take down the page |
 

@@ -1,9 +1,10 @@
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { FeaturedPropertiesFrame } from "@/components/sections/FeaturedPropertiesFrame";
-import { CardGrid } from "@/components/ui/CardGrid";
+import { Carousel } from "@/components/ui/Carousel";
 import type { SectionTone } from "@/components/ui/Section";
 import {
   FEATURED_PROPERTIES,
+  FEATURED_PROPERTIES_CAROUSEL,
   FEATURED_PROPERTY_COUNT,
 } from "@/content/featured-properties";
 import { fetchProperties } from "@/lib/api/properties";
@@ -12,10 +13,15 @@ import { fetchProperties } from "@/lib/api/properties";
  * The dynamic half of the section: the CMS read, and the three states it can
  * come back in.
  *
- * A Server Component, so the API is called server side and the section ships
- * no JavaScript of its own (TECHNICAL-DESIGN ch. 3.1). It never throws:
- * `fetchProperties` answers with a flag instead, which is what keeps a
- * failing section from taking the other eleven down with it.
+ * A Server Component, so the API is called server side. It never throws:
+ * `fetchProperties` answers with a flag instead, which is what keeps a failing
+ * section from taking the other eleven down with it.
+ *
+ * The cards are built here and handed to the carousel as rendered output, not
+ * as data. A Server Component passed as a prop is not part of the client
+ * component's module graph, so the carousel is the only JavaScript this
+ * section ships: `PropertyCard`, `next/image` and the property payload all
+ * stay on the server (TECHNICAL-DESIGN ch. 3.1).
  */
 export async function FeaturedPropertiesContent({
   tone,
@@ -27,7 +33,7 @@ export async function FeaturedPropertiesContent({
   /**
    * F4. Zero published properties is a valid state, not an error, and the
    * answer to it is that the section was never here: heading, intro and
-   * control go with the grid, leaving no empty gap on the page.
+   * control go with the cards, leaving no empty gap on the page.
    */
   if (!unavailable && properties.length === 0) {
     return null;
@@ -48,13 +54,14 @@ export async function FeaturedPropertiesContent({
           </p>
         </div>
       ) : (
-        <CardGrid>
-          {properties.map((property) => (
-            <li key={property.id}>
-              <PropertyCard property={property} />
-            </li>
-          ))}
-        </CardGrid>
+        <Carousel
+          labels={FEATURED_PROPERTIES_CAROUSEL}
+          slides={properties.map((property) => ({
+            id: property.id,
+            label: property.title,
+            card: <PropertyCard property={property} />,
+          }))}
+        />
       )}
     </FeaturedPropertiesFrame>
   );

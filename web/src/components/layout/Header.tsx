@@ -1,18 +1,25 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { MobileDrawer } from "@/components/layout/MobileDrawer";
+import { NavDropdown } from "@/components/layout/NavDropdown";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { BOOKING_CTA, BRAND_NAME, PRIMARY_NAV } from "@/content/navigation";
+import {
+  BOOKING_CTA,
+  BRAND_LOGO,
+  BRAND_NAME,
+  isNavGroup,
+  PRIMARY_NAV,
+} from "@/content/navigation";
 
 const DRAWER_ID = "site-menu";
 
 const FOCUS_RING =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current";
 
 /**
  * The site header. Sticky, transparent over the hero, solid once scrolled.
@@ -29,7 +36,6 @@ const FOCUS_RING =
  * by design (PRD ch. 6.1), which is why `main` carries no top offset here.
  */
 export function Header() {
-  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -83,51 +89,57 @@ export function Header() {
         <Container>
           <div className="relative flex h-16 items-center justify-between lg:h-20">
             {/*
-              `next/link` for the homepage, which is a real route and gets
-              client side navigation for it. The six navigation items below stay
-              plain anchors because those pages are not built: this project
-              redesigns the homepage, and typed routes would reject a `Link` to
-              a route that does not exist. When one is added, the Next lint rule
-              flags the anchor, which is exactly the reminder wanted.
+              `next/link` for the homepage, which is the one route this project
+              builds and so the one that gets client side navigation. Every
+              destination in the navigation below is on the live site and opens
+              in a new tab, which is why those are plain anchors: this is a
+              homepage redesign, and leaving it in place is the point.
+
+              Both tones of the wordmark are in the markup at once and crossfade
+              with the header, rather than one `src` swapping on scroll. A swap
+              would flash on the first crossing while the second file loads, and
+              it would fight the colour transition already running beside it.
             */}
             <Link
-              className={`font-heading text-h3 tracking-tight transition-colors ${labelColour} ${FOCUS_RING}`}
+              aria-label={BRAND_NAME}
+              className={`relative block h-12 w-12 shrink-0 lg:h-16 lg:w-16 ${FOCUS_RING} ${labelColour}`}
               href="/"
             >
-              {BRAND_NAME}
+              <LogoTone
+                alt=""
+                hidden={scrolled}
+                priority
+                src={BRAND_LOGO.light}
+              />
+              <LogoTone alt="" hidden={!scrolled} src={BRAND_LOGO.ink} />
             </Link>
 
             <nav aria-label="Primary" className="hidden lg:block">
-              <ul className="flex items-center gap-8">
-                {PRIMARY_NAV.map((item) => {
-                  const current = pathname === item.href;
-
-                  return (
-                    <li key={item.href}>
+              <ul className="flex items-center gap-7">
+                {PRIMARY_NAV.map((entry) => (
+                  <li key={entry.label}>
+                    {isNavGroup(entry) ? (
+                      <NavDropdown group={entry} labelColour={labelColour} />
+                    ) : (
                       <a
-                        aria-current={current ? "page" : undefined}
-                        className={`inline-flex min-h-11 items-center text-small font-medium transition-colors ${labelColour} ${FOCUS_RING}`}
-                        href={item.href}
+                        className={`group inline-flex min-h-11 items-center text-small font-medium transition-colors ${labelColour} ${FOCUS_RING}`}
+                        href={entry.href}
+                        rel="noopener noreferrer"
+                        target="_blank"
                       >
                         {/*
-                          The active marker is an accent rule under a label that
+                          The hover marker is an accent rule under a label that
                           keeps its own colour. Accent reaches 2.39 to 1 on a
                           light surface, so it marks and never carries text
                           (DESIGN-SYSTEM ch. 2.3).
                         */}
-                        <span
-                          className={
-                            current
-                              ? "border-b-2 border-accent pb-1"
-                              : undefined
-                          }
-                        >
-                          {item.label}
+                        <span className="border-b-2 border-transparent pb-1 transition-colors group-hover:border-accent">
+                          {entry.label}
                         </span>
                       </a>
-                    </li>
-                  );
-                })}
+                    )}
+                  </li>
+                ))}
               </ul>
             </nav>
 
@@ -153,9 +165,39 @@ export function Header() {
         id={DRAWER_ID}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
-        pathname={pathname}
       />
     </>
+  );
+}
+
+/**
+ * One tone of the wordmark. Both are always present and the header fades
+ * between them, so `hidden` here means transparent and inert rather than
+ * removed: taking one out of the DOM is what would cost a load on the first
+ * scroll.
+ */
+function LogoTone({
+  alt,
+  hidden,
+  priority = false,
+  src,
+}: {
+  alt: string;
+  hidden: boolean;
+  priority?: boolean;
+  src: string;
+}) {
+  return (
+    <Image
+      alt={alt}
+      className={`absolute inset-0 object-contain transition-opacity ${
+        hidden ? "opacity-0" : "opacity-100"
+      }`}
+      fill
+      priority={priority}
+      sizes="64px"
+      src={src}
+    />
   );
 }
 

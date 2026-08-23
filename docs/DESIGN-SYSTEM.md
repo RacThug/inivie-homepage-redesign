@@ -240,23 +240,72 @@ breakpoint.
 
 | State | Treatment |
 | --- | --- |
-| Resting, over the hero | No background. A scrim carries the labels: `ink` at 55 per cent fading to nothing over 220px, so the gradient ends below the header rather than at its edge. Labels and logo in `surface` |
-| Scrolled | `surface` background, 1px `border` along the bottom, labels and logo in `ink`. The scrim is removed rather than faded, because it has nothing left to do |
+| Resting, over the hero | No background. A scrim carries the labels: `ink` at 55 per cent fading to nothing over 220px, so the gradient ends below the header rather than at its edge. Labels and wordmark in `surface` |
+| Scrolled | `surface` background, 1px `border` along the bottom, labels and wordmark in `ink`. The scrim is removed rather than faded, because it has nothing left to do |
 
 The state is read from a sentinel one header tall at the top of the document,
 watched by an `IntersectionObserver`. A scroll listener would run on every
 frame to answer a question that changes twice.
 
-**Navigation.** Six items, inline from 1024px, drawer below it. The active item
-is marked with a 2px `accent` rule under a label that keeps its own colour.
-Accent reaches 2.39 to 1 on a light surface, so it marks and never carries text.
+**The wordmark**, 48px on mobile and 64px from the desktop breakpoint, in the
+tone the state above sets. Both tones are in the markup at once and crossfade
+with the header, rather than one `src` swapping on scroll: a swap flashes on
+the first crossing while the second file loads, and it fights the colour
+transition already running beside it. The ink tone is a recolour of the
+production asset rather than a runtime `filter`, because a filter that
+approximates ink resolves differently in every browser and ch. 2.1 is meant to
+be the only place a colour is decided.
+
+**Navigation.** Five entries, inline from 1024px, drawer below it. Four are
+groups over a brand family and open a panel; one is a plain link. The
+structure is production's, and so is every destination: this project redesigns
+the homepage and nothing else, so each link is an absolute URL to the live
+property that owns it and opens in a new tab.
+
+A hovered or open entry is marked with a 2px `accent` rule under a label that
+keeps its own colour, the same marker as ch. 6.4's earlier active state. Accent
+reaches 2.39 to 1 on a light surface, so it marks and never carries text.
+Production recolours the label to accent instead, which works on its own dark
+header and would not survive the scrolled state here.
+
+**The group panels.** A `surface` panel below the trigger, at least 224px wide,
+`radius-control`, 1px `border`, `shadow-raised`, entering on the `animate-enter`
+of ch. 5. Padding on the panel's wrapper bridges the gap under the trigger, so
+the pointer does not cross a dead strip on the way down; a timeout there would
+be guessing how fast someone moves a mouse.
+
+Production opens these on `group-hover` and nothing else, which leaves four of
+the five entries unreachable without a mouse. Hover is kept, because it is the
+right behaviour for a pointer, but as an addition to a real disclosure rather
+than the whole mechanism: the trigger is a button reporting `aria-expanded`,
+Down arrow opens it and moves into the panel, Escape closes it and hands focus
+back, and tabbing out of the last item dismisses it.
+
+A click means different things by input. Touch and keyboard toggle, because
+neither has a hover that could have opened the panel already. A mouse click
+opens and does not close: dismissing what the pointer is still resting on is
+what makes a hover menu feel broken, and production does nothing at all here.
+
+**The focus ring inverts with the state.** ch. 6.3 sets an `ink` ring, which is
+invisible over the hero, so the header's own controls take `currentColor` and
+follow the label. Inside a group panel the ring is `ink` again, because the
+panel is `surface` whatever the header behind it is doing.
 
 **The drawer**, per RS3. A `surface` panel from the left, at most `24rem` wide,
 over an `ink` scrim at 50 per cent. Focus moves to the close control on open,
 is trapped inside while open, and returns to the toggle on close. Escape
-closes. The item order matches the desktop navigation exactly, and the booking
-control is pinned to the bottom of the panel. Every target is at least 44 by 44
-pixels on both axes.
+closes. The booking control is pinned to the bottom of the panel. Every target
+is at least 44 by 44 pixels on both axes.
+
+The entries match the desktop navigation exactly. Production's own drawer adds
+Consultant and Offers that its desktop bar never shows, which teaches the
+visitor two site structures; both already have a home in the footer of ch. 6.5.
+
+Groups are laid out open rather than as accordions, with the group name as an
+eyebrow caption in `ink-muted` and its links indented behind a 1px rule. There
+are ten links in total and the panel scrolls, so collapsing them would hide the
+structure behind a tap for no space that is actually short. The caption is
+`ink-muted` and not `accent` because this one is text.
 
 ### 6.5 Footer
 

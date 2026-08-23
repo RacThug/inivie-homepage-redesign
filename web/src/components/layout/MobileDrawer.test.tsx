@@ -9,7 +9,7 @@ function renderDrawer(overrides: { onClose?: () => void } = {}) {
   const onClose = overrides.onClose ?? vi.fn();
 
   const view = render(
-    <MobileDrawer id="site-menu" onClose={onClose} open pathname="/stay" />,
+    <MobileDrawer id="site-menu" onClose={onClose} open />,
   );
 
   return { ...view, onClose };
@@ -85,13 +85,49 @@ describe("MobileDrawer", () => {
     });
   });
 
-  it("marks the current page without recolouring its label", () => {
+  it("mirrors the desktop navigation, groups and all", () => {
     renderDrawer();
 
-    const current = screen.getByRole("link", { name: "Stay" });
+    const nav = screen.getByRole("navigation", { name: "Primary" });
 
-    expect(current).toHaveAttribute("aria-current", "page");
-    expect(current.firstElementChild).toHaveClass("border-accent");
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual([
+      "iNi ViE",
+      "SOLO",
+      "Restaurant",
+      "Beach & Day Club",
+      "Kids & Playground",
+      "Svaha Spa",
+      "Hammana",
+      "Souljourn",
+      "We Inivie",
+      "Sign Up",
+    ]);
+  });
+
+  it("captions a group without pretending it leads anywhere", () => {
+    renderDrawer();
+
+    const nav = screen.getByRole("navigation", { name: "Primary" });
+
+    expect(
+      within(nav).queryByRole("link", { name: "Resort & Villa" }),
+    ).not.toBeInTheDocument();
+    expect(within(nav).getByText("Resort & Villa").tagName).toBe("P");
+  });
+
+  it("sends every destination to the live site in a new tab", () => {
+    renderDrawer();
+
+    for (const link of within(
+      screen.getByRole("navigation", { name: "Primary" }),
+    ).getAllByRole("link")) {
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
   });
 
   it("gives every target the 44px minimum on both axes (RS2)", () => {

@@ -11,6 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
@@ -28,7 +29,13 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    ".next/e2e/properties/types/**/*.ts",
+    ".next/e2e/properties/dev/types/**/*.ts",
+    ".next/e2e/no-properties/types/**/*.ts",
+    ".next/e2e/no-properties/dev/types/**/*.ts",
+    ".next/e2e/stopped/types/**/*.ts",
+    ".next/e2e/stopped/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

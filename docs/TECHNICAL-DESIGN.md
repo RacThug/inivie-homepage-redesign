@@ -82,7 +82,8 @@ Versions verified against the npm registry, Packagist, the Laravel support polic
 | Image storage | Laravel filesystem, configured disk. `public` for this project, see ch. 5.5 | - | - |
 | Backend tests | Pest | 4.x | 4.7.8 |
 | Carousel | `embla-carousel-react` | 8.x | 8.6.0, verified 23 August 2026 |
-| Frontend tests | Vitest + Testing Library, Playwright | 4.x | 4.1.11 |
+| Frontend tests | Vitest + Testing Library | 4.x | 4.1.11 |
+| Frontend end to end tests | Playwright | 1.x | 1.62.1, verified 24 August 2026 |
 | DOM for component tests | jsdom | 29.x | 30.0.1 |
 | PHP formatting | Laravel Pint | - | - |
 | JS linting | ESLint + `eslint-config-next` | 9.x | 10.9.0 |
@@ -776,6 +777,14 @@ Naming principles: components in PascalCase, folders in kebab-case, one componen
 | Next.js component | Vitest + Testing Library | The property card renders every field, and hides price and rating when null |
 | Next.js end to end | Playwright | The homepage loads and shows cards, the section is hidden on empty data, the fallback appears when the API is down, and the mobile navigation opens and closes |
 
+**The end to end suite builds the site three times.** The homepage is prerendered (ch. 3.4), so which of the three states the CMS can be in a visitor sees was settled when the site was built rather than when the page was requested, and one build cannot show all three. `web/e2e/servers.ts` is the table of them: a frontend per state, each with its own `distDir` and its own port, with a stub CMS behind the two states that answer at all and nothing at all behind the third. `npm run test:e2e` brings the stubs up, builds the three, and hands over to Playwright.
+
+Driving a single build through the three states with `revalidateTag` would be one build instead of three. It would also be testing the regeneration path rather than the built HTML that F4 and F5 are actually met in, which is the opposite of what the suite is for.
+
+**The CMS is stubbed rather than run.** What is under test here is the frontend's behaviour in the face of an answer, and `cms/tests` is the authority on whether Laravel produces it; a suite that needed a database, a migration and a seed before it could assert anything about a fallback would be slower and would fail for more reasons than the one it is asking about. The stub's fixtures are typed as `Property`, so a change to the payload reaches it the same way it reaches everywhere else the contract is pinned (API-SPEC ch. 6).
+
+Chromium alone, and it is a download rather than a dependency: `npx playwright install chromium`, once. What the suite tests is the frontend against three states of its own API, which is not something browsers disagree about, and the component suite already covers the markup that they would.
+
 ### 9.2 Manual QA before submission
 
 1. Setup from a fresh clone following the README, with no hidden steps.
@@ -792,4 +801,6 @@ Naming principles: components in PascalCase, folders in kebab-case, one componen
 
 ### 9.3 Quality gates
 
-`npm run lint`, `npm run typecheck`, `./vendor/bin/pint --test`, and the full test suite must be green before the final commit. No skipped tests and no tolerated lint warnings.
+`npm run lint`, `npm run typecheck`, `npm run format:check`, `./vendor/bin/pint --test`, and both test suites must be green before the final commit. No skipped tests and no tolerated lint warnings.
+
+The end to end suite is the one gate with a cost worth naming: `npm run test:e2e` builds the frontend three times, so it takes about a minute where the others take seconds.

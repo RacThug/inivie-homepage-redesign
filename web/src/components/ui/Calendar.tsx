@@ -2,6 +2,12 @@
 
 import { DayPicker, type DateRange } from "react-day-picker";
 
+import {
+  CALENDAR_CAPTION,
+  CALENDAR_CELL,
+  CALENDAR_WEEKDAY,
+} from "@/components/ui/calendarMetrics";
+
 /**
  * `react-day-picker` in this project's palette.
  *
@@ -22,8 +28,12 @@ import { DayPicker, type DateRange } from "react-day-picker";
  * are empty. With the width on the button those cells collapsed to nothing and
  * every row slid left, which drew 1 August 2026 under Monday when it is a
  * Saturday.
+ *
+ * The size itself comes from `calendarMetrics.ts`, which `CalendarSkeleton`
+ * reads too: this file is loaded on demand and the skeleton holds its place
+ * until it lands, so the two have to agree by construction.
  */
-const CELL = "h-10 w-10 p-0 sm:h-11 sm:w-11";
+const CELL = `${CALENDAR_CELL} p-0`;
 
 const DAY = "h-full w-full rounded-control text-small transition-colors";
 
@@ -47,8 +57,7 @@ export function Calendar({
         root: "relative text-ink",
         months: "flex flex-col gap-5 sm:flex-row sm:gap-6",
         month: "space-y-2",
-        month_caption:
-          "flex h-10 items-center justify-center font-heading text-h3",
+        month_caption: `flex ${CALENDAR_CAPTION} items-center justify-center font-heading text-h3`,
         caption_label: "font-heading",
         // One pair of arrows for the whole calendar, level with the captions
         // beside them rather than floating over a month.
@@ -59,8 +68,7 @@ export function Calendar({
           "inline-flex h-9 w-9 items-center justify-center rounded-control text-ink transition-colors hover:bg-surface-alt disabled:pointer-events-none disabled:text-border",
         month_grid: "border-collapse",
         weekdays: "flex",
-        weekday:
-          "h-8 w-10 text-eyebrow font-medium uppercase text-ink-muted sm:w-11",
+        weekday: `${CALENDAR_WEEKDAY} text-eyebrow font-medium uppercase text-ink-muted`,
         week: "flex",
         day: CELL,
         day_button: `${DAY} hover:bg-surface-alt`,

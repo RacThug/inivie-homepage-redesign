@@ -484,17 +484,86 @@ The targets are in PRD ch. 8.2. They are met by:
 
 - Server Components for everything except the interactive widgets ch. 3.1 lists.
 - ISR, so a visitor almost always hits a pre-rendered page.
-- WebP images, sized per breakpoint, with `priority` reserved for the hero.
-- Fonts loaded through `next/font/google` with `display: swap` and a latin subset, which removes both layout shift and any runtime third party request.
+- WebP images, sized per breakpoint. One image on the route is preloaded, the hero poster, and it is the only one at `quality={60}` rather than Next's default 75: it is never seen undimmed, sitting under the ink gradient of DESIGN-SYSTEM ch. 6.8, so the detail the extra fifteen points buys is painted over. That is 49KB down to 35KB on the one image fetched before anything else.
+- The hero film requested only after the load event, and not at all on a connection reporting `saveData` or an `effectiveType` of 3g or below. The two cuts are 12MB and 16.5MB, and mounted at hydration they opened that request beside the property images and the fonts.
+- Fonts loaded through `next/font/google` with `display: swap` and a latin subset, which removes both layout shift and any runtime third party request. Inter is preloaded and Poppins is not: nothing above the fold is set in the heading face, because the hero carries no type at all.
+- `react-day-picker` split out of the route bundle. It is 32KB gzipped for a control most visits never open, so `DateRangeField` reaches it through `lazy` and `CalendarSkeleton` holds the panel's size until it lands.
 - Skeletons dimensioned to match final content, which keeps layout shift near zero.
 
 ### 7.2 Meeting the SEO targets
 
-Next.js Metadata API for title, description, Open Graph, and Twitter cards. Static `robots.txt` and a generated `sitemap.xml`. One `h1` on the page, with section headings as `h2` and card titles as `h3`. `Organization` JSON-LD in the root layout. A canonical URL from an environment variable.
+Next.js Metadata API for title, description, Open Graph, and Twitter cards. One `h1` on the page, with section headings as `h2` and card titles as `h3`. `Organization` JSON-LD in the root layout, built from the content the footer already renders rather than restated, so the two cannot disagree. A canonical URL from an environment variable.
+
+`robots.txt` is generated rather than static, which is a change from this chapter's first draft. The line in it that matters is the absolute URL of the sitemap, and an absolute URL cannot be written into a file in `public/` without hardcoding the host. So `SITE_URL` is read once in `web/src/lib/site.ts`, and the canonical, the Open Graph URLs, `robots.txt` and `sitemap.xml` all derive from it. A canonical pointing somewhere the sitemap does not is worse than either being absent: each one tells a crawler the other lied.
+
+The sitemap lists one URL, because this project builds one route. The rest of inivie.com is production's and is not served from here (PRD ch. 3.2).
+
+The social sharing image is `web/public/og-image.jpg`, 1200 by 630, cropped from the hero still. JPEG rather than the WebP it came from, because LinkedIn does not render WebP previews.
 
 ### 7.3 Meeting the accessibility targets
 
 Semantic landmarks (`header`, `nav`, `main`, `section`, `footer`). Alternative text is guaranteed non-empty because `image_alt` is a required CMS field, which is the reason it is modelled as `not null` rather than nullable. The FAQ accordion uses native `details` and `summary` so it is keyboard operable without custom JavaScript. The mobile drawer traps focus and closes on Escape. Contrast pairings are validated against the token table in DESIGN-SYSTEM ch. 2.
+
+Three rules the first draft did not name, all three found by measurement rather than by reading the markup.
+
+**Every landmark has a distinct name.** A named `<section>` is a region, and the hero was labelled "iNi ViE Hospitality" while the welcome block below it is labelled by an `h1` reading the same words. The hero's label is gone: the poster describes itself, the film is decorative, and the panel inside it is already a `form` landmark.
+
+**An accessible name extends the visible label, it never replaces it.** Six property cards read "View property", and the title that told them apart was supplied as an `aria-label`, so the control said one thing and answered to another. That is SC 2.5.3, and it leaves anyone driving the page by voice naming a control that no longer responds. The title is now appended in `sr-only` text, and `Button` no longer accepts an `aria-label` at all, so the door that invited it is shut.
+
+**A hit area is set, never inherited from a line height.** RS2 asks for 44 by 44 on mobile and SC 2.5.8 asks for 24 by 24 at every width. The footer's department desks stacked a number directly on an address at 18px a line, which failed both. Every link in the footer now carries one sizing rule.
+
+---
+
+### 7.4 What was measured, and what it said
+
+Measured on 24 August 2026 against `next build && next start`, in Lighthouse 13.4.1 and axe-core 4, driven headless through Microsoft Edge. The CMS was running, so Featured Properties held its six real cards. Re-run these rather than trusting the table if anything in ch. 7.1 changes.
+
+**Responsive.** No horizontal scroll at 320, 375, 390, 768, 1024, 1440 or 1920: `document.scrollWidth` equals `clientWidth` at every one, and no element's box crosses either edge. No console errors at any width. RS6's three widths are captured in `docs/screenshots/`.
+
+RS4, per breakpoint image sizes, holds. A phone at 375 with a 2x screen is served nothing wider than the 750px variant; the 1920px one appears only at 768 with a 2x screen, which genuinely asks for 1536 device pixels, and at 1440. RS5 holds too: the longest title in the seed data, "Nusa Penida Guide: Beaches, Boat Times and Trip Costs in Bali", sets on two lines inside its two line clamp at all three widths, and every element reporting a horizontal overflow is `sr-only`, which is what `sr-only` is.
+
+**Keyboard.** One walk from the top of the document to the end of the footer at 1440: 112 stops, beginning at the skip link and ending on the footer's policy link before focus leaves the page. Every stop draws an outline; none is focusable while invisible. The drawer of RS3 opens on Enter with focus on its close button, holds focus for twenty tabs without leaking, locks the page behind it, closes on Escape and hands focus back to the button that opened it.
+
+**Reduced motion.** With the operating system setting emulated: no `<video>` element mounts, zero `.mp4` requests are made, the media ribbon reports `paused`, and every transition duration collapses to 0.00001s. Without it: the film mounts, one `.mp4` is fetched, the ribbon runs, transitions are 200ms.
+
+**Accessibility.** axe-core across the WCAG 2.0 A and AA, 2.1 A and AA, 2.2 AA, best practice and experimental rule sets, at 375px and at 1440px.
+
+| Rule | Before | After |
+| --- | --- | --- |
+| `color-contrast` | 6 to 7 nodes | 6 to 7 nodes, and every one is `on-accent` on `accent`: the named exception of PRD ch. 8.4, measured in DESIGN-SYSTEM ch. 2.2 at 2.98 |
+| `label-content-name-mismatch` | 3 nodes | 0 |
+| `landmark-unique` | 1 node | 0 |
+| `target-size` | 9 nodes | 0 |
+| every other rule | 0 | 0 |
+
+`color-contrast-enhanced` reports 24 nodes and is not in scope: it is the AAA threshold of 7 to 1, and PRD ch. 8.4 targets AA.
+
+One measured shortfall against RS2 is knowingly kept. In a carousel, the slides either side of the selected one are drawn at 94 per cent (DESIGN-SYSTEM ch. 6.7), which takes a 44px control to 41px on the two cards that are only partly on screen anyway. The selected card, the one a visitor is acting on, is a full 44. There is no scale below 1 that leaves the control at 44, so the choice is the focus treatment or the last three pixels of a preview.
+
+**Performance.** Lighthouse mobile, on the local production build. Both throttling methods are recorded because they disagree, and the disagreement is the finding.
+
+Targets are PRD ch. 8.2, as corrected there on 24 August 2026. That correction came out of this measurement: two of its rows were describing the wrong thing, and the paragraphs below are what showed it.
+
+| | Target | Simulated, Lighthouse's default | Devtools throttling |
+| --- | --- | --- | --- |
+| Performance | at least 90 | **92** | **98** |
+| Largest Contentful Paint | under 2.5s measured | 3.3s to 3.4s estimated | **1.8s** |
+| Cumulative Layout Shift | under 0.1 | **0** | **0** |
+| Total Blocking Time | under 200ms | **20ms** | **120ms** |
+| Application JavaScript | under 50KB over the baseline | **45KB**, of 158KB in total | - |
+| Accessibility | - | 96 | 96 |
+| Best practices | - | 100 | 100 |
+| SEO | - | 100 | 100 |
+
+The performance score moves a point either way between runs, 91 to 93 over five; the figure above is the median. Everything else was stable.
+
+**Largest Contentful Paint, and why two numbers.** Lighthouse's default is Lantern, which models what the page would have done on a 1.6Mbps link rather than putting it on one. Apply that same profile to the network for real and the number is 1.8s. Unthrottled it is 0.2s. Both are kept because the estimate is what a reviewer running `lighthouse` with no arguments is shown, and an unexplained 3.3s beside a 2.5s target reads as a failure that nothing here would explain.
+
+Worth knowing either way: the element Chrome picks as largest is the header wordmark, not the hero photograph. Chrome will not accept an image covering the whole viewport as an LCP candidate, on the grounds that such an image is almost always a background, so the full bleed poster of PRD ch. 6.1 can never be this number whatever it costs. Verified by blocking the wordmark's request, after which the largest candidate falls to a 2,299 pixel span of text.
+
+**The JavaScript budget, and why it is now two numbers.** 158KB in total. 113KB of that is React and the Next runtime, in two chunks that were checked for and contain no component of ours. The 45KB above it is the twelve client components ch. 3.1 lists, and it is the only part any decision here moves: splitting `react-day-picker` out took the route from 176KB to 158KB, and the only remaining candidate of that size is the carousel, which renders the cards, so deferring it would blank three sections of the page to save 13KB.
+
+A single 150KB total, which is what ch. 8.2 asked for before any of this was measured, was a budget on the framework rather than on the application: it left 37KB for everything this project writes. Budgeting the 45KB instead is the number that can actually be spent or saved.
 
 ---
 
@@ -566,21 +635,31 @@ inivie-homepage-redesign/
     │   │   ├── globals.css    the design tokens, single source for the palette
     │   │   ├── layout.tsx
     │   │   ├── page.tsx
+    │   │   ├── robots.ts      both generated rather than static, so the host
+    │   │   ├── sitemap.ts     in them is the one the canonical uses: ch. 7.2
     │   │   └── api/revalidate/route.ts
     │   ├── components/
-    │   │   ├── layout/{Header,MobileDrawer,Footer}.tsx
-    │   │   ├── property/{PropertyCard,PropertyCardSkeleton,PropertyGrid}.tsx
+    │   │   ├── layout/{Header,MobileDrawer,NavDropdown,Footer}.tsx
+    │   │   ├── property/{PropertyCard,PropertyCardSkeleton}.tsx
     │   │   │                  the pieces of the dynamic section, kept apart
     │   │   │                  from sections/ because the skeleton and the real
     │   │   │                  cards have to share one grid
+    │   │   ├── search/{SearchDock,DestinationField,DateRangeField,GuestsField}.tsx
     │   │   ├── sections/{Hero,FeaturedProperties,Culinary,...}.tsx
-    │   │   └── ui/{Button,Card,Badge,Container,SectionHeading}.tsx
-    │   ├── content/           typed static content
+    │   │   ├── venue/VenueCard.tsx
+    │   │   └── ui/{Button,Card,Badge,Container,SectionHeading,...}.tsx
+    │   ├── content/           typed static content, and site.ts, the words
+    │   │                      the metadata and the structured data share
     │   ├── design/            contrast maths, token parsing, palette checks
-    │   ├── lib/api/properties.ts
+    │   ├── lib/
+    │   │   ├── api/properties.ts
+    │   │   ├── site.ts        the one origin every absolute URL derives from
+    │   │   └── organization.ts  Organization JSON-LD, read off the footer
     │   └── types/property.ts
     ├── e2e/
     └── public/
+        ├── og-image.jpg       1200 by 630, the social sharing card
+        └── home/              the section imagery, and the hero film
 
 `web/` has no `.gitignore` of its own. The root file covers both applications,
 and a nested one would shadow it: `create-next-app` ships `.env*`, which in

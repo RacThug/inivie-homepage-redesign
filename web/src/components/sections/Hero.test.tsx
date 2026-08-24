@@ -27,6 +27,20 @@ describe("Hero", () => {
     expect(image).not.toHaveAttribute("loading", "lazy");
   });
 
+  /**
+   * axe's `landmark-unique`. A named `<section>` is a region, and this one was
+   * labelled "iNi ViE Hospitality" while the welcome block below it is
+   * labelled by an `<h1>` reading the same words. Two regions with one name
+   * are two landmarks a screen reader user cannot tell apart, and the hero
+   * had nothing of its own to announce: the photograph carries its own
+   * description and the panel inside it is already a `form` landmark.
+   */
+  it("adds no landmark of its own, so the brand name stays the welcome block's", () => {
+    render(<Hero />);
+
+    expect(screen.queryByRole("region")).toBeNull();
+  });
+
   it("carries the search panel", () => {
     render(<Hero />);
 

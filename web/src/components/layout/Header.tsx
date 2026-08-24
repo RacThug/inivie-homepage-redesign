@@ -104,12 +104,7 @@ export function Header() {
               className={`relative block h-12 w-12 shrink-0 lg:h-16 lg:w-16 ${FOCUS_RING} ${labelColour}`}
               href="/"
             >
-              <LogoTone
-                alt=""
-                hidden={scrolled}
-                priority
-                src={BRAND_LOGO.light}
-              />
+              <LogoTone alt="" eager hidden={scrolled} src={BRAND_LOGO.light} />
               <LogoTone alt="" hidden={!scrolled} src={BRAND_LOGO.ink} />
             </Link>
 
@@ -171,16 +166,26 @@ export function Header() {
  * between them, so `hidden` here means transparent and inert rather than
  * removed: taking one out of the DOM is what would cost a load on the first
  * scroll.
+ *
+ * The resting tone loads eagerly: it is the brand mark at the top of the
+ * document and there is nothing to defer it past. `loading` rather than the
+ * `priority` this used to carry, which Next 16 deprecated in favour of an
+ * explicit `preload` (`node_modules/next/dist/docs`, Image, ch. preload).
+ *
+ * Next emits a preload link for an eager image either way, verified in the
+ * built HTML: the second tone below is the one with `loading="lazy"` and it
+ * is the one with no link. So this is a rename to the supported prop rather
+ * than a change in what the browser is asked to do.
  */
 function LogoTone({
   alt,
+  eager = false,
   hidden,
-  priority = false,
   src,
 }: {
   alt: string;
+  eager?: boolean;
   hidden: boolean;
-  priority?: boolean;
   src: string;
 }) {
   return (
@@ -190,7 +195,7 @@ function LogoTone({
         hidden ? "opacity-0" : "opacity-100"
       }`}
       fill
-      priority={priority}
+      loading={eager ? "eager" : "lazy"}
       sizes="64px"
       src={src}
     />

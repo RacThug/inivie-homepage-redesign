@@ -105,4 +105,35 @@ describe("Footer", () => {
     // is the single place in the design system it is allowed to carry text.
     expect(screen.getByText("Departments")).toHaveClass("text-gold");
   });
+
+  /**
+   * RS2 on mobile, and WCAG 2.2 SC 2.5.8 at every width.
+   *
+   * The department desks stack a name, a number and an address with nothing
+   * between them, so an 18px line put two different destinations 18px apart:
+   * axe and Lighthouse both failed the pair on target size at 375px and at
+   * 1440px. Every link in the footer is therefore sized rather than left to
+   * the line height of the text inside it - 44px on mobile for RS2, and 24px
+   * from the tablet breakpoint, which is the floor SC 2.5.8 sets.
+   */
+  it.each([
+    ["info@inivie.com"],
+    ["+62 361 9346082"],
+    ["View on map"],
+    ["reservation@inivie.com"],
+    ["+62 811-3986-889"],
+    ["View open jobs"],
+    ["About Us"],
+    ["Blog"],
+    ["TikTok"],
+    ["General Policy"],
+  ])("gives %s a hit area rather than a line height", (name) => {
+    render(<Footer />);
+
+    expect(screen.getByRole("link", { name })).toHaveClass(
+      "min-h-11",
+      "min-w-11",
+      "sm:min-h-6",
+    );
+  });
 });

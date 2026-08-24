@@ -133,7 +133,17 @@ describe("SearchPanel", () => {
       expect(
         screen.getByRole("dialog", { name: SEARCH_PANEL.dates }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("grid")).toBeInTheDocument();
+      /*
+        Awaited, because the grid is 32KB of `react-day-picker` that the route
+        does not ship until this field is opened (PRD ch. 8.2). The timeout is
+        raised off the one second default deliberately: what is being waited
+        for here is Vitest transforming a module for the first time, and with
+        the whole suite running in parallel workers that has been seen to take
+        longer than a second on a cold cache.
+      */
+      expect(
+        await screen.findByRole("grid", {}, { timeout: 10_000 }),
+      ).toBeInTheDocument();
     });
   });
 

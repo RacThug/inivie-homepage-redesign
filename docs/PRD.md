@@ -4,9 +4,9 @@
 | --- | --- |
 | Document type | Product Requirements Document |
 | Project | Technical Test - Homepage Redesign for inivie.com |
-| Version | 2.2 |
+| Version | 2.3 |
 | Date | 23 August 2026 |
-| Last amendment | ch. 2.3, 6.1 and 6.2, on the user's decision after the visual design pass. See [briefs/homepage-design-brief.md](./briefs/homepage-design-brief.md) |
+| Last amendment | ch. 8.2 and 8.4, on the user's decision after the non-functional pass measured them. Earlier: ch. 2.3, 6.1 and 6.2 after the visual design pass. See [briefs/homepage-design-brief.md](./briefs/homepage-design-brief.md) |
 | Submission deadline | 27 August 2026 (GitHub link sent to the HR team) |
 | Tech stack | Option 2: Next.js + Tailwind CSS + Laravel (CMS & API) + MySQL |
 | Dynamic section chosen | **Featured Properties** ("Featured property for you") |
@@ -305,6 +305,16 @@ Targets are stated here. How each target is met is in [TECHNICAL-DESIGN.md](./TE
 | Total Blocking Time | under 200 milliseconds |
 | JavaScript on the homepage route | under 150 KB gzipped |
 
+**Correction, 24 August 2026.** Two rows above were written before the page existed, and measuring it showed both of them describing the wrong thing. Corrected here rather than in the table, which stays as it was agreed. TECHNICAL-DESIGN ch. 7.4 holds the measurements.
+
+**Largest Contentful Paint** does not say how it is measured, and the two ways Lighthouse can measure it disagree by a second and a half on this page. Lighthouse's default is Lantern, which *models* what the page would have done on a 1.6Mbps link rather than putting it on one. Apply that same profile to the network for real and the page paints at 1.8s; unthrottled it is 0.2s. **The target is under 2.5 seconds measured, and it is met at 1.8s.** The 3.3s estimate is recorded beside it, because it is what a reviewer running `lighthouse` with no arguments is shown and an unexplained number is a number that looks like a failure.
+
+A second thing this row could not have known. Chrome refuses an image covering the whole viewport as a Largest Contentful Paint candidate, on the grounds that such an image is almost always a background. The full bleed hero of ch. 6.1 is therefore never this measurement whatever it weighs, and the element Chrome actually picks is the header wordmark. That is not a defect and nothing here is written to change it; it is written down so nobody spends an afternoon optimising a photograph that the metric does not look at.
+
+**JavaScript on the homepage route** was one number written without knowing what an App Router page costs before a line of this project is added to it. That floor measures 113 KB gzipped in this build, in two chunks that contain no component of ours, which left the 150 KB budget 37 KB for the whole application and made it a budget on a framework choice rather than on any decision taken here. **The target is now 50 KB of application JavaScript above the framework baseline, and it is met at 45 KB**, for 158 KB in total.
+
+The old number is not being moved to fit what shipped. 45 KB is what twelve client components weigh with the date picker already split out of the route, and 50 KB is a ceiling with five kilobytes of room in it, which is a real constraint on the next thing anybody adds.
+
 ### 8.3 SEO
 
 Descriptive title and description, social sharing metadata, `robots.txt` and `sitemap.xml`, a single top level heading per page with a correct heading hierarchy, organisation structured data, and a canonical URL.
@@ -312,6 +322,16 @@ Descriptive title and description, social sharing metadata, `robots.txt` and `si
 ### 8.4 Accessibility
 
 Target WCAG 2.1 level AA. Semantic landmarks, meaningful alternative text on every image, visible keyboard focus, full keyboard operability, contrast meeting the AA threshold, and no serious violations reported by axe DevTools.
+
+**Correction, 24 August 2026.** "No serious violations reported by axe DevTools" is **not met**, and is recorded as unmet rather than reworded until it is. axe reports exactly one, on every accented control on the page: `on-accent` on `accent`, white on the brand orange, measuring 2.98 to 1 against AA's 4.5.
+
+It is the deviation DESIGN-SYSTEM ch. 2.2 accepted with the alternatives built and measured rather than argued about, and it is the client's own control: inivie.com ships white on this exact orange and measures the same 2.98. No foreground rescues that fill. Ink passes at rest and drops to 4.17 the moment a pointer lands, and reaching AA with white needs the orange eleven points of lightness below the brand's, at which point it reads burnt rather than bright.
+
+So the sentence above stands as written, with one named exception: **`on-accent` on `accent`, and nothing else.** Naming the exception rather than softening the sentence is the whole point of writing this down. A rule relaxed to "no serious violations except where we decided otherwise" would also excuse the next contrast failure, silently, and there would be no line left to fail. `web/src/design/palette.test.ts` asserts the failing ratio, so this exception cannot quietly become two.
+
+Every other axe rule reports zero, across WCAG 2.0 A and AA, 2.1 A and AA, 2.2 AA, best practice and experimental, at 375px and at 1440px.
+
+One measured shortfall against RS2 is kept on the same terms. A carousel draws the slides either side of the selected one at 94 per cent, which takes their 44px control to 41px on two cards that are only partly on screen. The card a visitor is acting on is a full 44, and no scale below 1 leaves the neighbours at 44, so the choice is the focus treatment or the last three pixels of a preview.
 
 ### 8.5 Security
 

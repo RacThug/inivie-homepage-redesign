@@ -36,8 +36,18 @@ interface ButtonProps {
   onClick?: () => void;
   /** Only meaningful on the button element, which is the default rendering. */
   type?: "button" | "submit";
-  "aria-label"?: string;
 }
+
+/*
+ * There is deliberately no `aria-label` here.
+ *
+ * It was used once, by the property card, to tell six controls reading "View
+ * property" apart, and it did that by replacing the label rather than
+ * extending it: the button said one thing and answered to another, which is
+ * how it failed WCAG 2.1 SC 2.5.3. A caller that needs to distinguish two
+ * otherwise identical controls appends `<span className="sr-only">` to the
+ * children instead, so the accessible name still opens with the visible words.
+ */
 
 /**
  * Shared shape, so every variant and the inert state line up in a card row.
@@ -195,7 +205,6 @@ export function Button({
   disabled = false,
   onClick,
   type = "button",
-  "aria-label": ariaLabel,
 }: ButtonProps) {
   const inert = href === null && !disabled;
   const available = !disabled && !inert;
@@ -232,7 +241,7 @@ export function Button({
 
   if (href && !disabled) {
     return (
-      <a aria-label={ariaLabel} className={className} href={href}>
+      <a className={className} href={href}>
         {content}
       </a>
     );
@@ -240,7 +249,6 @@ export function Button({
 
   return (
     <button
-      aria-label={ariaLabel}
       className={className}
       disabled={disabled}
       onClick={onClick}

@@ -45,6 +45,21 @@ const nextConfig: NextConfig = {
      * network whatever this is set to.
      */
     dangerouslyAllowLocalIP: isLocalCms,
+
+    /**
+     * 75 is Next's default and is what every image on the page uses except
+     * one. The hero poster takes 60, because it is the only image here that
+     * is never seen undimmed: it sits under the ink gradient of ch. 6.8, at
+     * full opacity across the top and 40 per cent from the middle down, so
+     * the detail the extra 15 points buys is being painted over. It was the
+     * largest image on the route at 49KB, down to 35KB here, and it is
+     * fetched before anything else the visitor is waiting for.
+     *
+     * Both have to be listed. Next 16 refuses any quality not declared here,
+     * so that the optimiser cannot be asked for arbitrary variants of an
+     * image by anyone who can edit a URL.
+     */
+    qualities: [60, 75],
   },
 };
 

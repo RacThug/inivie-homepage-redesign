@@ -421,11 +421,19 @@ Production's own height took some finding. `inivie.com` stamps `data-is-bot="tru
 | Runtime | 31.7s | 36.5s |
 | Weight | 15.8MB | 11.6MB |
 
-**The poster is what paints.** It is a `next/image` with `priority`, and the film mounts only after hydration and fades in over it across one second. The largest contentful paint is therefore the same 143KB still it was before the film existed, which is what keeps ch. 8.2's floor reachable. If the film never arrives, the hero is exactly what it was.
+**The poster is what paints.** It is the one `next/image` on the route that is preloaded, and the film does not mount until the load event has been and gone, then fades in over it across one second. If the film never arrives, the hero is exactly what it was.
+
+Waiting for the load event is the difference between the film costing the page nothing and the film costing it everything. Mounted at hydration, an 11.6MB request opened alongside the property images, the fonts and the poster itself, on a connection all four were already competing for. Nothing on screen is waiting for the film - the poster is painted by then and the overlay is over both - so it waits for everything that is.
+
+The poster is also the one image on the site at `quality={60}` rather than Next's default 75, which takes it from 49KB to 35KB. It is the only image here that is never seen undimmed: the overlay described below is opaque at the top and 40 per cent from the middle down, so the detail the extra fifteen points buys is painted over. Rendered both ways under that overlay before the number was chosen.
+
+One thing this paragraph used to claim and should not have: that the poster is the largest contentful paint. It is not, and it cannot be. Chrome refuses an image that covers the whole viewport as an LCP candidate, on the grounds that such an image is almost always a background, so a full bleed hero is never that measurement whatever it weighs. TECHNICAL-DESIGN ch. 7.4 has the verification.
 
 Only one cut is ever fetched, and the choice is made once. A `media` attribute on two `<source>` elements leaves both files reachable and browsers have long disagreed about which they pull, so the decision is made in script instead. It is not revisited: a phone at 390 by 844 turned on its side is 844 wide and crosses the switch, and a live query would answer a rotation with a fifteen megabyte download.
 
 **Under `prefers-reduced-motion: reduce` the film is never requested.** Not fetched and paused, never asked for. This is the one place the hero departs from production, which plays its loop whatever the operating system has been told, and it departs because ch. 5 calls the setting a hard requirement rather than a preference.
+
+**Nor is it requested on a connection that cannot afford it.** A browser reporting `saveData`, or an `effectiveType` of 3g or below, gets the poster and no film. Eleven and a half megabytes is a decoration behind a picture that is already there, and a visitor who has told their browser to spend less data has said something specific about decorations. Handled exactly as reduced motion is: not fetched, rather than fetched and hidden.
 
 **What the film shows, and why the overlay covers everything.** Both cuts are advertisements rather than background footage, with copy burned into the frame for most of their runtime: a Forbes award card, a "WE sustain our nature" sequence, a screen recording of a signup form, a fifty thousand welcome coins promotion on the landscape cut and a membership benefits list on the portrait one, and four seconds of white end card at the close of each. Playing them behind a hero was a decision taken with those frames on the table.
 

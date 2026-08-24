@@ -27,7 +27,29 @@ const SECONDARY = "text-small text-on-ink-muted";
 const FOCUS_RING =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface";
 
-const ACTION_LINK = `text-small text-gold underline-offset-4 hover:underline ${FOCUS_RING}`;
+/**
+ * The hit area every link in this footer gets, rather than the line height of
+ * whatever text ends up inside it.
+ *
+ * 44 by 44 on mobile is RS2. The 24px floor from the tablet breakpoint is
+ * WCAG 2.2 SC 2.5.8, and it is here because the departments column stacks a
+ * number directly on an address with nothing between them: at 18px a line
+ * they were 18px apart, and both axe and Lighthouse failed the pair at 375px
+ * and again at 1440px. Sizing the control is the fix; spacing the column
+ * apart would have been the same 18px target with more air around it.
+ *
+ * `min-w-11` costs nothing visually. These are left aligned boxes, so a label
+ * narrower than 44px - "Blog", "TikTok" - simply sits in a wider one.
+ *
+ * The display utility is left to each call site rather than baked in here.
+ * A contact row has to be its own line and a social channel has to sit beside
+ * the next one, so the two need `flex` and `inline-flex` respectively, and
+ * Tailwind decides which of a pair of display utilities wins by the order it
+ * emits them rather than by the order they are written on the element.
+ */
+const HIT_AREA = "min-h-11 min-w-11 items-center sm:min-h-6";
+
+const ACTION_LINK = `${HIT_AREA} text-small text-gold underline-offset-4 hover:underline ${FOCUS_RING}`;
 
 /**
  * Four columns on desktop, two on tablet, one on mobile (RS from
@@ -58,7 +80,7 @@ export function Footer() {
             <ul className="mt-4 flex flex-col gap-1">
               <li>
                 <a
-                  className={`text-small text-surface ${FOCUS_RING}`}
+                  className={`flex ${HIT_AREA} text-small text-surface ${FOCUS_RING}`}
                   href={`tel:${HEAD_OFFICE.phone.replace(/\s/g, "")}`}
                 >
                   {HEAD_OFFICE.phone}
@@ -66,14 +88,14 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  className={`text-small text-surface ${FOCUS_RING}`}
+                  className={`flex ${HIT_AREA} text-small text-surface ${FOCUS_RING}`}
                   href={`mailto:${HEAD_OFFICE.email}`}
                 >
                   {HEAD_OFFICE.email}
                 </a>
               </li>
               <li>
-                <a className={ACTION_LINK} href={HEAD_OFFICE.mapUrl}>
+                <a className={`flex ${ACTION_LINK}`} href={HEAD_OFFICE.mapUrl}>
                   View on map
                 </a>
               </li>
@@ -90,21 +112,21 @@ export function Footer() {
                   </p>
                   {desk.phone && (
                     <a
-                      className={`${SECONDARY} block ${FOCUS_RING}`}
+                      className={`flex ${HIT_AREA} ${SECONDARY} ${FOCUS_RING}`}
                       href={`tel:${desk.phone.replace(/\s/g, "")}`}
                     >
                       {desk.phone}
                     </a>
                   )}
                   <a
-                    className={`${SECONDARY} block break-words ${FOCUS_RING}`}
+                    className={`flex ${HIT_AREA} ${SECONDARY} break-words ${FOCUS_RING}`}
                     href={`mailto:${desk.email}`}
                   >
                     {desk.email}
                   </a>
                   {desk.actions?.map((action) => (
                     <a
-                      className={`${ACTION_LINK} mt-1 block`}
+                      className={`mt-1 flex ${ACTION_LINK}`}
                       href={action.href}
                       key={action.href}
                     >
@@ -122,7 +144,7 @@ export function Footer() {
               {COMPANY_LINKS.map((link) => (
                 <li key={link.href}>
                   <a
-                    className={`inline-flex min-h-11 items-center text-small text-surface underline-offset-4 hover:underline sm:min-h-0 ${FOCUS_RING}`}
+                    className={`inline-flex ${HIT_AREA} text-small text-surface underline-offset-4 hover:underline ${FOCUS_RING}`}
                     href={link.href}
                   >
                     {link.label}
@@ -174,7 +196,7 @@ export function Footer() {
               {SOCIAL_LINKS.map((social) => (
                 <li key={social.href}>
                   <a
-                    className={`inline-flex min-h-11 items-center text-small text-surface underline-offset-4 hover:underline sm:min-h-0 ${FOCUS_RING}`}
+                    className={`inline-flex ${HIT_AREA} text-small text-surface underline-offset-4 hover:underline ${FOCUS_RING}`}
                     href={social.href}
                   >
                     {social.label}
@@ -187,7 +209,7 @@ export function Footer() {
 
         <div className="flex flex-col gap-3 border-t border-surface/15 py-6 sm:flex-row sm:items-center sm:justify-between">
           <a
-            className={`inline-flex min-h-11 items-center text-small text-surface underline-offset-4 hover:underline sm:min-h-0 ${FOCUS_RING}`}
+            className={`inline-flex ${HIT_AREA} text-small text-surface underline-offset-4 hover:underline ${FOCUS_RING}`}
             href={LEGAL.policy.href}
           >
             {LEGAL.policy.label}

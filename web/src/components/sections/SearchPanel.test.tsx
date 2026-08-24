@@ -288,4 +288,31 @@ describe("docked under the header", () => {
     // An ink ring is invisible on ink, for the reason ch. 6.5 gives.
     expect(dates).toHaveClass("focus-visible:outline-surface");
   });
+
+  /**
+   * The phone's summary row turns over with them, which it did not.
+   *
+   * It was written when the panel only ever sat on ink and hard coded
+   * `surface` text and a gold pin, so the docked band drew it white on white:
+   * the only control the panel has below `sm` was invisible on exactly the
+   * breakpoint it exists for, and the bar read as a stray pin in an empty
+   * strip. The fields' own tone flip had been applied a field at a time and
+   * this row was not a field.
+   */
+  it("turns the phone's summary row over with them", () => {
+    render(<SearchPanel docked />);
+
+    const summary = trigger(SEARCH_PANEL.summary);
+    expect(summary).toHaveClass("text-ink");
+    expect(summary).toHaveClass("focus-visible:outline-ink");
+    expect(summary).not.toHaveClass("text-surface");
+  });
+
+  it("keeps that row on the dark tone at rest, where the card is ink", () => {
+    render(<SearchPanel />);
+
+    const summary = trigger(SEARCH_PANEL.summary);
+    expect(summary).toHaveClass("text-surface");
+    expect(summary).toHaveClass("focus-visible:outline-surface");
+  });
 });

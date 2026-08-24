@@ -6,7 +6,7 @@ import { DateRangeField } from "@/components/search/DateRangeField";
 import { DestinationField } from "@/components/search/DestinationField";
 import { GuestsField } from "@/components/search/GuestsField";
 import { Button } from "@/components/ui/Button";
-import type { FieldChrome } from "@/components/ui/FieldPopover";
+import { FIELD_TONES, type FieldChrome } from "@/components/ui/FieldPopover";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { SEARCH_ACTION, SEARCH_PANEL } from "@/content/hero";
 import { startOfToday } from "@/lib/dates";
@@ -28,8 +28,7 @@ import { startOfToday } from "@/lib/dates";
  * fields side by side do not fit 375px.
  */
 
-const FOCUS_RING =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface";
+const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2";
 
 interface SearchPanelProps {
   /**
@@ -86,16 +85,23 @@ export function SearchPanel({ docked = false }: SearchPanelProps) {
         under `sm:hidden` would leave assistive technology reading a collapsed
         state off a control that is no longer on screen and a panel that is
         always open.
+
+        It is dressed off the panel's ground, not off the hero's. This row was
+        written when the panel only ever sat on ink, so it hard coded
+        `surface` text and a gold pin; docked, `SearchDock` puts the band on
+        `surface`, and that is white on white. The control disappeared on the
+        one breakpoint it exists for, leaving the docked bar as a pin floating
+        in an empty strip with nothing to press.
       */}
       <button
         aria-controls={`${fieldId}-fields`}
         aria-expanded={open}
-        className={`flex min-h-11 w-full items-center justify-between gap-3 text-left text-body text-surface sm:hidden ${FOCUS_RING}`}
+        className={`flex min-h-11 w-full items-center justify-between gap-3 text-left text-body sm:hidden ${FIELD_TONES[chrome.tone].text} ${FIELD_TONES[chrome.tone].ring} ${FOCUS_RING}`}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         type="button"
       >
         <span className="flex items-center gap-2">
-          <span className="text-gold">
+          <span className={FIELD_TONES[chrome.tone].icon}>
             <PinIcon />
           </span>
           {SEARCH_PANEL.summary}

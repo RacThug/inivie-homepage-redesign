@@ -288,6 +288,11 @@ production asset rather than a runtime `filter`, because a filter that
 approximates ink resolves differently in every browser and ch. 2.1 is meant to
 be the only place a colour is decided.
 
+On the homepage the wordmark returns the visitor to the top of the page rather
+than navigating to the route they are already on, which is what it looked like
+it would do and what Next answered with nothing. ch. 6.18 has the measurement
+and the rest of the behaviour.
+
 **Navigation.** Five entries, inline from 1024px, drawer below it. Four are
 groups over a brand family and open a panel; one is a plain link. The
 structure is production's, and so is every destination: this project redesigns
@@ -380,6 +385,10 @@ against what is behind it.
 Reservations, Marketing, Media, Human Resources, Travel Agents and a general
 line. Merging them into a single "contact us" would send a job applicant to the
 reservations team, which is a redesign of the business rather than of the page.
+
+**The last row leaves a corner free.** Its bottom padding is 80px rather than
+the 24px above it, because the back to top control of ch. 6.18 is fixed to the
+window and at the foot of the page that puts it in this row.
 
 ### 6.6 Skeleton
 
@@ -652,6 +661,24 @@ One component draws all three. It holds no data and no words of its own: the car
 **Looping.** The track loops only when there are at least six cards. Below that it cannot cover its own width twice over, which is what looping without cloning needs, and it stops at its ends instead with the step controls disabled where they lead nowhere. F3 permits as few as three properties, so this is read from the data rather than assumed. The two venue sections carry six each, which is also why they carry six: three cards on a looping track show the same restaurant twice within one turn of the wheel.
 
 **Announced as one thing.** Each track is a labelled carousel holding a list, and no two of the three share a control: three sections offering a button called "Next" is three buttons a screen reader cannot tell apart. Every card is in the document, visible and reachable by tab, so a screen reader says how many properties there are before reading the first, and a card reached by keyboard is scrolled into view rather than left clipped. The steps and dots carry no visible text, so each is named by what it reaches: "Next restaurant", "Go to Ajowa Resort". Dots hold the 44 by 44 of RS2 on mobile and narrow from `sm`, where the requirement no longer applies and six full-size targets read as six separate controls rather than as one scale.
+
+### 6.18 Back to top
+
+**Why it exists.** The homepage is 16.6 viewports tall at 375px and 10.7 at 1440px. The header is fixed and the search panel docks into it, so both the navigation and the booking control already follow a visitor down the page; what nothing offered was a way back to the start of it. The wordmark looked like that offer and was not one: it is a link to `/`, Next answers a navigation to the route the visitor is already on by doing nothing, and the click was measured at the foot of the built page as scrollY 12628 before and 12628 after.
+
+**Two entrances, one behaviour.** The wordmark scrolls rather than navigates on the page it points at, and stays an ordinary link everywhere else. A modified click is left to the browser, because cmd or ctrl click on a wordmark is how a second tab gets opened. The floating control below is the discoverable form of the same thing, for a visitor who has no reason to expect a logo to scroll.
+
+**The control.** A 44px `surface` disc on the property card's own treatment: 1px `border`, rest elevation, raised on hover. Full round, which ch. 4.2 reserves for icon buttons and avatars. Inside it, a 20px arrow at the header hamburger's 1.75px stroke, because they are the same size of icon on the same page. It is named "Back to top" by `aria-label`, there being no visible label for an accessible name to contradict, and it holds 44 by 44 on both axes per RS2.
+
+**Where it sits.** Fixed to the window, 20px from the right and the bottom and 40px from the desktop breakpoint, which is the container gutter of ch. 4.1 borrowed as the page's own reading of how far something sits from an edge. It is pinned to the window rather than to the grid, so the two coincide only below 1360px. `z-30` puts it under the header, under the drawer, and under the search panel's mobile sheet, which is pinned to the same corner and is the one thing that would rather have it out of the way.
+
+**When it appears.** After one viewport, which on the homepage is exactly the hero leaving. The threshold is a sentinel of the hero's own height watched by an `IntersectionObserver`, the same shape ch. 6.4 uses for the header's two states: one callback per crossing rather than a handler on every scroll frame. It enters on the ch. 5 entrance, a fade and a 12px rise, and is not in the document before that. The first screen is the one screen nobody needs returning from.
+
+**Focus.** Activating it moves focus to the wordmark. The control removes itself the moment the scroll it started arrives, and an element that disappears while focused drops focus onto `body`: the visitor would be back at the top of the page with their next Tab starting from the beginning of the document, which is the journey they pressed the button to avoid.
+
+**The corner is reserved.** The footer's last row carries 80px of bottom padding rather than the 24px above it. The control is fixed to the window, so at the foot of the page it stands in that row, and at 320px it sat across the end of "All Rights Reserved". Reserving the 64px it occupies is the fix; hiding the control over the footer would take it away exactly where it is most wanted.
+
+**Reduced motion.** The scroll is smooth unless `prefers-reduced-motion: reduce` is set, read at the moment of the click rather than held in state, for the reason ch. 6.17 gives about the same query. `globals.css` already collapses every CSS transition and animation under it; a scroll the browser runs itself is the one piece of motion CSS cannot reach.
 
 ---
 

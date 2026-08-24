@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { MobileDrawer } from "@/components/layout/MobileDrawer";
@@ -14,6 +16,7 @@ import {
   isNavGroup,
   PRIMARY_NAV,
 } from "@/content/navigation";
+import { HOME_LINK_ID, scrollToTop } from "@/lib/pageTop";
 
 const DRAWER_ID = "site-menu";
 
@@ -38,6 +41,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -57,6 +61,29 @@ export function Header() {
   }, []);
 
   const labelColour = scrolled ? "text-ink" : "text-surface";
+
+  /**
+   * The wordmark is a link to `/`, and on the homepage that is the route the
+   * visitor is already on. Next answers a navigation to the current route by
+   * doing nothing, which left the one control that is always on screen and
+   * reads as "take me back to the start" doing nothing at all: measured at the
+   * foot of the homepage, scrollY was 12628 before the click and 12628 after.
+   *
+   * So on that page it scrolls instead of navigating, which is what it looked
+   * like it would do. Everywhere else it stays an ordinary link.
+   *
+   * A modified click is left alone: cmd or ctrl click on a wordmark is how a
+   * visitor opens the homepage in a second tab, and preventing the default
+   * there would take that away to run a scroll they did not ask for.
+   */
+  function returnToTop(event: MouseEvent<HTMLAnchorElement>): void {
+    if (pathname !== "/") return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
+
+    event.preventDefault();
+    scrollToTop();
+  }
 
   return (
     <>
@@ -103,6 +130,8 @@ export function Header() {
               aria-label={BRAND_NAME}
               className={`relative block h-12 w-12 shrink-0 lg:h-16 lg:w-16 ${FOCUS_RING} ${labelColour}`}
               href="/"
+              id={HOME_LINK_ID}
+              onClick={returnToTop}
             >
               <LogoTone alt="" eager hidden={scrolled} src={BRAND_LOGO.light} />
               <LogoTone alt="" hidden={!scrolled} src={BRAND_LOGO.ink} />

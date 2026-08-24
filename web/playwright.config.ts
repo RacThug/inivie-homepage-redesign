@@ -6,9 +6,10 @@ import { defineConfig, devices } from "@playwright/test";
 import { MEDIA_HOST, SITES } from "./e2e/servers.ts";
 
 /**
- * End to end coverage of the four paths TECHNICAL-DESIGN ch. 9.1 names: the
+ * End to end coverage of the paths TECHNICAL-DESIGN ch. 9.1 names: the
  * homepage shows cards, the section disappears on empty data, the fallback
- * appears when the CMS is down, and the mobile navigation opens and closes.
+ * appears when the CMS is down, the mobile navigation opens and closes, and
+ * the two controls that return a visitor to the top of the page do.
  *
  * Three servers rather than one. `e2e/servers.ts` is the table of them and
  * carries the reason; `e2e/run.mts` builds them.

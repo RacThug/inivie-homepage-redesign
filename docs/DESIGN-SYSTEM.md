@@ -455,7 +455,7 @@ Docked, the panel drops its eyebrows to screen reader only labels and tightens t
 
 **Docked it is a band, not a card.** Flush against the header at that header's own height, `surface` edge to edge, divided from the header by the same hairline the header already carries, so the two read as one strip of chrome. The ground sits on the wrapper rather than on the form, so the band can run the full width while its fields stay on the page's container. No radius, no shadow, no gap.
 
-Floating it as a card was tried first and is worse in a way only rendering shows: the 12px between it and the header showed the page through, and the card stood on top of the property grid with the cards' titles cut off behind its top edge. It read as a foreign object dropped on the page rather than as chrome.
+Floating it as a card was tried first and is worse in a way only rendering shows: the 12px between it and the header showed the page through, and the card stood on top of the property cards with their titles cut off behind its top edge. It read as a foreign object dropped on the page rather than as chrome.
 
 `ink` was tried next, on the reasoning that a dark band keeps the booking control prominent. That reasoning was wrong and the render says so: against a `surface` header the ink band is a heavy slab, hardest to defend where it cuts across a section of photographs, and the accent Search button is **more** prominent on `surface` than on `ink`, not less, because nothing dark is competing with it. Two bands of different colour is what makes anyone ask the question in the first place; on a pair of elements fused with no gap between them, it reads as an accident.
 
@@ -671,23 +671,27 @@ Design mobile first. Every rule is written as a minimum width, never a maximum.
 
 | Component | Mobile | Tablet | Desktop |
 | --- | --- | --- | --- |
-| Property grid | 1 column | 2 columns | 3 columns |
-| Culinary and wellness grids | 1 column | 2 columns | 3 columns |
+| Portfolio carousels: Featured Properties, Culinary, Wellness | Slide 72% of the track | 56% | 36% |
 | Special offers | 1 column | 2 columns | 3 columns, first item spanning 2 |
+| What's New | 1 column | 2 columns | 3 columns |
 | Navigation | Drawer | Drawer | Inline |
 | Footer columns | 1 | 2 | 4 |
 | Hero height | 100vh | 100vh | 100vh |
 
+The first row is the slide width of ch. 6.17, and the three ranges above are the breakpoints it names: `sm` opens the tablet range, `lg` the desktop one. Those sections were a one, two, three column grid until ch. 6.17 replaced it with a centre mode track, and this table went on saying grid afterwards. A section that is a list keeps the grid, which is what Special Offers and What's New are.
+
 ### 7.3 Non-negotiables
 
-| ID | Rule |
+RS1 to RS6 are requirements, and [PRD.md](./PRD.md) ch. 8.1 is where they are written. That text is frozen, so this chapter points at it rather than carrying a second copy. The copy that used to stand here had already drifted from it: RS3 had acquired a focus trap and an Escape key the requirement does not mention, RS4 had turned from a prohibition into an instruction about `sizes`, and RS6 had lost the screenshots it asks for.
+
+| ID | Where this document answers it |
 | --- | --- |
-| RS1 | No horizontal scroll at any width from 320px upward |
-| RS2 | Touch targets at least 44 by 44 pixels on mobile |
-| RS3 | Navigation collapses to a drawer below 1024px, with a focus trap and Escape to close |
-| RS4 | Images carry per breakpoint `sizes`, so mobile never downloads desktop assets |
-| RS5 | No clipped or overflowing text on the longest title in the seed data |
-| RS6 | Manually verified at 375px, 768px, and 1440px before submission |
+| RS1 | ch. 4.1, the container and its side padding, and ch. 6.17, the one track allowed to run past the edge |
+| RS2 | ch. 6.3 for the hit area every button carries, ch. 6.17 for the carousel dots, ch. 8.5 for the admin |
+| RS3 | ch. 6.4 for the public drawer, and ch. 8.3, where the admin adopts its rules rather than inventing a second set |
+| RS4 | Nothing here. It is an image loading rule rather than a visual one, and TECHNICAL-DESIGN ch. 4.3 carries it |
+| RS5 | The two line title and three line excerpt of ch. 6.1, and the three line title of ch. 6.13 |
+| RS6 | ch. 9 |
 
 ---
 
@@ -883,7 +887,7 @@ Dark mode, charts or sparklines on the dashboard, toast notifications, saved fil
 Before submission:
 
 1. Contrast check every pairing in ch. 2.2, with the `surface` on `accent` result recorded explicitly.
-2. axe DevTools with zero serious violations.
+2. axe DevTools with zero serious violations, save the one ch. 2.2 accepts and PRD ch. 8.4 names: `on-accent` on `accent`. A second violation, on that rule or any other, fails this pass.
 3. Visual pass at 375px, 768px, and 1440px, with screenshots kept for the README.
 4. A reduced motion pass with the operating system setting enabled.
 

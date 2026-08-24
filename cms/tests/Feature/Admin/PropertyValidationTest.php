@@ -146,12 +146,16 @@ describe('image', function () {
         ]))->assertSessionHasErrors('image');
     });
 
-    it('rejects an image smaller than 800 by 600', function () {
-        // There is no server side resizing, so what passes here is what the
-        // homepage renders. See ch. 5.4.
+    it('takes a small image, because nothing floors the dimensions', function () {
+        // A floor of 800 by 600 stood here and was removed on purpose, so
+        // this pins the decision rather than leaving the hole where a test
+        // used to be. There is no server side resizing, so a small picture
+        // is rendered soft on a 400px card; that is a worse looking card
+        // rather than a broken one, and refusing an editor over it is an
+        // unusual thing for a CMS to do. See ch. 5.3.
         $this->post(route('admin.properties.store'), propertyForm([
-            'image' => FakeImage::png('small.png', 640, 480),
-        ]))->assertSessionHasErrors(['image' => 'The image must be at least 800 by 600 pixels.']);
+            'image' => FakeImage::png('small.png', 320, 240),
+        ]))->assertSessionHasNoErrors();
     });
 
     it('rejects an image over 2 MB', function () {

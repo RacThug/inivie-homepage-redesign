@@ -115,7 +115,7 @@
                 type="file"
                 :required="! $property->exists"
                 accept="image/jpeg,image/png,image/webp"
-                help="JPG, PNG or WebP, at least 800 by 600 pixels and no larger than 2 MB."
+                help="JPG, PNG or WebP, no larger than 2 MB."
             />
 
             <x-field

@@ -55,10 +55,10 @@ it('seeds pictures the upload form itself would accept', function () {
     // data held to a lower bar looks fine until the first reviewer
     // re-uploads one of these files and is told it is too small.
     //
-    // Restating the mime list, the 2 MB cap and the 800 by 600 floor here
-    // would be the second copy of a rules table ch. 5.3 warns drifts, and
-    // the copy that drifts is the one nobody reads. So this submits each
-    // seed picture through the create form and requires it to be taken.
+    // Restating the mime list and the 2 MB cap here would be the second
+    // copy of a rules table ch. 5.3 warns drifts, and the copy that drifts
+    // is the one nobody reads. So this submits each seed picture through
+    // the create form and requires it to be taken.
     $this->actingAs(User::factory()->create());
 
     Property::pluck('image_path')->each(function (string $path) {

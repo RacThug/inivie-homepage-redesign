@@ -12,10 +12,15 @@ class StorePropertyRequest extends PropertyRequest
 {
     /**
      * Required, because `properties.image_path` is not nullable and a card
-     * without an image is not a card. The mime list, the 2 MB cap, and the
-     * minimum dimensions are ch. 5.3, and they are the whole of the upload
-     * defence: there is no server side resizing, so what is accepted here
-     * is what the homepage renders.
+     * without an image is not a card. The mime list and the 2 MB cap are
+     * ch. 5.3, and they are the whole of the upload defence.
+     *
+     * There is no floor on the pixel dimensions. One was here, at 800 by
+     * 600, and it is gone by decision rather than by oversight: it is an
+     * unusual thing for a CMS to refuse an editor over, and the card it
+     * protected is a 400px render that a small picture makes soft rather
+     * than broken. What is left is that there is no server side resizing
+     * either, so what is accepted here is what the homepage renders.
      *
      * @return array<int, mixed>
      */
@@ -26,7 +31,6 @@ class StorePropertyRequest extends PropertyRequest
             'image',
             'mimes:jpg,jpeg,png,webp',
             'max:2048',
-            'dimensions:min_width=800,min_height=600',
         ];
     }
 

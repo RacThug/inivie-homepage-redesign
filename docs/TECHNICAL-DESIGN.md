@@ -472,7 +472,7 @@ Enforced through `StorePropertyRequest` and `UpdatePropertyRequest`, never inlin
 | `category` | required, one of the enum values |
 | `location` | required, max 120 |
 | `excerpt` | required, max 240 |
-| `image` | required on create, optional on update, mime `jpg,jpeg,png,webp`, max 2 MB, minimum dimensions 800x600 |
+| `image` | required on create, optional on update, mime `jpg,jpeg,png,webp`, max 2 MB |
 | `image_alt` | required, max 160 |
 | `price_from` | optional, integer, min 0 |
 | `rating` | optional, numeric, between 0 and 5 |
@@ -481,6 +481,10 @@ Enforced through `StorePropertyRequest` and `UpdatePropertyRequest`, never inlin
 | `is_published` | boolean |
 
 Validation failures return the user to the form with old input and per field error messages, satisfying capability C8 in PRD ch. 7.1. The one value a browser will not let a form repopulate is the file input, so a failure elsewhere costs the admin that field alone.
+
+**Nothing floors the pixel dimensions.** A floor stood here at 800 by 600, and it was not arbitrary: the property card's image is rendered at most 400px wide at 4:3 (`CAROUSEL_IMAGE_SIZES`), so a retina screen asks for exactly 800 by 600 real pixels and ch. 5.4 has no server side resizing to make up the difference.
+
+It was removed anyway. Refusing an editor's photograph over its pixel count is an unusual thing for a CMS to do, and what the rule bought was a card that goes soft rather than a page that breaks: `next/image` serves a small file happily, it simply has no pixels to work with. The trade is stated here rather than left as a gap, and `PropertyValidationTest` asserts that a 320 by 240 upload is taken, so the rule cannot return by accident.
 
 `slug` is required here and optional on the form, which is not a contradiction: the request derives it from the title in `prepareForValidation` before the rules run. Deriving it there rather than leaving it to `PropertyObserver` is what turns a collision into a per field message instead of a unique constraint violation the admin reads as a 500. The observer stays as the guarantee for the paths that never touch a form, such as the seeder and Tinker. See D4 in DATA-MODEL ch. 3.
 
@@ -497,7 +501,7 @@ The ceiling on `sort_order` is the column's, not a preference: DATA-MODEL ch. 1 
 - On update with a new image, the old file is deleted only once the record has saved and the surrounding transaction has committed, through `DB::afterCommit`. If the save fails or the transaction rolls back, the original file survives and the row still points at it. Deleting any earlier leaves a property pointing at a file that no longer exists, with nothing to restore it from.
 - An upload lands before the row that will point at it, on both the create and the update path, because `image_path` is not nullable. If that write then throws, the upload is removed on the way out. Otherwise the disk accumulates files no row has ever pointed at, and nothing will ever collect them.
 - Deleting a property is a soft delete, so its image is retained. Files are removed only on force delete.
-- No server side resizing. Size optimisation is handled by `next/image`. The 2 MB cap and minimum dimensions already protect quality and storage.
+- No server side resizing. Size optimisation is handled by `next/image`, and the 2 MB cap is what protects storage. There is no floor on the dimensions either (ch. 5.3), so a small upload reaches the card at its own size and is rendered soft.
 - The seed images of DATA-MODEL ch. 4 are committed under `cms/database/seeders/images/` and copied onto the disk by the seeder, overwriting whatever is at the destination. Seeding is a reset to a known state: the seeder rewrites `image_path` back to the canonical path either way, so leaving a replaced file in place would only put the row and the disk out of step. They are not committed under `storage/` because that is state the application writes and a force delete is entitled to empty.
 
 `PropertyImageStore` performs all of this, and decides none of it. Controllers never touch the filesystem directly.

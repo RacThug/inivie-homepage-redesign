@@ -131,7 +131,6 @@ abstract class PropertyRequest extends FormRequest
             'slug.required' => 'The slug comes from the title, so add a title or type a slug.',
             'slug.alpha_dash' => 'The slug may only contain letters, numbers, dashes and underscores.',
             'slug.unique' => 'Another property already uses this slug.',
-            'image.dimensions' => 'The image must be at least 800 by 600 pixels.',
             'image.max' => 'The image may not be larger than 2 MB.',
         ];
     }

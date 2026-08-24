@@ -148,6 +148,12 @@ Three rules keep both paths working:
 
 `FRONTEND_INTERNAL_URL` is the second of those two lines and it exists for a reason worth stating on its own: it is not a duplicate of `FRONTEND_URL`. CORS compares `FRONTEND_URL` against the origin a browser presents, which is `http://localhost:3000` on both paths. The revalidation callback opens a socket, and inside the container `localhost` is the container. Collapsing them into one variable makes one of the two wrong, and which one depends on the path.
 
+##### "Nothing else differs" is about `.env`, not about setup
+
+The rule above governs addresses inside the application's configuration, and it holds. What it does not cover is the work Compose does *around* the application, which on the native path becomes the reviewer's: the `mysql` service creates the database and its user from `MYSQL_DATABASE`, `MYSQL_USER` and `MYSQL_PASSWORD`, and the `app` service's `command:` is what runs `php artisan serve`. Neither is a line in `.env` and neither is a command anybody types on the Docker path, so both are absent from the block a native reviewer would otherwise copy.
+
+The README carries them explicitly for that reason: a `CREATE DATABASE` and a `GRANT` before the migration, and an `artisan serve` after it. #32 is where this surfaced. The native instructions had been written as "the Docker commands without the `docker compose exec` prefix", which is true of every line that is a command and silently drops the two things that never were.
+
 ##### Why not set `DB_HOST` in the compose file
 
 The obvious design is to keep `.env.example` pointing at `127.0.0.1` for the native path and let Compose export `DB_HOST=mysql`, so neither reviewer edits anything. That was the original plan here, and **it does not work**.
@@ -185,6 +191,22 @@ This is not a new prerequisite. Node is already required for `web/`, so both pat
 
 A silent, correct-looking wrong result is the same failure shape as the `DB_HOST` problem recorded above, and it costs the same kind of afternoon. The API is unaffected because JSON needs no stylesheet, which is exactly why this stayed invisible until the first Blade screen was built.
 
+#### One list of setup steps, and it is the README
+
+`cms/composer.json` used to carry a `setup` script of its own: `composer install`, copy `.env`, `key:generate`, `migrate --force`, `storage:link`, `npm install --ignore-scripts`, `npm run build`. It was deleted in #32. The README setup chapter is now the only description of setup in the repository.
+
+It was never a shortcut for the documented path. It was a second path that disagreed with the first, in three places at once:
+
+| `composer setup` | The README block |
+| --- | --- |
+| Ran `npm install` and `npm run build` as part of the same command | Runs them on the host. The image is `php:8.5-cli` and carries neither `node` nor `npm`, verified 24 August 2026, so those two lines abort in the container |
+| `migrate --force`, no seed | `migrate --seed`, which is what puts the eight properties and the admin account in the database |
+| Carried `storage:link` until #27, and the `.env` copy until #32 | Carried neither, both times |
+
+The last row is the argument. Both setup bugs found in this project are the same bug: a step that lived in the script, which nothing runs, and not in the README, which is the path a reviewer actually follows. The script being the more complete list is what made it harmless to look at and useless to run. No edit makes either list a superset of the other either, because the work is split between a container and the host by toolchain, so the script cannot hold the Node lines and still be one command. Two lists, one of which cannot run as written on the documented path, is worse than one list that has been executed.
+
+The README's own two blocks, Docker and native, are not that failure repeated. They sit adjacent in one chapter, each describes a path a reviewer is meant to take, and the chapter above states what the second one has to do that the first does not. The thing deleted was a list in another file that nothing in the documentation invoked, which is what let it be more complete than the README and useless anyway.
+
 #### Compose scope
 
 Two services, `app` and `mysql`, in a file short enough to read in full. Laravel Sail was considered and set aside: it is the ecosystem convention and instantly recognisable, but it generates configuration rather than expressing a decision, and its defaults carry services this project has no use for. In a test that grades code quality, a short file that a reviewer can read end to end is the better artefact.
@@ -219,7 +241,7 @@ Run on 22 August 2026:
 | `artisan migrate:fresh --seed` | Re-run 22 August 2026 with the `properties` migration and seeder. Schema matches DATA-MODEL ch. 2 column for column, including the `enum`, `char(3)`, `decimal(2,1)` and all three indexes |
 | `artisan test` | 138 Pest tests green. The suite runs on SQLite in memory per `phpunit.xml`; the migration is additionally verified against MySQL by the row above |
 | `vendor/bin/pint --test` | Clean across 62 files |
-| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it is in both the `composer setup` script and the README setup block. It was in `composer setup` alone until #27, which is a gap rather than a division of labour: the README's Docker path runs `composer install` and then artisan commands directly, so it never invokes `composer setup`, and a reviewer following it got a populated database and a 403 on every picture. An upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above |
+| `artisan storage:link` | Created. The `public` disk is served through this symlink, so it is in the README setup block. It was in the `composer setup` script alone until #27, which was a gap rather than a division of labour: the README's Docker path runs `composer install` and then artisan commands directly, so it never invoked `composer setup`, and a reviewer following it got a populated database and a 403 on every picture. An upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above. That script is gone as of #32, per the chapter above |
 | Admin property CRUD end to end | Signed in, created a property with a real upload, saw the thumbnail render from `/storage/properties/`, edited it, and cancelled a delete from the confirm modal. Chromium at 1440px and 375px, no console errors |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
 | `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
@@ -227,6 +249,22 @@ Run on 22 August 2026:
 | Native path | **Not verified.** This machine has no PHP or MySQL |
 
 The warm figure is the useful one. At ~50ms through a Windows bind mount, the earlier claim that `artisan serve` is barely affected by bind mount latency holds, and no volume tuning is warranted.
+
+##### The README block, run from a fresh clone
+
+Run on 24 August 2026 for #32, from a `git clone` into an empty directory with no `.env`, no `vendor/`, no `node_modules/` and no `public/build/`, against its own Compose project and its own database volume so that nothing already set up on the machine could stand in for a missing step:
+
+| Check | Result |
+| --- | --- |
+| `artisan key:generate` with no `.env` | **Fails, loudly.** `file_get_contents(/app/.env): Failed to open stream`, raised as an `ErrorException` at `KeyGenerateCommand.php:105`, exit code 1, no file written. #32 predicted a silent empty `.env` from reading the two guards on the lines below it; Laravel's error handler converts the warning into an exception before either guard is reached, so the setup stops there instead of continuing on a broken configuration. The better of the two outcomes, and the missing line is the same bug either way |
+| `cp .env.example .env`, then the block in order | Every command green: `composer install`, `key:generate` (`APP_KEY` written into `.env`), `migrate --seed` (4 migrations, both seeders), `storage:link`, and `npm install && npm run build` on the host |
+| `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` |
+| `GET /api/v1/properties` | The 3 published seed rows, `max-age=60, public`, `X-Robots-Tag: noindex` |
+| `GET /storage/properties/leedon-villa-seminyak.webp` | `200 image/webp`, 42,536 bytes. The seeded imagery of #27 arrives through the symlink with nothing downloaded |
+| `GET /admin`, `GET /admin/login` | `302` to the login screen, then `200` serving the compiled `app-*.css` and `app-*.js` from `public/build/` |
+| Native path | **Still not verified.** This machine has no PHP or MySQL outside Docker. The README marks that path as unverified rather than implying otherwise |
+
+The Compose project was isolated on purpose. A verification run that borrows the database, the `vendor/` or the built assets sitting on the machine cannot tell a documented step from a step that happened to have been taken already, which is how a README passes review and fails a reviewer.
 
 #### Frontend verification status
 

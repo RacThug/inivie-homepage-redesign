@@ -35,17 +35,32 @@ export interface FieldChrome {
  * 3 to 1 against what is behind it, and the obvious candidates fail on
  * `surface`: `border` reaches 1.25 and `muted` 2.16. `ink-muted` reaches 7.61
  * and is what the border takes.
+ *
+ * Exported, and split into atoms rather than one string per tone, because the
+ * fields are not the only thing standing on this ground. The phone collapses
+ * the whole stack behind a summary row that `SearchPanel` owns, and that row
+ * dressed itself in `surface` text and a gold pin from the days when the
+ * panel was only ever on the hero. Docked, that is white on a white band: the
+ * row went invisible on exactly the breakpoint it exists for. One table both
+ * of them read from is what stops the next ground from doing it again.
  */
-const TONES = {
+export const FIELD_TONES = {
   dark: {
-    trigger:
-      "border-surface/25 text-surface hover:border-surface/50 focus-visible:outline-surface",
+    text: "text-surface",
+    border: "border-surface/25 hover:border-surface/50",
+    ring: "focus-visible:outline-surface",
     icon: "text-gold",
     detail: "text-on-ink-muted",
   },
   light: {
-    trigger:
-      "border-ink-muted text-ink hover:border-ink focus-visible:outline-ink",
+    text: "text-ink",
+    border: "border-ink-muted hover:border-ink",
+    ring: "focus-visible:outline-ink",
+    /*
+      Not `gold`, which the summary row had. It measures 2.26 to 1 on
+      `surface` against the 3.71 the hero's ink gives it, so it arrives as a
+      smudge; on this ground the icon takes the muted text tone instead.
+    */
     icon: "text-ink-muted",
     detail: "text-ink-muted",
   },
@@ -168,18 +183,22 @@ export function FieldPopover({
         */
         aria-labelledby={`${labelId} ${triggerId}`}
         id={triggerId}
-        className={`flex h-12 w-full items-center gap-2 rounded-control border px-3 text-left text-body transition-colors ${TONES[chrome.tone].trigger} ${FOCUS_RING}`}
+        className={`flex h-12 w-full items-center gap-2 rounded-control border px-3 text-left text-body transition-colors ${FIELD_TONES[chrome.tone].border} ${FIELD_TONES[chrome.tone].text} ${FIELD_TONES[chrome.tone].ring} ${FOCUS_RING}`}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         ref={triggerRef}
         type="button"
       >
         {icon && (
-          <span className={`flex-none ${TONES[chrome.tone].icon}`}>{icon}</span>
+          <span className={`flex-none ${FIELD_TONES[chrome.tone].icon}`}>
+            {icon}
+          </span>
         )}
         <span className="min-w-0 flex-1 truncate">
           {value}
           {detail && (
-            <span className={`ml-2 text-small ${TONES[chrome.tone].detail}`}>
+            <span
+              className={`ml-2 text-small ${FIELD_TONES[chrome.tone].detail}`}
+            >
               {detail}
             </span>
           )}

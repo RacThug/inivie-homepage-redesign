@@ -180,6 +180,23 @@ test.describe("with properties published", () => {
       .poll(() => image.evaluate((node: HTMLImageElement) => node.naturalWidth))
       .toBeGreaterThan(0);
   });
+
+  /**
+   * The crop anchor travels from the CMS and has to survive the whole way:
+   * column, payload, type guard, utility class. The stub gives the second
+   * property `top`, and nothing between here and there is allowed to quietly
+   * put it back in the middle. DESIGN-SYSTEM ch. 6.1.
+   */
+  test("crops each card where the CMS said to", async ({ page }) => {
+    await page.goto(url);
+
+    const cards = page
+      .getByRole("region", { name: HEADING })
+      .getByRole("article");
+
+    await expect(cards.first().getByRole("img")).toHaveClass(/object-center/);
+    await expect(cards.nth(1).getByRole("img")).toHaveClass(/object-top/);
+  });
 });
 
 test.describe("with nothing published", () => {

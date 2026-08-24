@@ -474,6 +474,7 @@ Enforced through `StorePropertyRequest` and `UpdatePropertyRequest`, never inlin
 | `excerpt` | required, max 240 |
 | `image` | required on create, optional on update, mime `jpg,jpeg,png,webp`, max 2 MB |
 | `image_alt` | required, max 160 |
+| `image_focus` | required, one of the enum values |
 | `price_from` | optional, integer, min 0 |
 | `rating` | optional, numeric, between 0 and 5 |
 | `cta_url` | optional, valid URL |

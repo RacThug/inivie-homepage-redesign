@@ -10,6 +10,15 @@
 
 export type PropertyCategory = "resort" | "villa" | "hotel";
 
+/**
+ * Which part of the photograph the card's 4:3 crop keeps.
+ *
+ * The frontend cannot work this out for itself: a crop only knows the
+ * shape of the picture, not where its subject is. So the editor says, in
+ * the CMS, and it travels with the property. DESIGN-SYSTEM ch. 6.1.
+ */
+export type ImageFocus = "top" | "center" | "bottom";
+
 export interface Property {
   id: number;
   title: string;
@@ -20,6 +29,9 @@ export interface Property {
   /** Absolute, and built by the CMS. The frontend never assembles it (P6). */
   image_url: string;
   image_alt: string;
+  /** Where the 4:3 crop is anchored. `center` is the default and what
+   *  every property carried before an editor could say otherwise. */
+  image_focus: ImageFocus;
   /**
    * Whole currency units, or null. Null means the card omits the price
    * row rather than rendering a zero (rule D7).

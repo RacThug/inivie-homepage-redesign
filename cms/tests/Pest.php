@@ -66,6 +66,7 @@ function propertyForm(array $overrides = []): array
         'excerpt' => 'A three bedroom villa a short walk from the beach.',
         'image' => FakeImage::png('villa.png', 1200, 900),
         'image_alt' => 'The pool terrace at dusk.',
+        'image_focus' => 'center',
         'price_from' => 4500000,
         'rating' => 4.8,
         'cta_url' => 'https://inivie.com/properties/leedon-villa-seminyak',

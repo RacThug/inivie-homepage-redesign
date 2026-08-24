@@ -96,15 +96,20 @@
                      image, so the admin can see what they are about to
                      replace rather than guessing from a filename. --}}
                 <div class="flex items-center gap-3">
+                    {{-- Cropped to 4:3 at the stored focus, which is the
+                         homepage card's own framing at a smaller size. A
+                         preview that showed the whole photograph would be
+                         showing something no visitor ever sees. --}}
                     <img
                         src="{{ $property->imageUrl() }}"
                         alt="{{ $property->image_alt }}"
                         width="128"
                         height="96"
                         class="h-24 w-32 rounded-control border border-border object-cover"
+                        style="object-position: {{ $property->image_focus->value }}"
                     >
                     <p class="text-[13px] leading-[18px] text-ink-muted">
-                        The current image.<br>Choosing a new file replaces it.
+                        The current image, cropped the way the card crops it.<br>Choosing a new file replaces it.
                     </p>
                 </div>
             @endif
@@ -116,6 +121,16 @@
                 :required="! $property->exists"
                 accept="image/jpeg,image/png,image/webp"
                 help="JPG, PNG or WebP, no larger than 2 MB."
+            />
+
+            <x-field
+                name="image_focus"
+                label="Image focus"
+                type="select"
+                :value="old('image_focus', $property->image_focus->value)"
+                :options="$focuses"
+                required
+                help="The card crops to 4:3. This is the part it keeps."
             />
 
             <x-field

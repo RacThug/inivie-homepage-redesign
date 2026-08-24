@@ -82,7 +82,8 @@ Versions verified against the npm registry, Packagist, the Laravel support polic
 | Image storage | Laravel filesystem, configured disk. `public` for this project, see ch. 5.5 | - | - |
 | Backend tests | Pest | 4.x | 4.7.8 |
 | Carousel | `embla-carousel-react` | 8.x | 8.6.0, verified 23 August 2026 |
-| Frontend tests | Vitest + Testing Library, Playwright | 4.x | 4.1.11 |
+| Frontend tests | Vitest + Testing Library | 4.x | 4.1.11 |
+| Frontend end to end tests | Playwright | 1.x | 1.62.1, verified 24 August 2026 |
 | DOM for component tests | jsdom | 29.x | 30.0.1 |
 | PHP formatting | Laravel Pint | - | - |
 | JS linting | ESLint + `eslint-config-next` | 9.x | 10.9.0 |
@@ -802,4 +803,4 @@ Chromium alone, and it is a download rather than a dependency: `npx playwright i
 
 `npm run lint`, `npm run typecheck`, `npm run format:check`, `./vendor/bin/pint --test`, and both test suites must be green before the final commit. No skipped tests and no tolerated lint warnings.
 
-The end to end suite is the one gate with a cost worth naming: `npm run test:e2e` builds the frontend three times and takes about a minute. It runs before a pull request that touched `web/` or the payload contract, rather than before every commit.
+The end to end suite is the one gate with a cost worth naming: `npm run test:e2e` builds the frontend three times, so it takes about a minute where the others take seconds.

@@ -158,8 +158,13 @@ const IMAGE = await readFile(
   new URL("../public/home/story/1.webp", import.meta.url),
 );
 
-function json(body: unknown, status = 200): [string, number, string] {
-  return [JSON.stringify(body), status, "application/json"];
+interface JsonResponse {
+  body: string;
+  status: number;
+}
+
+function json(body: unknown, status = 200): JsonResponse {
+  return { body: JSON.stringify(body), status };
 }
 
 const server = createServer((request, response) => {
@@ -175,17 +180,17 @@ const server = createServer((request, response) => {
     return;
   }
 
-  const [body, status, type] = route(url);
+  const { body, status } = route(url);
 
   response.writeHead(status, {
-    "content-type": type,
+    "content-type": "application/json",
     // Mirrors what the real endpoint sends (API-SPEC ch. 5.1).
     "cache-control": "public, max-age=60",
   });
   response.end(body);
 });
 
-function route(url: URL): [string, number, string] {
+function route(url: URL): JsonResponse {
   if (url.pathname === "/api/v1/health") {
     return json({ status: "ok" });
   }

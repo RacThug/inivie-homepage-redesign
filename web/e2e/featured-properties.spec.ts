@@ -1,8 +1,10 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
+import { FEATURED_PROPERTY_COUNT } from "@/content/featured-properties";
+import type { Property, PropertyListResponse } from "@/types/property";
+
 import { expectStaticPageIntact } from "./homepage.ts";
 import { site } from "./servers.ts";
-import type { Property, PropertyListResponse } from "../src/types/property.ts";
 
 /**
  * The one section on the homepage that reads the CMS, in the three states its
@@ -39,7 +41,9 @@ async function publishedProperties(
   request: APIRequestContext,
   cmsUrl: string,
 ): Promise<Property[]> {
-  const response = await request.get(`${cmsUrl}/api/v1/properties?limit=6`);
+  const response = await request.get(
+    `${cmsUrl}/api/v1/properties?limit=${FEATURED_PROPERTY_COUNT}`,
+  );
 
   expect(response.ok()).toBe(true);
 
@@ -73,6 +77,14 @@ test.describe("with properties published", () => {
     );
   });
 
+  /**
+   * `PropertyCard.test.tsx` already covers this markup against a fixture, and
+   * ch. 9.1 leaves it there. What is asserted here is the other half of the
+   * claim: that the values reaching the card are the ones the API actually
+   * answered with, nulls included, after a real request, a real prerender and
+   * a real browser. A fixture cannot go stale against a payload it is the
+   * only copy of.
+   */
   test("renders every field the CMS filled in, and omits the ones it left empty", async ({
     page,
     request,
@@ -176,8 +188,25 @@ test.describe("with nothing published", () => {
    * the answer to it is that the section was never here: eyebrow, heading,
    * intro and pill leave with the cards, so the page has no empty frame in it.
    */
-  test("has no Featured Properties section at all", async ({ page }) => {
-    await page.goto(site("no-properties").url);
+  const { cmsUrl, url } = site("no-properties");
+
+  test("has no Featured Properties section at all", async ({
+    page,
+    request,
+  }) => {
+    /**
+     * Asked of the CMS first, so a section that is missing because the stub
+     * was misconfigured cannot pass as a section correctly hidden. An empty
+     * set is a 200 with an empty array, never a 404 (API-SPEC ch. 3.5).
+     */
+    const response = await request.get(
+      `${cmsUrl}/api/v1/properties?limit=${FEATURED_PROPERTY_COUNT}`,
+    );
+
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toEqual({ data: [], meta: { count: 0 } });
+
+    await page.goto(url);
 
     await expect(page.getByRole("region", { name: HEADING })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: HEADING })).toHaveCount(0);

@@ -53,19 +53,23 @@ export interface Site {
   distDir: string;
 }
 
-export const SITES: readonly Site[] = CMS_STATES.map((cms) => ({
-  cms,
-  url: `http://${HOST}:${WEB_PORTS[cms]}`,
-  cmsUrl: `http://${HOST}:${CMS_PORTS[cms]}`,
-  // Under `.next` rather than beside it, so the one directory every tool here
-  // already ignores covers these too.
-  distDir: `.next/e2e/${cms}`,
-}));
-
+/**
+ * Everything about a world is derived from the state it is named for, so this
+ * is a description rather than a lookup and there is no table to fall out of
+ * step with `CMS_STATES`.
+ */
 export function site(cms: CmsState): Site {
-  // `SITES` is built from `CMS_STATES`, so this cannot miss.
-  return SITES.find((candidate) => candidate.cms === cms)!;
+  return {
+    cms,
+    url: `http://${HOST}:${WEB_PORTS[cms]}`,
+    cmsUrl: `http://${HOST}:${CMS_PORTS[cms]}`,
+    // Under `.next` rather than beside it, so the one directory every tool
+    // here already ignores covers these too.
+    distDir: `.next/e2e/${cms}`,
+  };
 }
+
+export const SITES: readonly Site[] = CMS_STATES.map(site);
 
 /** The two states that answer at all, and so the two stubs to start. */
 export const STUBS = SITES.filter((candidate) => candidate.cms !== "stopped");

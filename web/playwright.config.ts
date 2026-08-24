@@ -10,9 +10,8 @@ import { MEDIA_HOST, SITES } from "./e2e/servers.ts";
  * homepage shows cards, the section disappears on empty data, the fallback
  * appears when the CMS is down, and the mobile navigation opens and closes.
  *
- * Three servers rather than one, because the homepage is prerendered and the
- * CMS state is therefore fixed at build time. `e2e/servers.ts` is the table of
- * them and carries the reasoning; `e2e/run.mts` builds them.
+ * Three servers rather than one. `e2e/servers.ts` is the table of them and
+ * carries the reason; `e2e/run.mts` builds them.
  *
  * Chromium alone. What this suite tests is the frontend against three states
  * of its own API, which is not a thing browsers disagree about, and the
@@ -66,12 +65,8 @@ export default defineConfig({
     env: {
       NEXT_DIST_DIR: site.distDir,
       CMS_API_URL: site.cmsUrl,
-      /**
-       * `next.config.ts` is read again by `next start`, and the image
-       * allowlist it builds is applied per request rather than baked in. So
-       * the media host has to be given to the server as well as to the build,
-       * or the optimiser refuses the very pictures the build linked to.
-       */
+      /** The server needs this as well as the build, for the reason
+       *  `MEDIA_HOST` carries in `e2e/servers.ts`. */
       NEXT_PUBLIC_MEDIA_HOST: MEDIA_HOST,
       SITE_URL: site.url,
     },

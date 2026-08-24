@@ -37,5 +37,5 @@
     ".next/e2e/stopped/types/**/*.ts",
     ".next/e2e/stopped/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next/e2e"]
+  "exclude": ["node_modules"]
 }

@@ -257,6 +257,7 @@ The rule is enforced from both ends, against the key list in ch. 3.3 written out
 | `cms/tests/Feature/Api/V1/PropertyIndexTest.php` | The resource returning a different key set from the documented one, asserted against a real response |
 | `web/src/types/property.test.ts` | The TypeScript interface drifting from the same list. `tsc` locks its fixtures to the interface, and the assertions lock the fixtures to the list |
 | `web/src/lib/api/properties.ts` | The same drift at run time, on a real response rather than a fixture. Its field table is typed `Record<keyof Property, ...>`, so a field added to the interface and not to the table fails `tsc`: the check cannot fall behind the contract it checks |
+| `web/e2e/stub-cms.mts` | The same drift in the payload the end to end suite answers with. Its fixtures are declared `Property[]`, so a stand-in that has stopped describing the real response fails `tsc` rather than quietly testing the frontend against a payload the CMS no longer sends |
 
 Neither test asks the code under test what its fields are. A test that does cannot notice the code returning the wrong thing.
 

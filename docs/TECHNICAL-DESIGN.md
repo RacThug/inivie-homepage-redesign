@@ -309,11 +309,11 @@ Re-run on 24 August 2026 for #19, from a `git clone` into an empty directory wit
 | Check | Result |
 | --- | --- |
 | `npm install` | 472 packages in 16s on Node 24.13.0, no vulnerabilities |
-| `npm run build` with no `.env.local` | **Succeeds.** Seven routes built, one line of warning in the output: `[api/properties] CMS_API_URL is not set, so there is no API to call` |
+| `npm run build` with no `.env.local` | **Succeeds.** Five routes built, one line of warning in the output: `[api/properties] CMS_API_URL is not set, so there is no API to call` |
 | The homepage in that state | `200`, every other section rendered, and Featured Properties with its heading, its blurb, its View All link and no cards. F5 behaving exactly as specified, and the reason a missing `.env.local` gets its own paragraph in the README |
 | `cp .env.example .env.local`, no edits | Enough on its own. Both addresses in it already point at `localhost:8000`, where the CMS block leaves the API and the images |
 | `npm run build && npm start` | `200` in 31ms warm. Six property cards, of the seven published of eight seeded |
-| `GET /_next/image?url=...localhost:8000/storage/properties/...` | `200 image/jpeg`, 2.7KB at 256px. The optimiser reaches the CMS disk through the `storage:link` symlink, which is the pair of steps that fail together and separately |
+| `GET /_next/image?url=...localhost:8000/storage/properties/...` | `200 image/jpeg`, around 3KB at 256px. The optimiser reaches the CMS disk through the `storage:link` symlink, which is the pair of steps that fail together and separately |
 | `npm run dev` | Ready in 0.4s, `.env.local` named in its own startup output |
 | `robots.txt`, `sitemap.xml` | `200` and `200`, both built from `SITE_URL` |
 | `POST /api/revalidate` with no secret set | `401`, the documented refusal of ch. 3.3 |

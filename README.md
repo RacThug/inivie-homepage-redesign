@@ -225,16 +225,18 @@ What the frontend run produced, in order:
 | Step | Result |
 | --- | --- |
 | `npm install` | 472 packages in 16s, no vulnerabilities |
-| `npm run build` | Compiled and typechecked, seven routes, the homepage prerendered with a 1 minute revalidate |
+| `npm run build` | Compiled and typechecked in 19s, five routes, the homepage prerendered with a 1 minute revalidate |
 | `npm run dev` | Ready in 0.4s, `.env.local` picked up by name in its own output |
 | The homepage, against the CMS | 200. Six property cards, the number Featured Properties asks for, of the seven published of eight seeded: the eighth is unpublished in the seed data on purpose, so the publish toggle has something to show |
-| The pictures | `next/image` optimises them off the CMS through the storage symlink, `200 image/jpeg`, 2.7KB for a card at 256px |
+| The pictures | `next/image` optimises them off the CMS through the storage symlink, `200 image/jpeg`, around 3KB for a card at 256px |
 | `robots.txt`, `sitemap.xml`, `POST /api/revalidate` | 200, 200, and 401 with no secret set, which is the documented refusal |
 | `npm test` | 359 Vitest tests in 41 files, green |
 | `npm run lint`, `npm run typecheck`, `npm run format:check` | Clean |
 | The same build with no `.env.local` | 200, and Featured Properties with no cards. The failure the note above describes, reproduced rather than predicted |
 
 Two of those rows were red the first time and are green because of it, both of them defects a reviewer would have met before anybody else did. `npm run format:check` failed on `next-env.d.ts`, a file Next writes itself, gitignores, and marks as not to be edited: it lands with CRLF endings from `next build` on Windows and Prettier wants LF, so the gate failed on a file nobody in this repository owns. It is in `web/.prettierignore` now. And `npm test` failed once, on the very first run of the suite and never again, in the test that opens the calendar: that grid is `lazy`-imported, so the first click on the date field was also the first time Vitest transformed `react-day-picker`, which took 1.4s warm and longer than the ten second wait on a cold clone with eight workers competing for the disk. The module is imported at the top of that test file now, which moves the cost into the file's import phase where no test timeout is running. A suite that fails once on the first run and passes forever after is worse than one that fails every time, and a reviewer's first `npm test` is exactly that run.
+
+**On the ten minutes A15 asks for.** The frontend block is about forty seconds of that: sixteen for `npm install`, nineteen for the build, and the rest is typing. The time goes to the CMS, and how much depends on the path and on what is already on the machine: the Docker path pays once for pulling `php:8.5-cli` and building the image on top of it, the native path pays `composer install` instead. No total is quoted here, because a number that depends on the state of a reviewer's Docker cache is not a number worth printing, and none was measured on a cold one.
 
 ---
 

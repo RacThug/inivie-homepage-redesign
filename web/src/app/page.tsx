@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ComponentType } from "react";
 
 import { CulinaryJourney } from "@/components/sections/CulinaryJourney";
@@ -45,6 +46,18 @@ export const SECTIONS: readonly (readonly [Section, SectionTone])[] = [
   [FeaturedIn, "alt"],
   [Faq, "surface"],
 ];
+
+/**
+ * The canonical URL of PRD ch. 8.3, resolved against the `metadataBase` the
+ * layout sets from `SITE_URL`.
+ *
+ * It sits on the page rather than on the layout because that is what it
+ * describes. A canonical on the shell would tell a crawler that every route
+ * built under it is this one.
+ */
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 /**
  * The homepage. It composes sections in order and holds no logic of its own,

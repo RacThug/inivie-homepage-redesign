@@ -61,6 +61,8 @@ Verified directly against `https://inivie.com` and `https://blog.inivie.com` on 
 
 Production fonts: **Poppins**, **Inter**, **Lato**, and **Great Vibes** (script, used as an accent). Dominant production colours: navy `#1C2434`, orange `#FF8737` and `#FF8432`, gold `#C9A779`, neutrals `#F0F0F0` and `#AAB1BB`. These feed the token set in [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md).
 
+**Correction, 24 August 2026.** Neither orange above is the one production puts on a control. Sampling the live Search button pixel by pixel returns `#FD6501`: same hue 24 and saturation, eleven points of lightness below `#FF8737`. This audit had read the accent off lighter elements, so the token set it fed carried a paler orange than the client's for the whole of the build. The colour of record is `#FD6501` and DESIGN-SYSTEM ch. 2.1 holds it; the two values above stay written down because they are what the audit saw, and mistaking a page's most common orange for its accent is the kind of error worth leaving legible.
+
 **Production API authentication model (probed against public endpoints)**
 
 | Probe | Result | Conclusion |

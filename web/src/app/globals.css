@@ -12,8 +12,8 @@
   /* Colour - DESIGN-SYSTEM ch. 2.1 */
   --color-ink: #1c2434;
   --color-ink-muted: #4a5468;
-  --color-accent: #ff8737;
-  --color-accent-hover: #f46100;
+  --color-accent: #fd6501;
+  --color-accent-hover: #e05a00;
   --color-gold: #c9a779;
   --color-gold-dark: #8e6a39;
   --color-surface: #ffffff;
@@ -31,11 +31,18 @@
   --color-on-ink-muted: #b0b7c2;
 
   /**
-   * Text on an accent fill. Measured, not assumed: white on `accent` reaches
-   * only 2.39 to 1, so the fallback named in DESIGN-SYSTEM ch. 2.2 applies and
-   * accented controls carry `ink` text at 6.49 to 1.
+   * Text on an accent fill.
+   *
+   * `#ff8737` was recorded here as the brand orange, but sampling production's
+   * own Search button gives `#fd6501`: the same hue 24 and saturation, eleven
+   * points darker. The first draft had read the accent off a lighter element.
+   *
+   * White on that fill measures 2.98 to 1, so this pairing does not clear the
+   * 4.5 AA asks for and neither does production's. It is a deliberate
+   * deviation, recorded in DESIGN-SYSTEM ch. 2.2 rather than hidden: the
+   * client's live control is what the redesign matches.
    */
-  --color-on-accent: var(--color-ink);
+  --color-on-accent: var(--color-surface);
 
   /* Typography - DESIGN-SYSTEM ch. 3. Suffixed tokens are the desktop step. */
   --font-heading: var(--font-poppins);

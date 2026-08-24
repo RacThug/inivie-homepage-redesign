@@ -66,6 +66,35 @@ describe("Faq", () => {
     });
   });
 
+  /**
+   * The rules span the column and the content sits inside them. Flush was the
+   * first treatment: the marker then ended level with the end of its own rule
+   * and read as clipped rather than placed, and the hover band bled into the
+   * section's margin instead of reading as a row.
+   */
+  describe("the row inset", () => {
+    it("holds the question and its marker off the ends of the rule", () => {
+      render(<Faq />);
+
+      const summary = screen
+        .getByRole("heading", { name: FAQ.entries[0].question })
+        .closest("summary");
+
+      expect(summary).toHaveClass("px-2", "sm:px-4");
+    });
+
+    /** So an answer starts under the first letter of its question rather than
+     *  two pixels to the left of it. */
+    it("puts the answer on the same inset as its question", () => {
+      render(<Faq />);
+
+      expect(screen.getByText(FAQ.entries[0].answer)).toHaveClass(
+        "px-2",
+        "sm:px-4",
+      );
+    });
+  });
+
   /** Brief ch. 4.11: a centred column of roughly 900px. This and the welcome
    *  block are the two places on the page where centring is correct. */
   it("centres the heading over a capped column", () => {

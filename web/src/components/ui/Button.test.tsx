@@ -53,12 +53,60 @@ describe("Button", () => {
       expect(screen.getByRole("button")).toHaveClass("border-ink", "text-ink");
     });
 
+    /**
+     * An outline has no fill of its own to darken, and the tint it used to
+     * take on hover, `surface-alt` on `surface`, is a 1.25 to 1 step that a
+     * visitor cannot see happen. Inverting reuses the two colours the variant
+     * already names rather than reaching for a third.
+     */
+    it("inverts the secondary outline on hover rather than tinting it", () => {
+      render(<Button variant="secondary">Enquire</Button>);
+
+      expect(screen.getByRole("button")).toHaveClass(
+        "hover:bg-ink",
+        "hover:text-surface",
+      );
+    });
+
     it("renders the ghost variant as text only", () => {
       render(<Button variant="ghost">Enquire</Button>);
       const button = screen.getByRole("button");
 
       expect(button).toHaveClass("text-ink");
       expect(button).not.toHaveClass("bg-accent");
+    });
+
+    /**
+     * The affordance has to be there before a pointer is. Underline on hover
+     * alone left "About us" reading as the paragraph it follows, and a touch
+     * screen has no hover to reveal it with at all.
+     */
+    it("draws the ghost underline at rest, not only on hover", () => {
+      render(<Button variant="ghost">About us</Button>);
+      const label = screen.getByText("About us");
+
+      expect(label).toHaveClass("underline", "decoration-muted");
+      expect(label).toHaveClass("group-hover/ghost:decoration-ink");
+    });
+
+    it("ends a ghost link with a chevron, hidden from assistive technology", () => {
+      const { container } = render(<Button variant="ghost">About us</Button>);
+      const chevron = container.querySelector("svg");
+
+      expect(chevron).not.toBeNull();
+      expect(chevron).toHaveAttribute("aria-hidden");
+      expect(screen.getByRole("button")).toHaveAccessibleName("About us");
+    });
+
+    /**
+     * A named group, because a property card sets a plain `group` for its
+     * image scale: an unnamed one here would nudge the chevron whenever the
+     * pointer was anywhere on the card.
+     */
+    it("scopes the ghost hover to its own control", () => {
+      render(<Button variant="ghost">About us</Button>);
+
+      expect(screen.getByRole("button")).toHaveClass("group/ghost");
     });
 
     /**
@@ -218,6 +266,23 @@ describe("Button", () => {
         "text-on-accent",
       );
     });
+  });
+
+  /**
+   * `UNAVAILABLE` replaces the variant outright, so an inert control is no
+   * longer a text link. Leaving the underline and the chevron on it would be
+   * the affordance pointing at a destination that was explicitly declared
+   * absent.
+   */
+  it("drops the ghost affordance when the destination is absent", () => {
+    const { container } = render(
+      <Button href={null} variant="ghost">
+        About us
+      </Button>,
+    );
+
+    expect(container.querySelector("svg")).toBeNull();
+    expect(screen.getByText("About us")).not.toHaveClass("underline");
   });
 
   /** A text link, so it sits flush with the copy it follows. A button's

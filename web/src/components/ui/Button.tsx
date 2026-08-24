@@ -57,9 +57,21 @@ const VARIANTS: Record<ButtonVariant, Record<ButtonTone, string>> = {
     light: "px-5 bg-accent text-on-accent hover:bg-accent-hover",
     dark: "px-5 bg-accent text-on-accent hover:bg-accent-hover",
   },
+  /**
+   * An outlined pill, so hover has no fill of its own to darken and has to
+   * come from somewhere else. It inverts: the border colour floods in and the
+   * label flips to the ground it was drawn on.
+   *
+   * The tint this used to carry, `surface-alt` on `surface`, is a 1.25 to 1
+   * step. That is the separator token doing a state's job, and on a real
+   * screen it is not a state at all - a visitor moving a pointer over "All
+   * restaurants" saw nothing move. Inverting uses the two colours already in
+   * the variant rather than inventing a third, and `surface` on `ink` is
+   * measured at 15.54 to 1 in palette.test.ts.
+   */
   secondary: {
-    light: "px-5 border border-ink text-ink hover:bg-surface-alt",
-    dark: "px-5 border border-surface text-surface hover:bg-surface/10",
+    light: "px-5 border border-ink text-ink hover:bg-ink hover:text-surface",
+    dark: "px-5 border border-surface text-surface hover:bg-surface hover:text-ink",
   },
   /**
    * A text link, so it carries no horizontal padding: a button's inset would
@@ -68,10 +80,21 @@ const VARIANTS: Record<ButtonVariant, Record<ButtonTone, string>> = {
    *
    * On ink it is `gold`, the one colour that carries text on that ground at
    * 6.87 to 1. `ink` there would disappear.
+   *
+   * The affordance is at rest, not on hover. Underline-on-hover leaves "About
+   * us" indistinguishable from the paragraph above it until a pointer happens
+   * to cross it, and a touch screen has no pointer to cross it with: the link
+   * is invisible as a link for the whole time anyone is reading. So the rule
+   * is always drawn and the chevron is always there, and hover deepens the
+   * rule and nudges the chevron rather than conjuring either one.
+   *
+   * A named group, because a property card sets a plain `group` for its image
+   * scale and an unnamed `group-hover:` here would fire whenever the card
+   * beneath the pointer did.
    */
   ghost: {
-    light: "text-ink underline-offset-4 hover:underline",
-    dark: "text-gold underline-offset-4 hover:underline",
+    light: "group/ghost text-ink",
+    dark: "group/ghost text-gold",
   },
   /**
    * A filled ink pill, for a section's own secondary control. PRD ch. 6.2 asks
@@ -98,6 +121,52 @@ const FOCUS: Record<ButtonTone, string> = {
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink",
   dark: "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface",
 };
+
+/**
+ * Resting and hovered underline for the ghost variant, per ground.
+ *
+ * `muted` is the resting rule on a light surface. It is a decorative use of a
+ * token that may never carry text (DESIGN-SYSTEM ch. 2.2), which is exactly
+ * what a 2px rule is, and it is the quietest colour on the page that is still
+ * unmistakably drawn. `border` was the other candidate and is the same 1.25 to
+ * 1 that made the old secondary hover invisible.
+ *
+ * It sits on an inner span rather than on the control, so the chevron beside
+ * it is not underlined too.
+ */
+const GHOST_UNDERLINE: Record<ButtonTone, string> = {
+  light:
+    "underline decoration-muted decoration-2 underline-offset-4 transition-[text-decoration-color] group-hover/ghost:decoration-ink",
+  dark: "underline decoration-gold/50 decoration-2 underline-offset-4 transition-[text-decoration-color] group-hover/ghost:decoration-gold",
+};
+
+/**
+ * The chevron that ends a ghost link.
+ *
+ * `-ml-1` against the control's own `gap-2`, which is spacing for a pair of
+ * words and too wide between a label and the mark that belongs to it.
+ *
+ * Decorative: the link already says where it goes, and "About us chevron
+ * right" is not a better announcement than "About us".
+ */
+function GhostChevron() {
+  return (
+    <svg
+      aria-hidden
+      className="-ml-1 flex-none transition-transform group-hover/ghost:translate-x-0.5"
+      fill="none"
+      height="14"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 16 16"
+      width="14"
+    >
+      <path d="M6 3.5L10.5 8L6 12.5" />
+    </svg>
+  );
+}
 
 function classes(
   variant: ButtonVariant,
@@ -129,13 +198,26 @@ export function Button({
   "aria-label": ariaLabel,
 }: ButtonProps) {
   const inert = href === null && !disabled;
-  const className = classes(
-    variant,
-    tone,
-    size,
-    fullWidth,
-    !disabled && !inert,
-  );
+  const available = !disabled && !inert;
+  const className = classes(variant, tone, size, fullWidth, available);
+
+  /**
+   * The ghost affordance is part of the variant, not of what a caller passes
+   * in, so callers keep writing `<Button variant="ghost">About us</Button>`.
+   *
+   * It is dropped when the control is unavailable: `UNAVAILABLE` replaces the
+   * variant outright, so an inert ghost is no longer a text link and an
+   * underline pointing at nothing would be the affordance lying.
+   */
+  const content =
+    variant === "ghost" && available ? (
+      <>
+        <span className={GHOST_UNDERLINE[tone]}>{children}</span>
+        <GhostChevron />
+      </>
+    ) : (
+      children
+    );
 
   /**
    * An explicitly absent destination. DESIGN-SYSTEM ch. 6.1 asks for muted and
@@ -145,13 +227,13 @@ export function Button({
    * here to announce as unavailable.
    */
   if (inert) {
-    return <span className={className}>{children}</span>;
+    return <span className={className}>{content}</span>;
   }
 
   if (href && !disabled) {
     return (
       <a aria-label={ariaLabel} className={className} href={href}>
-        {children}
+        {content}
       </a>
     );
   }
@@ -164,7 +246,7 @@ export function Button({
       onClick={onClick}
       type={type}
     >
-      {children}
+      {content}
     </button>
   );
 }

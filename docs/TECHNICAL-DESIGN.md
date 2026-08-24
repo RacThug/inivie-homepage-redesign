@@ -588,6 +588,10 @@ The sitemap lists one URL, because this project builds one route. The rest of in
 
 The social sharing image is `web/public/og-image.jpg`, 1200 by 630, cropped from the hero still. JPEG rather than the WebP it came from, because LinkedIn does not render WebP previews.
 
+**The favicon is the mandala, not the wordmark.** `web/src/app/favicon.ico` and `cms/public/favicon.ico` are the same file, built from `web/public/inivie-logo-light.png` by cropping the mandala out of it: the "iNi ViE" beneath the mark is illegible under about 100 pixels and contributes grey. The tile is solid `ink` with the mark in `surface`, which is the one treatment that stays visible on a light browser chrome and a dark one alike, and it is what replaced the Next.js scaffold's own icon, which had been shipping since the app was created.
+
+It holds 16, 32 and 48, and they are not the same drawing scaled three times. A line drawing of this density averages to grey when it is resampled to 16 pixels, so the 16 carries a larger mark with its alpha multiplied and the two bigger ones carry the drawing as it is. `apple-icon.png` is the same tile at 180, which Next turns into the `apple-touch-icon` link. The CMS declares its own copy in the shared head partial rather than relying on the browser's guess at `/favicon.ico`, so an admin with the panel and the site open can tell the two tabs apart.
+
 ### 7.3 Meeting the accessibility targets
 
 Semantic landmarks (`header`, `nav`, `main`, `section`, `footer`). Alternative text is guaranteed non-empty because `image_alt` is a required CMS field, which is the reason it is modelled as `not null` rather than nullable. The FAQ accordion uses native `details` and `summary` so it is keyboard operable without custom JavaScript. The mobile drawer traps focus and closes on Escape. Contrast pairings are validated against the token table in DESIGN-SYSTEM ch. 2.
@@ -752,6 +756,8 @@ inivie-homepage-redesign/
     ├── e2e/
     └── public/
         ├── og-image.jpg       1200 by 630, the social sharing card
+        ├── inivie-logo-*.png  the wordmark in both tones, and the source
+        │                      the favicon's mandala is cropped from
         └── home/              the section imagery, and the hero film
 
 `web/` has no `.gitignore` of its own. The root file covers both applications,

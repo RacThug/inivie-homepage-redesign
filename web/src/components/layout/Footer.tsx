@@ -207,7 +207,15 @@ export function Footer() {
           </section>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-surface/15 py-6 sm:flex-row sm:items-center sm:justify-between">
+        {/*
+          The bottom padding is 80px rather than the 24px above it because the
+          back to top control stands in this corner. It is fixed to the window,
+          so at the foot of the page it is fixed to the foot of this row, and
+          at 320px it sat across the end of "All Rights Reserved". The page
+          reserves the 64px the control occupies instead of letting a line of
+          type run underneath it.
+        */}
+        <div className="flex flex-col gap-3 border-t border-surface/15 pt-6 pb-20 sm:flex-row sm:items-center sm:justify-between">
           <a
             className={`inline-flex ${HIT_AREA} text-small text-surface underline-offset-4 hover:underline ${FOCUS_RING}`}
             href={LEGAL.policy.href}

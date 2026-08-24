@@ -1,10 +1,29 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Header } from "./Header";
 import { visibleText } from "./visibleText";
+
+/**
+ * There is no router in a test, and `usePathname` is how the wordmark knows
+ * whether the page it points at is the page the visitor is on. `vi.hoisted`
+ * because the factory below is lifted above the imports and would otherwise
+ * read the binding before it exists.
+ */
+const route = vi.hoisted(() => ({ pathname: "/" }));
+
+vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
+
+afterEach(() => {
+  route.pathname = "/";
+  vi.restoreAllMocks();
+});
+
+function wordmark() {
+  return screen.getByRole("link", { name: "iNi ViE" });
+}
 
 function openMenu() {
   return userEvent.click(screen.getByRole("button", { name: "Open menu" }));
@@ -40,6 +59,59 @@ describe("Header", () => {
     // Both tones are in the markup at once, so the crossfade on the first
     // scroll does not wait on a second file.
     expect(home.querySelectorAll("img")).toHaveLength(2);
+  });
+
+  describe("the wordmark", () => {
+    /**
+     * It is a link to `/`, and on the homepage that is the route the visitor
+     * is already on, which Next answers by doing nothing at all. Measured at
+     * the foot of the built homepage before this: scrollY 12628 before the
+     * click, 12628 after. The one control always on screen, and it was inert.
+     */
+    it("returns a homepage visitor to the top rather than doing nothing", () => {
+      const scrollTo = vi
+        .spyOn(window, "scrollTo")
+        .mockImplementation(() => {});
+
+      render(<Header />);
+
+      expect(fireEvent.click(wordmark())).toBe(false);
+      expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", top: 0 });
+    });
+
+    /** cmd or ctrl click on a wordmark is how a visitor opens the homepage in
+     *  a second tab. Scrolling the page they are reading instead would take
+     *  that away and give them something they did not ask for. */
+    it("leaves a modified click to the browser", () => {
+      const scrollTo = vi
+        .spyOn(window, "scrollTo")
+        .mockImplementation(() => {});
+
+      render(<Header />);
+      const link = wordmark();
+      link.addEventListener("click", (event) => event.preventDefault());
+
+      fireEvent.click(link, { metaKey: true });
+
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
+
+    /** On any other route it is an ordinary link again, and the navigation is
+     *  the whole point of it. */
+    it("still navigates from a page that is not the homepage", () => {
+      const scrollTo = vi
+        .spyOn(window, "scrollTo")
+        .mockImplementation(() => {});
+
+      route.pathname = "/about";
+      render(<Header />);
+      const link = wordmark();
+      link.addEventListener("click", (event) => event.preventDefault());
+
+      fireEvent.click(link);
+
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
   });
 
   it("carries no booking control, because the hero's panel is the one", () => {

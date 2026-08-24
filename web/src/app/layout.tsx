@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 
+import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SITE } from "@/content/site";
@@ -123,6 +124,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <Footer />
+
+        {/*
+          Last in the document as well as last on the page, so the control
+          that returns a visitor to the top is the final stop of a walk
+          through it rather than something the tab order meets on the way.
+        */}
+        <BackToTop />
       </body>
     </html>
   );

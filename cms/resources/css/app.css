@@ -207,9 +207,14 @@
 
     /* The optional title row, separated by a 1px rule. The negative margins
        pull the rule out to the panel edge, where a divider belongs; padding
-       it inward would read as an underlined heading instead. */
+       it inward would read as an underlined heading instead.
+
+       The vertical padding is restated because `-mt-5` takes the panel's own
+       20px away with it, and a row that only pads its underside leaves the
+       heading sitting on the top border. 12px each side is the same 42px row
+       the data table header takes in ch. 8.5, on the same 13px label type. */
     .panel-title {
-        @apply -mx-5 -mt-5 mb-5 border-b border-border px-5 pb-3 text-[13px] leading-[18px] font-medium text-ink-muted;
+        @apply -mx-5 -mt-5 mb-5 border-b border-border px-5 py-3 text-[13px] leading-[18px] font-medium text-ink-muted;
     }
 
     /**

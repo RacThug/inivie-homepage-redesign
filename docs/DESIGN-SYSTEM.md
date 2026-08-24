@@ -821,7 +821,7 @@ Each is specified once here and reused by the issues named, rather than reinvent
 
 **Nav icon.** One per nav item, 20px, single stroke at 1.5px, `currentColor`, from one set. Icons exist for the rail in ch. 8.3, not for decoration: an item that cannot be drawn as a clear icon is a sign the nav is carrying something that is not a section.
 
-**Panel.** `surface` background, 1px `border`, 12px card radius, no shadow, 20px padding. An optional title row separated by a 1px `border` rule.
+**Panel.** `surface` background, 1px `border`, 12px card radius, no shadow, 20px padding. An optional title row separated by a 1px `border` rule, running to both panel edges and taking 12px above and below its label. That is the same 42px row on the same label type as the data table header below, which is what stops a panel with a title and a table beside it from reading as two different components. The row's own padding is stated rather than inherited: it is pulled out of the panel's 20px, so a row that padded only its underside would leave the heading sitting on the top border.
 
 **Stat tile.** A panel holding a label in label size `ink-muted`, then the figure in stat scale `ink`. The dashboard is two tiles, published and draft, side by side from 640px and stacked below it. A count of zero renders as `0`. An empty state is for a list with no rows, not for a counter that legitimately reads zero.
 

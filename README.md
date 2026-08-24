@@ -59,7 +59,7 @@ Lighthouse 13 and axe-core, against `next build && next start` on 24 August 2026
 
 | | Target | Measured |
 | --- | --- | --- |
-| Lighthouse Performance, mobile | at least 90 | **93** |
+| Lighthouse Performance, mobile | at least 90 | **92**, moving a point either way between runs |
 | Lighthouse Accessibility | - | **96** |
 | Lighthouse Best practices | - | **100** |
 | Lighthouse SEO | - | **100** |

@@ -544,14 +544,16 @@ One measured shortfall against RS2 is knowingly kept. In a carousel, the slides 
 
 | | Target | Simulated, Lighthouse's default | Devtools throttling |
 | --- | --- | --- | --- |
-| Performance | at least 90 | **93** | **98** |
-| Largest Contentful Paint | under 2.5s | 3.3s | **1.8s** |
+| Performance | at least 90 | **92** | **98** |
+| Largest Contentful Paint | under 2.5s | 3.3s to 3.4s | **1.8s** |
 | Cumulative Layout Shift | under 0.1 | **0** | **0** |
 | Total Blocking Time | under 200ms | **20ms** | **120ms** |
 | JavaScript, gzipped | under 150KB | 158KB | - |
 | Accessibility | - | 96 | 96 |
 | Best practices | - | 100 | 100 |
 | SEO | - | 100 | 100 |
+
+The performance score moves a point either way between runs, 91 to 93 over five; the figure above is the median. Everything else was stable.
 
 Two rows miss, and neither is fixed by writing different code here.
 

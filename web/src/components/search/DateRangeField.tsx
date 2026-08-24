@@ -1,13 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import type { DateRange } from "react-day-picker";
 
-import { Calendar } from "@/components/ui/Calendar";
+import { CalendarSkeleton } from "@/components/ui/CalendarSkeleton";
 import { FieldPopover, type FieldChrome } from "@/components/ui/FieldPopover";
 import { SEARCH_PANEL } from "@/content/hero";
 import { addDays, formatStay, nightsBetween, toIso } from "@/lib/dates";
 import { useMediaQuery } from "@/lib/useMediaQuery";
+
+/**
+ * The grid, fetched the first time somebody opens this field.
+ *
+ * `react-day-picker` is 32KB gzipped, which is a fifth of the 150KB PRD
+ * ch. 8.2 allows the whole route, spent on a control most visits never open.
+ * `FieldPopover` renders its children only while the panel is open, so the
+ * import is not merely deferred: it is never requested at all unless the
+ * field is used. The type import above survives the split, being erased.
+ *
+ * `lazy` rather than `next/dynamic`, because the fallback has to be told how
+ * many months it is standing in for, and `next/dynamic` gives its `loading`
+ * component no props.
+ */
+const Calendar = lazy(async () => ({
+  default: (await import("@/components/ui/Calendar")).Calendar,
+}));
 
 interface DateRangeFieldProps {
   chrome: FieldChrome;
@@ -59,17 +76,19 @@ export function DateRangeField({ chrome, today }: DateRangeFieldProps) {
         value={from ? formatStay(from, to) : SEARCH_PANEL.datesEmpty}
       >
         {(close) => (
-          <Calendar
-            fromDate={today}
-            months={months}
-            onSelect={(next) => {
-              setRange(next);
-              // Both ends chosen and nothing left to say, so the panel gets
-              // out of the way rather than waiting to be dismissed.
-              if (next?.from && next.to) close();
-            }}
-            selected={range}
-          />
+          <Suspense fallback={<CalendarSkeleton months={months} />}>
+            <Calendar
+              fromDate={today}
+              months={months}
+              onSelect={(next) => {
+                setRange(next);
+                // Both ends chosen and nothing left to say, so the panel gets
+                // out of the way rather than waiting to be dismissed.
+                if (next?.from && next.to) close();
+              }}
+              selected={range}
+            />
+          </Suspense>
         )}
       </FieldPopover>
     </>

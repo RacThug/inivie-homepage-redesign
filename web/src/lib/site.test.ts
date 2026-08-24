@@ -5,7 +5,17 @@ import { siteOrigin, siteUrl } from "./site";
 const original = process.env.SITE_URL;
 
 afterEach(() => {
-  process.env.SITE_URL = original;
+  /*
+    Deleted rather than assigned back when there was nothing there. Assigning
+    `undefined` to a key of `process.env` stores the five character string
+    "undefined", which is neither unset nor a URL, and the next test in the
+    file would read it as a malformed value.
+  */
+  if (original === undefined) {
+    delete process.env.SITE_URL;
+  } else {
+    process.env.SITE_URL = original;
+  }
 });
 
 describe("siteOrigin", () => {
@@ -26,10 +36,9 @@ describe("siteOrigin", () => {
   it.each([
     ["unset", undefined],
     ["empty", "   "],
-    ["missing its scheme", "inivie.com"],
   ])("falls back to localhost when it is %s", (_case, value) => {
-    // Loudly wrong in the emitted canonical, rather than a build that refuses
-    // to produce a page because a metadata value was mistyped.
+    // The local case, and the only one where an absent value is an answer
+    // rather than a mistake.
     if (value === undefined) {
       delete process.env.SITE_URL;
     } else {
@@ -37,6 +46,17 @@ describe("siteOrigin", () => {
     }
 
     expect(siteOrigin()).toBe("http://localhost:3000");
+  });
+
+  /**
+   * Set but unparseable is a typo, and the failure to avoid is the quiet one:
+   * a deployment whose canonical, sitemap and sharing card all point at
+   * localhost, with nothing saying so until a crawler has believed it.
+   */
+  it("refuses a value that is not a URL", () => {
+    process.env.SITE_URL = "inivie.com";
+
+    expect(() => siteOrigin()).toThrow(/SITE_URL is not a URL/);
   });
 });
 

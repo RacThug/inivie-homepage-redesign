@@ -8,6 +8,9 @@ import { HERO_IMAGE, HERO_VIDEO } from "@/content/hero";
  * `HeroMedia` decides which cut to fetch once per page load and caches it in
  * module scope, so every case here needs a module that has not decided yet.
  */
+/** What `document.readyState` currently answers, so a test can move it. */
+let state: DocumentReadyState = "complete";
+
 interface Conditions {
   /** What `navigator.connection` reports, where anything reports it. */
   connection?: { saveData?: boolean; effectiveType?: string };
@@ -48,9 +51,6 @@ async function renderWith(
   const { HeroMedia } = await import("./HeroMedia");
   return render(<HeroMedia />);
 }
-
-/** What `document.readyState` currently answers, so a test can move it. */
-let state: DocumentReadyState = "complete";
 
 /** The browser reaching the end of the load: `readyState` settles on
  *  "complete" and the event fires, in that order. */

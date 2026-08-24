@@ -520,6 +520,12 @@ Measured on 24 August 2026 against `next build && next start`, in Lighthouse 13.
 
 **Responsive.** No horizontal scroll at 320, 375, 390, 768, 1024, 1440 or 1920: `document.scrollWidth` equals `clientWidth` at every one, and no element's box crosses either edge. No console errors at any width. RS6's three widths are captured in `docs/screenshots/`.
 
+RS4, per breakpoint image sizes, holds. A phone at 375 with a 2x screen is served nothing wider than the 750px variant; the 1920px one appears only at 768 with a 2x screen, which genuinely asks for 1536 device pixels, and at 1440. RS5 holds too: the longest title in the seed data, "Nusa Penida Guide: Beaches, Boat Times and Trip Costs in Bali", sets on two lines inside its two line clamp at all three widths, and every element reporting a horizontal overflow is `sr-only`, which is what `sr-only` is.
+
+**Keyboard.** One walk from the top of the document to the end of the footer at 1440: 112 stops, beginning at the skip link and ending on the footer's policy link before focus leaves the page. Every stop draws an outline; none is focusable while invisible. The drawer of RS3 opens on Enter with focus on its close button, holds focus for twenty tabs without leaking, locks the page behind it, closes on Escape and hands focus back to the button that opened it.
+
+**Reduced motion.** With the operating system setting emulated: no `<video>` element mounts, zero `.mp4` requests are made, the media ribbon reports `paused`, and every transition duration collapses to 0.00001s. Without it: the film mounts, one `.mp4` is fetched, the ribbon runs, transitions are 200ms.
+
 **Accessibility.** axe-core across the WCAG 2.0 A and AA, 2.1 A and AA, 2.2 AA, best practice and experimental rule sets, at 375px and at 1440px.
 
 | Rule | Before | After |

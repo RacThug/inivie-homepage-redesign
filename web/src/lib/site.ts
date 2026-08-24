@@ -16,12 +16,15 @@
 const FALLBACK = "http://localhost:3000";
 
 /**
- * The origin, with no trailing slash.
+ * The origin, with no trailing slash. `siteUrl` below is the one that
+ * resolves a path against it, and its result carries one.
  *
- * A malformed value falls back rather than throwing. A site that will not
- * build because someone typed `inivie.com` without a scheme has turned a
- * metadata problem into an outage, and the fallback is visible in the emitted
- * `<link rel="canonical">` the moment anybody looks.
+ * Unset is the local case and takes the fallback. Set but unparseable is a
+ * typo, and it throws: everything downstream is a URL somebody else will read
+ * back - a canonical, a sitemap, a sharing card - so the failure to avoid is
+ * the quiet one, where a deployment ships pointing at localhost and nothing
+ * says so until a crawler has believed it. This runs while the page's
+ * metadata is built, so the build is where it stops.
  */
 export function siteOrigin(): string {
   const configured = process.env.SITE_URL?.trim();
@@ -31,7 +34,9 @@ export function siteOrigin(): string {
   try {
     return new URL(configured).origin;
   } catch {
-    return FALLBACK;
+    throw new Error(
+      `SITE_URL is not a URL: ${configured}. It wants a scheme and a host, as in https://inivie.com.`,
+    );
   }
 }
 

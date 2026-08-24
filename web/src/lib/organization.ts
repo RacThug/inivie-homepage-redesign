@@ -1,6 +1,6 @@
-import { SITE } from "@/content/site";
 import { HEAD_OFFICE, SOCIAL_LINKS } from "@/content/footer";
 import { BRAND_LOGO } from "@/content/navigation";
+import { SITE } from "@/content/site";
 import { siteUrl } from "@/lib/site";
 
 /**

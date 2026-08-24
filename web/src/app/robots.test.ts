@@ -1,12 +1,24 @@
 import { afterEach, describe, expect, it } from "vitest";
 
+import { siteOrigin } from "@/lib/site";
+
 import robots from "./robots";
 import sitemap from "./sitemap";
 
 const original = process.env.SITE_URL;
 
 afterEach(() => {
-  process.env.SITE_URL = original;
+  /*
+    Deleted rather than assigned back when there was nothing there. Assigning
+    `undefined` to a key of `process.env` stores the five character string
+    "undefined", which is neither unset nor a URL, and the next test in the
+    file would read it as a malformed value.
+  */
+  if (original === undefined) {
+    delete process.env.SITE_URL;
+  } else {
+    process.env.SITE_URL = original;
+  }
 });
 
 describe("robots.txt", () => {
@@ -18,7 +30,12 @@ describe("robots.txt", () => {
     process.env.SITE_URL = "https://inivie.com";
 
     expect(robots().sitemap).toBe("https://inivie.com/sitemap.xml");
-    expect(robots().host).toBe("https://inivie.com/");
+  });
+
+  /** A Yandex extension wanting a bare hostname, in a file where everything
+   *  else is a URL, to settle what the canonical link already settles. */
+  it("writes no Host line", () => {
+    expect(robots().host).toBeUndefined();
   });
 });
 
@@ -45,5 +62,6 @@ describe("sitemap.xml", () => {
     expect(new URL(sitemap()[0].url).origin).toBe(
       new URL(robots().sitemap as string).origin,
     );
+    expect(new URL(sitemap()[0].url).origin).toBe(siteOrigin());
   });
 });

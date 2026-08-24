@@ -12,8 +12,9 @@ import {
 
 /*
   Imported for its side effect on the module graph, not for anything it
-  exports. The date field loads this grid with `lazy`, so the first click on
-  that field is also the first time Vitest transforms `react-day-picker`.
+  exports, and it has to name the same module `DateRangeField` lazy-loads:
+  that field loads this grid with `lazy`, so the first click on it is also
+  the first time Vitest transforms `react-day-picker`.
   Naming it here pays that cost during this file's own import phase, which no
   test timeout covers, rather than inside the wait in "opens a calendar":
   measured at 1.4s on a warm cache with this file running alone, and past ten

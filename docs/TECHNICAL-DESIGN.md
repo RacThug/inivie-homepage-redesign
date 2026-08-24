@@ -209,7 +209,7 @@ The README's own two blocks, Docker and native, are not that failure repeated. T
 
 #### Compose scope
 
-Two services, `app` and `mysql`, in a file short enough to read in full. Laravel Sail was considered and set aside: it is the ecosystem convention and instantly recognisable, but it generates configuration rather than expressing a decision, and its defaults carry services this project has no use for. In a test that grades code quality, a short file that a reviewer can read end to end is the better artefact.
+Three services, `app`, `mysql` and `phpmyadmin`, in a file short enough to read in full. The first two are the application; the third is a browser for the database, added for goal G6 so that a reviewer can look at the seeded rows without installing a client, and it is annotated in the file as deletable on its own. Laravel Sail was considered and set aside: it is the ecosystem convention and instantly recognisable, but it generates configuration rather than expressing a decision, and its defaults carry services this project has no use for. In a test that grades code quality, a short file that a reviewer can read end to end is the better artefact.
 
 `php artisan serve` is used rather than nginx with php-fpm. A reverse proxy would add a container and a config file to serve a single local application, buying nothing that matters before production.
 
@@ -244,7 +244,7 @@ Run on 22 August 2026:
 | `artisan storage:link` | Created. The `public` disk is served through this symlink, so it is in the README setup block. It was in the `composer setup` script alone until #27, which was a gap rather than a division of labour: the README's Docker path runs `composer install` and then artisan commands directly, so it never invoked `composer setup`, and a reviewer following it got a populated database and a 403 on every picture. An upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above. That script is gone as of #32, per the chapter above |
 | Admin property CRUD end to end | Signed in, created a property with a real upload, saw the thumbnail render from `/storage/properties/`, edited it, and cancelled a delete from the confirm modal. Chromium at 1440px and 375px, no console errors |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
-| `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
+| `GET /api/v1/properties` | The 3 rows of the default page in `sort_order`, that default being `limit=3` and not the number of published rows (API-SPEC ch. 3.1), `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
 | `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` against MySQL, `Cache-Control: no-store` |
 | Native path | **Verified separately on 24 August 2026**, in its own section below |
 
@@ -259,7 +259,7 @@ Run on 24 August 2026 for #32, from a `git clone` into an empty directory with n
 | `artisan key:generate` with no `.env` | **Fails, loudly.** `file_get_contents(/app/.env): Failed to open stream`, raised as an `ErrorException` at `KeyGenerateCommand.php:105`, exit code 1, no file written. #32 predicted a silent empty `.env` from reading the two guards on the lines below it; Laravel's error handler converts the warning into an exception before either guard is reached, so the setup stops there instead of continuing on a broken configuration. The better of the two outcomes, and the missing line is the same bug either way |
 | `cp .env.example .env`, then the block in order | Every command green: `composer install`, `key:generate` (`APP_KEY` written into `.env`), `migrate --seed` (4 migrations, both seeders), `storage:link`, and `npm install && npm run build` on the host |
 | `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` |
-| `GET /api/v1/properties` | The 3 published seed rows, `max-age=60, public`, `X-Robots-Tag: noindex` |
+| `GET /api/v1/properties` | The 3 rows of the default page, `max-age=60, public`, `X-Robots-Tag: noindex` |
 | `GET /storage/properties/leedon-villa-seminyak.webp` | `200 image/webp`, 42,536 bytes. The seeded imagery of #27 arrives through the symlink with nothing downloaded |
 | `GET /admin`, `GET /admin/login` | `302` to the login screen, then `200` serving the compiled `app-*.css` and `app-*.js` from `public/build/` |
 | Native path | Run the same day, from its own fresh clone. Its record is the section below |
@@ -310,9 +310,9 @@ Re-run on 24 August 2026 for #19, from a `git clone` into an empty directory wit
 | --- | --- |
 | `npm install` | 472 packages in 16s on Node 24.13.0, no vulnerabilities |
 | `npm run build` with no `.env.local` | **Succeeds.** Five routes built, one line of warning in the output: `[api/properties] CMS_API_URL is not set, so there is no API to call` |
-| The homepage in that state | `200`, every other section rendered, and Featured Properties with its heading, its blurb, its View All link and no cards. F5 behaving exactly as specified, and the reason a missing `.env.local` gets its own paragraph in the README |
+| The homepage in that state | `200`, all eleven sections rendered, and Featured Properties among them with its heading, its blurb, its View All link and no cards. F5 behaving exactly as specified, and the reason a missing `.env.local` gets its own paragraph in the README |
 | `cp .env.example .env.local`, no edits | Enough on its own. Both addresses in it already point at `localhost:8000`, where the CMS block leaves the API and the images |
-| `npm run build && npm start` | `200` in 31ms warm. Six property cards, of the seven published of eight seeded |
+| `npm run build && npm start` | `200` in 31ms warm, and six property cards, the number the section asks for. The CMS answering was the running one rather than a freshly seeded database, so it held seven published rows against the seeder's six; a fresh seed is six published of eight (DATA-MODEL ch. 4), which fills the section exactly |
 | `GET /_next/image?url=...localhost:8000/storage/properties/...` | `200 image/jpeg`, around 3KB at 256px. The optimiser reaches the CMS disk through the `storage:link` symlink, which is the pair of steps that fail together and separately |
 | `npm run dev` | Ready in 0.4s, `.env.local` named in its own startup output |
 | `robots.txt`, `sitemap.xml` | `200` and `200`, both built from `SITE_URL` |

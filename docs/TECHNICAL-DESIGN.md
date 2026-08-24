@@ -129,7 +129,7 @@ Decoupling also allows each side to be optimised independently: the frontend for
 
 | Part | How it runs | Why |
 | --- | --- | --- |
-| `cms/` and MySQL | Docker Compose | Pins PHP 8.5 and MySQL 8.4 exactly, with no PHP installation on the developer's machine. Installing PHP on Windows means enabling extensions by hand, and MySQL installers routinely leave conflicting services behind |
+| `cms/` and MySQL | Docker Compose | Pins PHP 8.5 and MySQL 8.4 exactly, with no PHP installation on the developer's machine. Both halves of that were measured on 24 August 2026 rather than assumed: a native PHP on Windows arrives with no `php.ini` and every extension switched off, and the MySQL MSI lays down a server with no data directory and no service. See the native verification below |
 | `web/` | Native `npm run dev` | Next watches thousands of files. Through a Windows bind mount that is slow and hot reload misfires. Running it natively costs nothing, because Node is already the exact target version |
 
 Splitting the two is not a compromise. The Laravel container only runs `artisan serve`, so bind mount latency barely touches it, while a Next dev server is precisely the workload it punishes.
@@ -246,7 +246,7 @@ Run on 22 August 2026:
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
 | `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
 | `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` against MySQL, `Cache-Control: no-store` |
-| Native path | **Not verified.** This machine has no PHP or MySQL |
+| Native path | **Verified separately on 24 August 2026**, in its own section below |
 
 The warm figure is the useful one. At ~50ms through a Windows bind mount, the earlier claim that `artisan serve` is barely affected by bind mount latency holds, and no volume tuning is warranted.
 
@@ -262,9 +262,29 @@ Run on 24 August 2026 for #32, from a `git clone` into an empty directory with n
 | `GET /api/v1/properties` | The 3 published seed rows, `max-age=60, public`, `X-Robots-Tag: noindex` |
 | `GET /storage/properties/leedon-villa-seminyak.webp` | `200 image/webp`, 42,536 bytes. The seeded imagery of #27 arrives through the symlink with nothing downloaded |
 | `GET /admin`, `GET /admin/login` | `302` to the login screen, then `200` serving the compiled `app-*.css` and `app-*.js` from `public/build/` |
-| Native path | **Still not verified.** This machine has no PHP or MySQL outside Docker. The README marks that path as unverified rather than implying otherwise |
+| Native path | Run the same day, from its own fresh clone. Its record is the section below |
 
 The Compose project was isolated on purpose. A verification run that borrows the database, the `vendor/` or the built assets sitting on the machine cannot tell a documented step from a step that happened to have been taken already, which is how a README passes review and fails a reviewer.
+
+##### The native path, run the same day
+
+Run on 24 August 2026 for #32, on Windows 11 with Docker stopped and out of the loop: PHP 8.5.8 (VS17 x64, winget `PHP.PHP.8.5`), Composer 2.10.2, MySQL 8.4.9 (winget `Oracle.MySQL`), Node already present. Its own fresh clone, its own database.
+
+| Check | Result |
+| --- | --- |
+| Getting PHP to run at all | The install ships **no `php.ini`**. Without one, `curl`, `fileinfo`, `mbstring`, `openssl`, `pdo_mysql` and `zip` are all off, so Composer cannot unpack a dist archive and Laravel cannot reach MySQL. Copying `php.ini-development` to `php.ini` and uncommenting `extension_dir` plus those six is the entire fix. It is in the README now |
+| `pdo_sqlite` | The one the framework's required-extension list does not mention. `phpunit.xml` runs the suite on SQLite in memory, so without it all 192 tests error with `could not find driver` while the application itself serves perfectly. `php:8.5-cli` ships it, which is exactly why this could only surface here |
+| Getting MySQL to run at all | The MSI lays down files and stops: no data directory, no service, nothing listening. `mysqld --initialize-insecure`, `mysqld --install`, then start it. Left on Manual startup so it does not fight Compose for 3306 at every boot |
+| `CREATE DATABASE` and the `GRANT`, as the README writes them | Correct as written. `'inivie'@'localhost'` does match the TCP connection Laravel opens to `127.0.0.1`, which is the detail that could have made it wrong |
+| The two edited `.env` lines | `DB_HOST=127.0.0.1` and `FRONTEND_INTERNAL_URL=http://localhost:3000`, and nothing else. The rule in the table above holds as stated |
+| `composer install`, `key:generate`, `migrate --seed` | Green. 4 migrations, both seeders |
+| `artisan storage:link` | Created, as an NTFS **junction** rather than a symlink. Laravel falls back to one on Windows, so neither administrator rights nor Developer Mode are needed. The failure everyone expects at this line does not happen |
+| `npm install && npm run build` | The same `app-*.css` and `app-*.js` build hashes as the Docker run |
+| `artisan test` | **192 passed**, 533 assertions, 8.9s. The container takes 31s for the same suite |
+| `vendor/bin/pint --test` | Clean |
+| `artisan serve`, then the API, image and admin checks | Identical to the Docker rows: health `200`, the 3 published rows with the same three headers, the seeded `.webp` at `200 image/webp` and 42,536 bytes, `/admin` `302` into a `200` login page serving the compiled assets |
+
+Two things are worth keeping. **The application needed no change of any kind**, which turns ch. 2.4's claim about Docker-unaware code from an argument into a measurement. And every real obstacle was in the runtime rather than in this project: a PHP that installs with everything switched off, and an installer that lays down a database without starting one. That is the trade Docker buys, stated in the form of what it costs not to take it.
 
 #### Frontend verification status
 

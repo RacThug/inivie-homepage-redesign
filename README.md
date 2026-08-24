@@ -153,7 +153,9 @@ npm install && npm run build
 php artisan serve                 # http://localhost:8000, as the container did
 ```
 
-**This path is documented but unverified.** The machine this was built on has no PHP and no MySQL outside Docker, so the steps above are derived from the verified ones rather than executed. The application is built not to care which one you took - no container hostname reaches `config/`, and deleting `cms/docker-compose.yml` leaves a working Laravel application - but that is an argument about the code, not a run, and what Compose does for you around the code is what this section has to make up for.
+**PHP on Windows arrives with its extensions switched off.** A fresh install has no `php.ini` at all: copy `php.ini-development` next to it as `php.ini`, then uncomment `extension_dir = "ext"` and the lines for `curl`, `fileinfo`, `mbstring`, `openssl`, `pdo_mysql` and `zip`. Add `pdo_sqlite` as well if you intend to run the test suite, which uses SQLite in memory rather than your MySQL. Miss `pdo_mysql` and Laravel starts cleanly and dies on the first query; miss `pdo_sqlite` and all 192 tests fail with `could not find driver` while the site itself works perfectly. The container has all of them already, and that is the single biggest practical difference between the two paths.
+
+**This path was run on 24 August 2026 and it works.** A fresh clone on Windows 11, against PHP 8.5.8 and MySQL 8.4.9 installed natively, no Docker involved: every command above, then 192 Pest tests and `vendor/bin/pint --test` green, and the same API, image and admin checks the Docker path gets. Nothing in the application had to change for it - the whole cost was the `php.ini` in the paragraph above. [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4 has the full record.
 
 ### Looking at the database
 

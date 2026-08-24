@@ -239,14 +239,18 @@ That is why `SectionHeading` does not place the link and takes no `action`. The 
 | Variant | Treatment |
 | --- | --- |
 | Primary | `accent` background, text per ch. 2.2, 8px radius, `accent-hover` on hover |
-| Secondary | Transparent background, 1px `ink` border, `ink` text |
+| Secondary | Transparent background, 1px `ink` border, `ink` text. Inverts to an `ink` fill with `surface` text on hover |
 | Ink | `ink` background, `surface` text, lightening to `ink-muted` on hover |
-| Ghost | Text only in `ink`, underline on hover |
+| Ghost | Text only in `ink`, under a `muted` 2px rule that darkens to `ink` on hover, followed by a chevron that nudges right |
 | Disabled | `muted` text on `border` background, no pointer events |
 
 The ink variant is a section's own secondary control, one step below the accent fill so that a "View All Family" pill never competes with the call to action on the cards beneath it. PRD ch. 6.2 asks for it by name on Featured Properties. Its hover fill is `ink-muted` rather than an unnamed shade, because `ink-muted` is the one declared colour between ink and the page and `surface` on it is measured at AA in `palette.test.ts` rather than assumed.
 
+The secondary variant inverts on hover rather than tinting. An outline has no fill of its own to darken, and the tint it carried first, `surface-alt` on `surface`, is a 1.25 to 1 step: the separator token doing a state's job, and on a real screen not a state at all. Inverting reuses the two colours the variant already names instead of reaching for a third, and `surface` on `ink` is measured at 15.54.
+
 The ghost variant carries no horizontal padding, because it is a text link: a button's inset would push it out of line with the paragraph it follows, and there is no fill there for the inset to be inside of.
+
+Its affordance is drawn at rest, not conjured on hover. Underline-on-hover leaves a ghost link indistinguishable from the paragraph above it until a pointer happens to cross it, and a touch screen never crosses it at all, so the link is invisible as a link for the whole time anybody is reading. The rule and the chevron are therefore always present; hover deepens the rule from `muted` to `ink` and moves the chevron two pixels. The rule uses `muted` as a decorative colour, which ch. 2.2 permits and ch. 2.1 restricts it to: `border` was the other candidate and is the same 1.25 to 1 that made the old secondary hover invisible. Both are dropped when the control is inert, because `UNAVAILABLE` replaces the variant outright and an underline pointing at a destination declared absent is the affordance lying.
 
 The disabled and inert treatments **replace** the variant rather than layering over it. Combining them leaves two backgrounds and two text colours on one element, and which renders comes down to the order the utilities happen to be emitted in.
 

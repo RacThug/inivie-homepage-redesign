@@ -7,3 +7,8 @@ package-lock.json
 # last, so on Windows a fresh clone that has only built fails `format:check` on
 # a file nobody in this repository owns.
 next-env.d.ts
+
+# Written by Playwright, gitignored, and nothing here is hand edited.
+playwright-report
+test-results
+blob-report

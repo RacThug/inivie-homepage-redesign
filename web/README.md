@@ -8,11 +8,11 @@ Runs on http://localhost:3000. Node 24, no Docker.
 
 `src/types/property.ts` and `../cms/app/Http/Resources/PropertyResource.php` describe the same payload. They change in the same commit.
 
-| Topic | Document |
-| --- | --- |
-| Colour, typography, spacing, motion, breakpoints, components | [`../docs/DESIGN-SYSTEM.md`](../docs/DESIGN-SYSTEM.md) |
-| Endpoint contract, caching, revalidation, failure behaviour | [`../docs/API-SPEC.md`](../docs/API-SPEC.md) |
-| Rendering and caching, frontend composition | [`../docs/TECHNICAL-DESIGN.md`](../docs/TECHNICAL-DESIGN.md) ch. 3 and ch. 4 |
-| What was measured, and how the targets are met | [`../docs/TECHNICAL-DESIGN.md`](../docs/TECHNICAL-DESIGN.md) ch. 7 |
+| Topic                                                        | Document                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Colour, typography, spacing, motion, breakpoints, components | [`../docs/DESIGN-SYSTEM.md`](../docs/DESIGN-SYSTEM.md)                       |
+| Endpoint contract, caching, revalidation, failure behaviour  | [`../docs/API-SPEC.md`](../docs/API-SPEC.md)                                 |
+| Rendering and caching, frontend composition                  | [`../docs/TECHNICAL-DESIGN.md`](../docs/TECHNICAL-DESIGN.md) ch. 3 and ch. 4 |
+| What was measured, and how the targets are met               | [`../docs/TECHNICAL-DESIGN.md`](../docs/TECHNICAL-DESIGN.md) ch. 7           |
 
 `AGENTS.md` here is generated: `next dev` rewrites its rules block on every run.

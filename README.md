@@ -97,7 +97,12 @@ php artisan serve                 # http://localhost:8000, as the container did
 ```bash
 cd cms && composer test && vendor/bin/pint --test    # 192 Pest tests
 cd web && npm run lint && npm run typecheck && npm test && npm run format:check
+
+cd web && npx playwright install chromium            # one download, once
+cd web && npm run test:e2e                           # 7 Playwright tests
 ```
+
+The end to end suite needs neither the CMS nor a database. It builds the frontend three times against a stub, once per state the API can be in, because the homepage is prerendered and a build is therefore where that state is decided ([docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 9.1). That is what lets it prove requirement A14: the homepage still renders, cleanly and whole, with Laravel stopped. It takes about a minute, most of it the three builds.
 
 Lighthouse on the production build, `npm run build && npm start`, measured 24 August 2026: **92** performance on mobile, **96** accessibility, **100** best practices, **100** SEO, CLS 0. The full record, including the one accepted contrast exception, is in [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 7.4.
 

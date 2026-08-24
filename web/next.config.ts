@@ -25,6 +25,16 @@ const isLocalCms = LOOPBACK.has(new URL(`http://${MEDIA_HOST}`).hostname);
 const origin = `${isLocalCms ? "http" : "https"}://${MEDIA_HOST}`;
 
 const nextConfig: NextConfig = {
+  /**
+   * `.next`, unless something asks for somewhere else. The end to end suite
+   * does: it builds the site once per CMS state, and three builds sharing one
+   * directory would share one incremental cache and overwrite each other's
+   * prerendered homepage. See `e2e/servers.ts` for why there are three.
+   *
+   * Nothing but that suite sets it, so an ordinary build is unaffected.
+   */
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
+
   images: {
     // One pinned host, every path under it. The host is the boundary here;
     // narrowing the path as well would break on a move to object storage,

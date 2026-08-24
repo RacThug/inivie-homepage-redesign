@@ -209,7 +209,7 @@ The README's own two blocks, Docker and native, are not that failure repeated. T
 
 #### Compose scope
 
-Two services, `app` and `mysql`, in a file short enough to read in full. Laravel Sail was considered and set aside: it is the ecosystem convention and instantly recognisable, but it generates configuration rather than expressing a decision, and its defaults carry services this project has no use for. In a test that grades code quality, a short file that a reviewer can read end to end is the better artefact.
+Three services, `app`, `mysql` and `phpmyadmin`, in a file short enough to read in full. The first two are the application; the third is a browser for the database, added for goal G6 so that a reviewer can look at the seeded rows without installing a client, and it is annotated in the file as deletable on its own. Laravel Sail was considered and set aside: it is the ecosystem convention and instantly recognisable, but it generates configuration rather than expressing a decision, and its defaults carry services this project has no use for. In a test that grades code quality, a short file that a reviewer can read end to end is the better artefact.
 
 `php artisan serve` is used rather than nginx with php-fpm. A reverse proxy would add a container and a config file to serve a single local application, buying nothing that matters before production.
 
@@ -244,7 +244,7 @@ Run on 22 August 2026:
 | `artisan storage:link` | Created. The `public` disk is served through this symlink, so it is in the README setup block. It was in the `composer setup` script alone until #27, which was a gap rather than a division of labour: the README's Docker path runs `composer install` and then artisan commands directly, so it never invoked `composer setup`, and a reviewer following it got a populated database and a 403 on every picture. An upload that lands correctly and 404s in the browser is the same silent, correct-looking failure as the two recorded above. That script is gone as of #32, per the chapter above |
 | Admin property CRUD end to end | Signed in, created a property with a real upload, saw the thumbnail render from `/storage/properties/`, edited it, and cancelled a delete from the confirm modal. Chromium at 1440px and 375px, no console errors |
 | `GET localhost:8000` | `200`, 1.65s cold and roughly 50ms warm |
-| `GET /api/v1/properties` | The 3 published seed rows in `sort_order`, `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
+| `GET /api/v1/properties` | The 3 rows of the default page in `sort_order`, that default being `limit=3` and not the number of published rows (API-SPEC ch. 3.1), `max-age=60, public`, `X-Robots-Tag: noindex`, and `Access-Control-Allow-Origin: http://localhost:3000`. `?limit=13` and `?category=hostel` both `422`, `POST` `405` |
 | `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` against MySQL, `Cache-Control: no-store` |
 | Native path | **Verified separately on 24 August 2026**, in its own section below |
 
@@ -259,7 +259,7 @@ Run on 24 August 2026 for #32, from a `git clone` into an empty directory with n
 | `artisan key:generate` with no `.env` | **Fails, loudly.** `file_get_contents(/app/.env): Failed to open stream`, raised as an `ErrorException` at `KeyGenerateCommand.php:105`, exit code 1, no file written. #32 predicted a silent empty `.env` from reading the two guards on the lines below it; Laravel's error handler converts the warning into an exception before either guard is reached, so the setup stops there instead of continuing on a broken configuration. The better of the two outcomes, and the missing line is the same bug either way |
 | `cp .env.example .env`, then the block in order | Every command green: `composer install`, `key:generate` (`APP_KEY` written into `.env`), `migrate --seed` (4 migrations, both seeders), `storage:link`, and `npm install && npm run build` on the host |
 | `GET /api/v1/health` | `200 {"status":"ok","database":"connected"}` |
-| `GET /api/v1/properties` | The 3 published seed rows, `max-age=60, public`, `X-Robots-Tag: noindex` |
+| `GET /api/v1/properties` | The 3 rows of the default page, `max-age=60, public`, `X-Robots-Tag: noindex` |
 | `GET /storage/properties/leedon-villa-seminyak.webp` | `200 image/webp`, 42,536 bytes. The seeded imagery of #27 arrives through the symlink with nothing downloaded |
 | `GET /admin`, `GET /admin/login` | `302` to the login screen, then `200` serving the compiled `app-*.css` and `app-*.js` from `public/build/` |
 | Native path | Run the same day, from its own fresh clone. Its record is the section below |
@@ -301,6 +301,33 @@ Run on 22 August 2026, natively on Node 24.13.0:
 | `npm start`, then `GET localhost:3000` | `200`. Tokens, both fonts, and the reduced motion block all present in the served CSS |
 
 The last row is the one worth keeping. A token can be declared in `globals.css`, pass every unit test, and still not reach the browser if Tailwind never picks the theme block up, so the compiled stylesheet was read rather than assumed.
+
+##### The frontend block, run from a fresh clone
+
+Re-run on 24 August 2026 for #19, from a `git clone` into an empty directory with no `.env.local`, no `node_modules/` and no `.next/`, against the CMS on `localhost:8000`. The production server was given its own port rather than 3000, which a development server already held, so that nothing already running could answer for it.
+
+| Check | Result |
+| --- | --- |
+| `npm install` | 472 packages in 16s on Node 24.13.0, no vulnerabilities |
+| `npm run build` with no `.env.local` | **Succeeds.** Five routes built, one line of warning in the output: `[api/properties] CMS_API_URL is not set, so there is no API to call` |
+| The homepage in that state | `200`, all eleven sections rendered, and Featured Properties among them with its heading, its blurb, its View All link and no cards. F5 behaving exactly as specified, and the reason a missing `.env.local` gets its own paragraph in the README |
+| `cp .env.example .env.local`, no edits | Enough on its own. Both addresses in it already point at `localhost:8000`, where the CMS block leaves the API and the images |
+| `npm run build && npm start` | `200` in 31ms warm, and six property cards, the number the section asks for. The CMS answering was the running one rather than a freshly seeded database, so it held seven published rows against the seeder's six; a fresh seed is six published of eight (DATA-MODEL ch. 4), which fills the section exactly |
+| `GET /_next/image?url=...localhost:8000/storage/properties/...` | `200 image/jpeg`, around 3KB at 256px. The optimiser reaches the CMS disk through the `storage:link` symlink, which is the pair of steps that fail together and separately |
+| `npm run dev` | Ready in 0.4s, `.env.local` named in its own startup output |
+| `robots.txt`, `sitemap.xml` | `200` and `200`, both built from `SITE_URL` |
+| `POST /api/revalidate` with no secret set | `401`, the documented refusal of ch. 3.3 |
+| `npm run lint`, `npm run typecheck` | Clean |
+| `npm run format:check` | **Failed**, and fixed. See below |
+| `npm test` | **Failed once**, on the first run of the suite, and fixed. See below |
+
+Two rows were red, and both were defects only a fresh clone could show.
+
+`format:check` failed on `next-env.d.ts`. Next writes that file itself, gitignores it, and marks it as not to be edited; on Windows `next build` writes it with CRLF endings and Prettier's default is LF. It had never been seen because the working copy on this machine had been touched by `next dev`, which writes it differently. A gate that fails on a generated file nobody in this repository owns is a gate a reviewer has to be told to ignore, so the file is in `web/.prettierignore` now rather than the rule being relaxed.
+
+`npm test` failed once, in `SearchPanel.test.tsx > opens a calendar`, and passed on every run after it. The grid is `lazy`-imported so the route does not ship 32KB of `react-day-picker` to visitors who never open the date field (ch. 7.1), which means the click in that test was also the first time Vitest transformed the module. Measured alone on a warm cache that transform is 1.4s, inside a wait that allowed ten; on a fresh clone's first run, with eight workers competing for a disk whose files no cache has seen, it went past the allowance. The test file now imports `@/components/ui/Calendar` for its side effect on the module graph, which moves the transform into the file's import phase, where no test timeout is running. The measured cost of that test fell from 1437ms to 354ms.
+
+The generous timeout is kept, as insurance on a loaded machine, but the test no longer rests on it. Raising it further would have been the other option and is the worse one: it treats a first run that fails as a first run that needs longer, and a suite that fails once and then passes forever is harder to trust than one that fails every time. A reviewer's first `npm test` is that run.
 
 ---
 

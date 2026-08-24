@@ -530,7 +530,7 @@ RS4, per breakpoint image sizes, holds. A phone at 375 with a 2x screen is serve
 
 | Rule | Before | After |
 | --- | --- | --- |
-| `color-contrast` | 6 to 7 nodes | 6 to 7 nodes, and every one is the single accepted deviation of DESIGN-SYSTEM ch. 2.2: white on production's orange, 2.98 |
+| `color-contrast` | 6 to 7 nodes | 6 to 7 nodes, and every one is `on-accent` on `accent`: the named exception of PRD ch. 8.4, measured in DESIGN-SYSTEM ch. 2.2 at 2.98 |
 | `label-content-name-mismatch` | 3 nodes | 0 |
 | `landmark-unique` | 1 node | 0 |
 | `target-size` | 9 nodes | 0 |
@@ -542,26 +542,28 @@ One measured shortfall against RS2 is knowingly kept. In a carousel, the slides 
 
 **Performance.** Lighthouse mobile, on the local production build. Both throttling methods are recorded because they disagree, and the disagreement is the finding.
 
+Targets are PRD ch. 8.2, as corrected there on 24 August 2026. That correction came out of this measurement: two of its rows were describing the wrong thing, and the paragraphs below are what showed it.
+
 | | Target | Simulated, Lighthouse's default | Devtools throttling |
 | --- | --- | --- | --- |
 | Performance | at least 90 | **92** | **98** |
-| Largest Contentful Paint | under 2.5s | 3.3s to 3.4s | **1.8s** |
+| Largest Contentful Paint | under 2.5s measured | 3.3s to 3.4s estimated | **1.8s** |
 | Cumulative Layout Shift | under 0.1 | **0** | **0** |
 | Total Blocking Time | under 200ms | **20ms** | **120ms** |
-| JavaScript, gzipped | under 150KB | 158KB | - |
+| Application JavaScript | under 50KB over the baseline | **45KB**, of 158KB in total | - |
 | Accessibility | - | 96 | 96 |
 | Best practices | - | 100 | 100 |
 | SEO | - | 100 | 100 |
 
 The performance score moves a point either way between runs, 91 to 93 over five; the figure above is the median. Everything else was stable.
 
-Two rows miss, and neither is fixed by writing different code here.
-
-**Largest Contentful Paint.** Lighthouse's default is Lantern, which models what the page would have done on a 1.6Mbps link rather than measuring it. Apply that same profile to the network for real and the number is 1.8s. Unthrottled it is 0.2s. The estimate is recorded first because it is what a reviewer running `lighthouse` with no arguments is shown.
+**Largest Contentful Paint, and why two numbers.** Lighthouse's default is Lantern, which models what the page would have done on a 1.6Mbps link rather than putting it on one. Apply that same profile to the network for real and the number is 1.8s. Unthrottled it is 0.2s. Both are kept because the estimate is what a reviewer running `lighthouse` with no arguments is shown, and an unexplained 3.3s beside a 2.5s target reads as a failure that nothing here would explain.
 
 Worth knowing either way: the element Chrome picks as largest is the header wordmark, not the hero photograph. Chrome will not accept an image covering the whole viewport as an LCP candidate, on the grounds that such an image is almost always a background, so the full bleed poster of PRD ch. 6.1 can never be this number whatever it costs. Verified by blocking the wordmark's request, after which the largest candidate falls to a 2,299 pixel span of text.
 
-**The JavaScript budget.** 158KB against 150KB. 113KB of that is React and the Next runtime, which is the floor for an App Router page and not ours to move. The 45KB above it is the twelve client components ch. 3.1 lists. Splitting `react-day-picker` out took the route from 176KB to 158KB, and the only remaining candidate of that size is the carousel; the carousel renders the cards, so deferring it would blank three sections of the page to save 13KB. The budget is missed by 8KB and the page is better for it.
+**The JavaScript budget, and why it is now two numbers.** 158KB in total. 113KB of that is React and the Next runtime, in two chunks that were checked for and contain no component of ours. The 45KB above it is the twelve client components ch. 3.1 lists, and it is the only part any decision here moves: splitting `react-day-picker` out took the route from 176KB to 158KB, and the only remaining candidate of that size is the carousel, which renders the cards, so deferring it would blank three sections of the page to save 13KB.
+
+A single 150KB total, which is what ch. 8.2 asked for before any of this was measured, was a budget on the framework rather than on the application: it left 37KB for everything this project writes. Budgeting the 45KB instead is the number that can actually be spent or saved.
 
 ---
 

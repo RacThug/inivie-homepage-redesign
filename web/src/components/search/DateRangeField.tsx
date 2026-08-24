@@ -12,8 +12,9 @@ import { useMediaQuery } from "@/lib/useMediaQuery";
 /**
  * The grid, fetched the first time somebody opens this field.
  *
- * `react-day-picker` is 32KB gzipped, which is a fifth of the 150KB PRD
- * ch. 8.2 allows the whole route, spent on a control most visits never open.
+ * `react-day-picker` is 32KB gzipped against the 50KB PRD ch. 8.2 allows
+ * this project's own code, so left in the route it would be two thirds of
+ * the budget spent on a control most visits never open.
  * `FieldPopover` renders its children only while the panel is open, so the
  * import is not merely deferred: it is never requested at all unless the
  * field is used. The type import above survives the split, being erased.

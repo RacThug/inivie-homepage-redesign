@@ -3,8 +3,8 @@
  *
  * `Calendar` is loaded on demand: `react-day-picker` is 32KB gzipped and no
  * visitor has it in front of them until they open the stay field, so it does
- * not belong in the bundle the homepage route ships (PRD ch. 8.2 puts the
- * budget at 150KB). `CalendarSkeleton` holds its place while it arrives, and
+ * not belong in the bundle the homepage route ships (PRD ch. 8.2 budgets this
+ * project's own code at 50KB). `CalendarSkeleton` holds its place, and
  * has to be the same size to the pixel or it causes the shift it exists to
  * prevent. Importing the sizes from `Calendar` would import `DayPicker` with
  * them and undo the split, so they live here and both files read them.

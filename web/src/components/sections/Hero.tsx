@@ -10,9 +10,9 @@ import { HeroMedia } from "@/components/sections/HeroMedia";
  * carries production's burned in copy, which is a decision recorded in
  * DESIGN-SYSTEM ch. 6.8 rather than an oversight here.
  *
- * The largest contentful paint is unchanged: `HeroMedia` paints the poster
- * with `priority` and mounts the film afterwards, so the number that PRD
- * ch. 8.2 sets a floor under is still a 143KB still.
+ * The film costs the page nothing before it is on screen: `HeroMedia`
+ * preloads the poster and does not ask for the film until the load event,
+ * so nothing PRD ch. 8.2 measures is waiting on 12MB of video.
  *
  * It runs full bleed under the fixed header, which is why `layout.tsx` gives
  * `main` no top offset. The header's resting state is transparent and reads
@@ -31,10 +31,15 @@ export function Hero() {
       panel inside the section makes that true by construction instead of by a
       margin that has to be re-tuned every time the panel's height changes.
     */
-    <section
-      aria-label="iNi ViE Hospitality"
-      className="relative h-screen min-h-120"
-    >
+    /*
+      Unnamed on purpose, so it is a plain container rather than a region.
+      Naming it "iNi ViE Hospitality" gave the page two landmarks with that
+      name, the other being the welcome block below, which is labelled by the
+      page's `h1` reading the same words. Nothing is lost: the poster
+      describes itself, the film is decorative, and the panel is already a
+      `form` landmark of its own.
+    */
+    <section className="relative h-screen min-h-120">
       <HeroMedia />
 
       <SearchDock />

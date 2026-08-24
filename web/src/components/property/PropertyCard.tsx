@@ -90,11 +90,18 @@ export function PropertyCard({ property }: PropertyCardProps) {
             block at `sm` lets the inline-flex button shrink back again.
           */}
           <div className="mt-3.5 flex flex-col sm:block">
-            <Button
-              aria-label={`View ${property.title}`}
-              href={property.cta_url}
-            >
+            <Button href={property.cta_url}>
               {PROPERTY_CARD_ACTION}
+              {/*
+                Six cards carry the same words, so each control has to say
+                which property it leads to. The title extends the label rather
+                than replacing it: an `aria-label` here made the accessible
+                name "View Leedon Villa Seminyak" while the button read "View
+                property", which fails WCAG 2.1 SC 2.5.3 and leaves anyone
+                driving the page by voice naming a control that no longer
+                answers to it.
+              */}
+              <span className="sr-only">, {property.title}</span>
             </Button>
           </div>
         </div>

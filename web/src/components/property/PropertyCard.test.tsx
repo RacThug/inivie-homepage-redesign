@@ -70,8 +70,31 @@ describe("PropertyCard", () => {
     renderCard();
 
     expect(
-      screen.getByRole("link", { name: "View Leedon Villa Seminyak" }),
+      screen.getByRole("link", {
+        name: "View property, Leedon Villa Seminyak",
+      }),
     ).toHaveAttribute("href", leedon.cta_url);
+  });
+
+  /**
+   * WCAG 2.1 SC 2.5.3, Label in Name.
+   *
+   * Six cards all reading "View property" have to be told apart, and the
+   * title was previously supplied as an `aria-label` that replaced the label
+   * instead of extending it. That leaves a speech input user saying "click
+   * view property" to a control that is no longer called that, which is the
+   * exact failure the criterion is about. The title is now appended in text
+   * that is only hidden visually, so the accessible name still opens with the
+   * words on the button.
+   */
+  it("opens the accessible name with the words on the control", () => {
+    renderCard();
+
+    const link = screen.getByRole("link", {
+      name: /^View property, /,
+    });
+
+    expect(link).toHaveTextContent("View property");
   });
 
   describe("rating", () => {

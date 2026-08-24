@@ -600,7 +600,10 @@ A ribbon, sliding left at about 55 pixels a second. Each mark sits in a fixed 40
 | Question | Body scale, medium weight, `ink`, left aligned inside the centred column |
 | Marker | A plus whose vertical stroke fades out when the row opens, `ink-muted`, right aligned on the row |
 | Hover | The row ground shifts to `surface-alt` |
-| Answer | Body scale, `ink-muted`, capped at the measure |
+| Answer | Body scale, `ink-muted`, capped at the measure, on the same inset as its question |
+| Inset | 8px each side, 16px from 640px. The rules run the full width of the column; the content does not |
+
+**The rules span the column and the content is inset from them.** Flush was the alternative and is what this had first: the marker then ends level with the end of its own rule and reads as clipped rather than placed, and the hover band bleeds into the section's margin instead of reading as a row. The inset narrows on a phone, where the section's own padding is already most of the gap to the screen edge and 16px more would push the questions into the middle of the screen.
 
 
 ### 6.16 The gold rule

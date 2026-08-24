@@ -44,13 +44,24 @@ export function Faq({ tone }: { tone?: SectionTone }) {
                 triangle. The marker below replaces it, and it is `aria-hidden`
                 because `details` already announces its own state.
               */}
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-left transition-colors hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink [&::-webkit-details-marker]:hidden">
+              {/*
+                The rules run the full width of the column and the content is
+                inset from them. Flush was the alternative and is what this
+                had: the marker then ends level with the end of its own rule
+                and reads as clipped rather than placed, and the hover band
+                bleeds into the section's margin instead of looking like a
+                row. Narrower on a phone, where the section's own padding is
+                already most of the gap to the screen edge.
+              */}
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-2 py-4 text-left transition-colors hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:px-4 [&::-webkit-details-marker]:hidden">
                 <h3 className="text-body font-medium text-ink lg:text-body-lg">
                   {entry.question}
                 </h3>
                 <PlusIcon />
               </summary>
-              <p className="max-w-measure pb-5 text-body text-ink-muted lg:text-body-lg">
+              {/* The same inset, so an answer starts under the first letter
+                  of its question rather than two pixels to the left of it. */}
+              <p className="max-w-measure px-2 pb-5 text-body text-ink-muted sm:px-4 lg:text-body-lg">
                 {entry.answer}
               </p>
             </details>

@@ -10,6 +10,19 @@ import {
   SEARCH_PANEL,
 } from "@/content/hero";
 
+/*
+  Imported for its side effect on the module graph, not for anything it
+  exports. The date field loads this grid with `lazy`, so the first click on
+  that field is also the first time Vitest transforms `react-day-picker`.
+  Naming it here pays that cost during this file's own import phase, which no
+  test timeout covers, rather than inside the wait in "opens a calendar":
+  measured at 1.4s on a warm cache with this file running alone, and past ten
+  seconds on a fresh clone's first run with eight workers competing for the
+  disk. That run is a reviewer's first `npm test`, which is the one that has
+  to pass.
+*/
+import "@/components/ui/Calendar";
+
 import { SearchPanel } from "./SearchPanel";
 
 /** The calendar asks how wide the window is, and jsdom does not volunteer. */
@@ -135,11 +148,12 @@ describe("SearchPanel", () => {
       ).toBeInTheDocument();
       /*
         Awaited, because the grid is 32KB of `react-day-picker` that the route
-        does not ship until this field is opened (PRD ch. 8.2). The timeout is
-        raised off the one second default deliberately: what is being waited
-        for here is Vitest transforming a module for the first time, and with
-        the whole suite running in parallel workers that has been seen to take
-        longer than a second on a cold cache.
+        does not ship until this field is opened (PRD ch. 8.2), so it arrives
+        through a Suspense boundary rather than in the click's own render.
+        The module itself is already in the graph, imported at the top of this
+        file, so what is left here is one boundary resolving. The generous
+        timeout stays as insurance on a loaded machine; it is no longer what
+        the correctness of this test rests on.
       */
       expect(
         await screen.findByRole("grid", {}, { timeout: 10_000 }),

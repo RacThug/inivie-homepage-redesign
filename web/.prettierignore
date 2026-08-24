@@ -1,3 +1,9 @@
 .next
 node_modules
 package-lock.json
+
+# Written by `next build` and `next dev`, gitignored, and marked "should not be
+# edited" by Next itself. Its line endings follow whichever of the two wrote it
+# last, so on Windows a fresh clone that has only built fails `format:check` on
+# a file nobody in this repository owns.
+next-env.d.ts

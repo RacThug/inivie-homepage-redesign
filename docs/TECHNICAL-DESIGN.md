@@ -302,6 +302,33 @@ Run on 22 August 2026, natively on Node 24.13.0:
 
 The last row is the one worth keeping. A token can be declared in `globals.css`, pass every unit test, and still not reach the browser if Tailwind never picks the theme block up, so the compiled stylesheet was read rather than assumed.
 
+##### The frontend block, run from a fresh clone
+
+Re-run on 24 August 2026 for #19, from a `git clone` into an empty directory with no `.env.local`, no `node_modules/` and no `.next/`, against the CMS on `localhost:8000`. The production server was given its own port rather than 3000, which a development server already held, so that nothing already running could answer for it.
+
+| Check | Result |
+| --- | --- |
+| `npm install` | 472 packages in 16s on Node 24.13.0, no vulnerabilities |
+| `npm run build` with no `.env.local` | **Succeeds.** Seven routes built, one line of warning in the output: `[api/properties] CMS_API_URL is not set, so there is no API to call` |
+| The homepage in that state | `200`, every other section rendered, and Featured Properties with its heading, its blurb, its View All link and no cards. F5 behaving exactly as specified, and the reason a missing `.env.local` gets its own paragraph in the README |
+| `cp .env.example .env.local`, no edits | Enough on its own. Both addresses in it already point at `localhost:8000`, where the CMS block leaves the API and the images |
+| `npm run build && npm start` | `200` in 31ms warm. Six property cards, of the seven published of eight seeded |
+| `GET /_next/image?url=...localhost:8000/storage/properties/...` | `200 image/jpeg`, 2.7KB at 256px. The optimiser reaches the CMS disk through the `storage:link` symlink, which is the pair of steps that fail together and separately |
+| `npm run dev` | Ready in 0.4s, `.env.local` named in its own startup output |
+| `robots.txt`, `sitemap.xml` | `200` and `200`, both built from `SITE_URL` |
+| `POST /api/revalidate` with no secret set | `401`, the documented refusal of ch. 3.3 |
+| `npm run lint`, `npm run typecheck` | Clean |
+| `npm run format:check` | **Failed**, and fixed. See below |
+| `npm test` | **Failed once**, on the first run of the suite, and fixed. See below |
+
+Two rows were red, and both were defects only a fresh clone could show.
+
+`format:check` failed on `next-env.d.ts`. Next writes that file itself, gitignores it, and marks it as not to be edited; on Windows `next build` writes it with CRLF endings and Prettier's default is LF. It had never been seen because the working copy on this machine had been touched by `next dev`, which writes it differently. A gate that fails on a generated file nobody in this repository owns is a gate a reviewer has to be told to ignore, so the file is in `web/.prettierignore` now rather than the rule being relaxed.
+
+`npm test` failed once, in `SearchPanel.test.tsx > opens a calendar`, and passed on every run after it. The grid is `lazy`-imported so the route does not ship 32KB of `react-day-picker` to visitors who never open the date field (ch. 7.1), which means the click in that test was also the first time Vitest transformed the module. Measured alone on a warm cache that transform is 1.4s, inside a wait that allowed ten; on a fresh clone's first run, with eight workers competing for a disk whose files no cache has seen, it went past the allowance. The test file now imports `@/components/ui/Calendar` for its side effect on the module graph, which moves the transform into the file's import phase, where no test timeout is running. The measured cost of that test fell from 1437ms to 354ms.
+
+The generous timeout is kept, as insurance on a loaded machine, but the test no longer rests on it. Raising it further would have been the other option and is the worse one: it treats a first run that fails as a first run that needs longer, and a suite that fails once and then passes forever is harder to trust than one that fails every time. A reviewer's first `npm test` is that run.
+
 ---
 
 ## 3. Rendering and Caching Strategy

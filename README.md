@@ -94,10 +94,11 @@ The original brief PDF is deliberately not committed. It is the client's documen
 
 ## Setup
 
-Full setup instructions will be verified from a fresh clone before submission, which is acceptance criterion A15 in the PRD. What is already runnable:
+The CMS block below was run from a genuinely fresh clone on 24 August 2026, top to bottom, and every line of it is here because it was needed. The frontend still has to join it before acceptance criterion A15 in the PRD is met.
 
 ```bash
 cd cms
+cp .env.example .env              # nothing else creates it, see below
 docker compose up -d --build      # PHP 8.5 and MySQL 8.4
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
@@ -107,6 +108,8 @@ docker compose exec app php artisan storage:link
 npm install && npm run build      # on your machine, not in the container
 ```
 
+**The first line is the one a fresh clone cannot do without.** `.env` is gitignored, which is how requirement S4 keeps credentials out of version control, so only `.env.example` is committed and a clone arrives with no environment file at all. Nothing else in the block creates one. `key:generate` writes the key **into** `.env`, it does not create the file, and with no file to write into it stops the setup dead with `file_get_contents(/app/.env): Failed to open stream` and a non-zero exit. Copy it before `docker compose up` rather than after, so that the credentials MySQL initialises its volume with are the ones in the file.
+
 **That last pair is not optional, and skipping it fails quietly.** Laravel compiles its own CSS and JS with Vite, `cms/public/build/` is gitignored, and the container carries PHP but no Node. Without it the API still answers correctly and `/admin` still returns 200, serving unstyled HTML. The reasoning is in [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4.
 
 **`storage:link` is not optional either.** `cms/public/storage` is gitignored, so a fresh clone has no symlink and the `public` disk is not reachable over HTTP. Skipping that line leaves every seeded picture a 403 with its alt text showing, in the CMS and on the homepage alike.
@@ -115,7 +118,44 @@ npm install && npm run build      # on your machine, not in the container
 
 The eight seeded properties come with their pictures. They are drawings committed at `cms/database/seeders/images/`, not photographs: this repository is public, and the photography on the live site is licensed stock that may not be redistributed. `migrate --seed` copies them onto the storage disk, so there is nothing to download. [docs/DATA-MODEL.md](./docs/DATA-MODEL.md) ch. 4 has the reasoning.
 
-Using your own PHP and MySQL instead of Docker? Two lines in `cms/.env` differ, and nothing else does. `DB_HOST` goes from `mysql` to `127.0.0.1`, and `FRONTEND_INTERNAL_URL` from `http://host.docker.internal:3000` to `http://localhost:3000`: inside a container, the frontend running on your machine is not on localhost. [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4 has the reasoning.
+### Using your own PHP and MySQL
+
+Skip Docker entirely. Two of the things the block above relies on were never commands in it, they were Compose: creating the database with its user, and running the server. Both are yours here, on top of the two addresses in `.env`.
+
+So, once, in your MySQL:
+
+```sql
+CREATE DATABASE inivie;
+CREATE USER 'inivie'@'localhost' IDENTIFIED BY 'secret';
+GRANT ALL PRIVILEGES ON inivie.* TO 'inivie'@'localhost';
+```
+
+Those three values are `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` from `.env.example`. Change them there instead if you would rather not have a database called `inivie` on your machine.
+
+Then copy the environment file and edit two addresses in it:
+
+```bash
+cd cms
+cp .env.example .env
+```
+
+`DB_HOST` goes from `mysql` to `127.0.0.1`, and `FRONTEND_INTERNAL_URL` from `http://host.docker.internal:3000` to `http://localhost:3000`. Those two are the only addresses that differ between the paths: inside a container, the frontend running on your machine is not on localhost, and here it is. [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4 has the reasoning.
+
+The rest is the Docker block with the prefix dropped, plus the server that Compose was starting:
+
+```bash
+composer install
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm install && npm run build
+
+php artisan serve                 # http://localhost:8000, as the container did
+```
+
+**PHP on Windows arrives with its extensions switched off.** A fresh install has no `php.ini` at all: copy `php.ini-development` next to it as `php.ini`, then uncomment `extension_dir = "ext"` and the lines for `curl`, `fileinfo`, `mbstring`, `openssl`, `pdo_mysql` and `zip`. Add `pdo_sqlite` as well if you intend to run the test suite, which uses SQLite in memory rather than your MySQL. Miss `pdo_mysql` and Laravel starts cleanly and dies on the first query; miss `pdo_sqlite` and all 192 tests fail with `could not find driver` while the site itself works perfectly. The container has all of them already, and that is the single biggest practical difference between the two paths.
+
+**This path was run on 24 August 2026 and it works.** A fresh clone on Windows 11, against PHP 8.5.8 and MySQL 8.4.9 installed natively, no Docker involved: every command above, then 192 Pest tests and `vendor/bin/pint --test` green, and the same API, image and admin checks the Docker path gets. Nothing in the application had to change for it - the whole cost was the `php.ini` in the paragraph above. [docs/TECHNICAL-DESIGN.md](./docs/TECHNICAL-DESIGN.md) ch. 2.4 has the full record.
 
 ### Looking at the database
 

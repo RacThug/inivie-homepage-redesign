@@ -15,6 +15,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+
+    /*
+      What `npm run test:e2e` leaves behind. Both are gitignored, and neither
+      was ignored here: the HTML report ships its own bundled JavaScript, so
+      running the end to end suite and then the linter turned a green gate
+      into three thousand problems in vendored code.
+    */
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

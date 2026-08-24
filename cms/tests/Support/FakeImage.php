@@ -10,8 +10,8 @@ use Illuminate\Http\UploadedFile;
  * `UploadedFile::fake()->image()` would be the obvious tool, and it is not
  * usable here: it draws with GD, and the development image in
  * cms/Dockerfile has no GD, because nothing in the application needs it. The
- * `image` and `dimensions` rules of ch. 5.3 read the file header through
- * `getimagesize()` and `finfo`, both of which are core PHP.
+ * `image` rule of ch. 5.3 reads the file header through `getimagesize()`
+ * and `finfo`, both of which are core PHP.
  *
  * Adding the extension to the image would make the suite depend on the one
  * environment that has it, which is exactly the coupling ch. 2.4 rules out:

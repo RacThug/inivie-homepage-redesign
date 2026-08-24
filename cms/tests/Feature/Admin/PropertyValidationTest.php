@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ImageFocus;
 use App\Models\Property;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -146,18 +147,50 @@ describe('image', function () {
         ]))->assertSessionHasErrors('image');
     });
 
-    it('rejects an image smaller than 800 by 600', function () {
-        // There is no server side resizing, so what passes here is what the
-        // homepage renders. See ch. 5.4.
+    it('takes a small image, because nothing floors the dimensions', function () {
+        // A floor of 800 by 600 stood here and was removed on purpose, so
+        // this pins the decision rather than leaving the hole where a test
+        // used to be. There is no server side resizing, so a small picture
+        // is rendered soft on a 400px card; that is a worse looking card
+        // rather than a broken one, and refusing an editor over it is an
+        // unusual thing for a CMS to do. See ch. 5.3.
         $this->post(route('admin.properties.store'), propertyForm([
-            'image' => FakeImage::png('small.png', 640, 480),
-        ]))->assertSessionHasErrors(['image' => 'The image must be at least 800 by 600 pixels.']);
+            'image' => FakeImage::png('small.png', 320, 240),
+        ]))->assertSessionHasNoErrors();
     });
 
     it('rejects an image over 2 MB', function () {
         $this->post(route('admin.properties.store'), propertyForm([
             'image' => FakeImage::png('huge.png', 1200, 900, padToKilobytes: 2100),
         ]))->assertSessionHasErrors(['image' => 'The image may not be larger than 2 MB.']);
+    });
+});
+
+describe('image focus', function () {
+    it('takes each of the three the enum names', function () {
+        foreach (ImageFocus::cases() as $index => $focus) {
+            $this->post(route('admin.properties.store'), propertyForm([
+                'title' => "Focus {$focus->value}",
+                'slug' => "focus-{$focus->value}",
+                'image_focus' => $focus->value,
+            ]))->assertSessionHasNoErrors();
+
+            expect(Property::where('slug', "focus-{$focus->value}")->value('image_focus'))
+                ->toBe($focus);
+        }
+    });
+
+    it('refuses a position that is not one of them', function () {
+        // The select offers three, so anything else is a request that did
+        // not come from the form, and the card has no CSS for it.
+        $this->post(route('admin.properties.store'), propertyForm([
+            'image_focus' => 'north-by-northwest',
+        ]))->assertSessionHasErrors('image_focus');
+    });
+
+    it('is required, because the form always sends one', function () {
+        $this->post(route('admin.properties.store'), propertyForm(['image_focus' => null]))
+            ->assertSessionHasErrors('image_focus');
     });
 });
 

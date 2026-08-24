@@ -1,4 +1,5 @@
 import type {
+  ImageFocus,
   Property,
   PropertyCategory,
   PropertyListResponse,
@@ -89,6 +90,12 @@ const CATEGORIES: ReadonlySet<string> = new Set<PropertyCategory>([
   "hotel",
 ]);
 
+const FOCUSES: ReadonlySet<string> = new Set<ImageFocus>([
+  "top",
+  "center",
+  "bottom",
+]);
+
 const FIELDS: Record<keyof Property, Check> = {
   id: isNumber,
   title: isString,
@@ -98,6 +105,7 @@ const FIELDS: Record<keyof Property, Check> = {
   excerpt: isString,
   image_url: isString,
   image_alt: isString,
+  image_focus: (value) => isString(value) && FOCUSES.has(value as string),
   price_from: orNull(isNumber),
   currency: isString,
   rating: orNull(isNumber),

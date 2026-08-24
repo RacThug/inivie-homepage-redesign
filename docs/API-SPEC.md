@@ -71,6 +71,7 @@ Both parameters are optional, and omitting one is the only way to get its defaul
       "excerpt": "Private pool villa steps away from Seminyak beach.",
       "image_url": "http://localhost:8000/storage/properties/leedon.webp",
       "image_alt": "Private pool at Leedon Villa Seminyak at dusk",
+      "image_focus": "center",
       "price_from": 3500000,
       "currency": "IDR",
       "rating": 4.8,
@@ -94,6 +95,7 @@ Both parameters are optional, and omitting one is the only way to get its defaul
 | `excerpt` | string | no | `excerpt` | Max 240 characters, guaranteed by the schema |
 | `image_url` | string | no | derived from `image_path` | Absolute URL |
 | `image_alt` | string | no | `image_alt` | Never empty, guaranteed by a not-null column |
+| `image_focus` | string | no | `image_focus` | One of `top`, `center`, `bottom`. Which part of the photograph the card's 4:3 crop keeps. Defaults to `center`, which is what every property carried before an editor could say otherwise |
 | `price_from` | integer | **yes** | `price_from` | Whole currency units. When null the card omits the price row entirely (rule D7) |
 | `currency` | string | no | `currency` | ISO 4217 |
 | `rating` | number | **yes** | `rating` | One decimal. When null the card omits the rating |
@@ -226,6 +228,8 @@ The response shape is declared once as a Laravel API Resource, `cms/app/Http/Res
 ```ts
 export type PropertyCategory = 'resort' | 'villa' | 'hotel'
 
+export type ImageFocus = 'top' | 'center' | 'bottom'
+
 export interface Property {
   id: number
   title: string
@@ -235,6 +239,7 @@ export interface Property {
   excerpt: string
   image_url: string
   image_alt: string
+  image_focus: ImageFocus
   price_from: number | null
   currency: string
   rating: number | null

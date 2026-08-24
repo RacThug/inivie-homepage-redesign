@@ -41,6 +41,10 @@ class PropertyResource extends JsonResource
             // image, so the conversion cannot live in this class alone.
             'image_url' => $this->imageUrl(),
             'image_alt' => $this->image_alt,
+            // Which part of the photograph the card's 4:3 crop keeps. The
+            // frontend cannot work this out: only the editor knows where
+            // the subject of their picture is.
+            'image_focus' => $this->image_focus->value,
             'price_from' => $this->price_from,
             'currency' => $this->currency,
             // The decimal:1 cast hands back a string, and the contract

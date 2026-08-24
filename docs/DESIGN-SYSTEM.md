@@ -212,7 +212,7 @@ Implements the information requirements in PRD ch. 6.2. This section covers only
 
 | Element | Treatment |
 | --- | --- |
-| Image | 4:3 aspect ratio, `object-cover`, 12px radius, scales to 1.04 on card hover with the overflow clipped |
+| Image | 4:3 aspect ratio, `object-cover` anchored by `image_focus`, 12px radius, scales to 1.04 on card hover with the overflow clipped |
 | Category badge | Overlaid at the top left of the image, `surface` background at high opacity, `ink` text, small label size |
 | Rating | Top right of the content area. A `gold` star icon and a one decimal value in small size. The star is decorative and the value is named to assistive technology, because "4.8" beside an icon says nothing when it is read aloud |
 | Title | H3 scale, `ink`, clamped to 2 lines |
@@ -221,6 +221,8 @@ Implements the information requirements in PRD ch. 6.2. This section covers only
 | Price | Body size, prefixed with "From". The amount in `ink` medium weight, the "From" and "per night" qualifiers in `ink-muted`. Reads "From IDR 3,200,000 per night" |
 | Button | Full width on mobile, auto width on desktop. `accent` background with text colour resolved per ch. 2.2 |
 | Card | `surface` background, 1px `border`, 12px radius, rest elevation, raised on hover |
+
+**The crop is the editor's, not the layout's.** The box is a fixed 4:3 and the photograph is covered into it, so anything that is not 4:3 loses its edges. Which edges is a question only the person who took the picture can answer: the middle of a wide shot of a pool is the pool, and the middle of a portrait of a person is a torso. `image_focus` carries the answer from the CMS as one of `top`, `center` or `bottom`, and the card maps it to `object-top`, `object-center` or `object-bottom`. Centre is the default and is what every property rendered before the field existed.
 
 **Equal height rule.** Cards in a row must be the same height regardless of content length. Achieved by clamping the title and description and by pinning the button to the bottom of the card, not by fixing a card height.
 

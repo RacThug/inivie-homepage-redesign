@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ImageFocus;
 use App\Enums\PropertyCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePropertyRequest;
@@ -56,8 +57,15 @@ class PropertyController extends Controller
             // An empty model rather than a pile of nulls, so the shared form
             // partial can read `$property->title` on both screens instead of
             // branching on which one it is rendering.
-            'property' => new Property,
+            //
+            // With the column default carried on it, because a default that
+            // only exists in the database is not one the create form can
+            // render: the select would open on nothing and the admin would
+            // have to state a focus for every photograph that wants the
+            // ordinary one.
+            'property' => new Property(['image_focus' => ImageFocus::Center]),
             'categories' => $this->categories(),
+            'focuses' => $this->focuses(),
         ]);
     }
 
@@ -85,6 +93,7 @@ class PropertyController extends Controller
         return view('admin.properties.edit', [
             'property' => $property,
             'categories' => $this->categories(),
+            'focuses' => $this->focuses(),
         ]);
     }
 
@@ -164,6 +173,19 @@ class PropertyController extends Controller
     {
         return collect(PropertyCategory::cases())
             ->mapWithKeys(fn (PropertyCategory $category) => [$category->value => $category->label()])
+            ->all();
+    }
+
+    /**
+     * The image focus select's options, shaped the same way and for the
+     * same reason as the categories above.
+     *
+     * @return array<string, string>
+     */
+    private function focuses(): array
+    {
+        return collect(ImageFocus::cases())
+            ->mapWithKeys(fn (ImageFocus $focus) => [$focus->value => $focus->label()])
             ->all();
     }
 }

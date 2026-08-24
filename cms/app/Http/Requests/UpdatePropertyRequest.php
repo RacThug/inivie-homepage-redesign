@@ -25,7 +25,6 @@ class UpdatePropertyRequest extends PropertyRequest
             'image',
             'mimes:jpg,jpeg,png,webp',
             'max:2048',
-            'dimensions:min_width=800,min_height=600',
         ];
     }
 

@@ -35,8 +35,8 @@ Five principles govern every decision here. They are stated in PRD ch. 6.3 and r
 | --- | --- | --- |
 | `ink` | `#1C2434` | Primary text, dark surfaces, footer |
 | `ink-muted` | `#4A5468` | Secondary text |
-| `accent` | `#FF8737` | Primary button fills and markers. Never text on a light surface, see ch. 2.2 |
-| `accent-hover` | `#F46100` | Hover and pressed states |
+| `accent` | `#FD6501` | Primary button fills and markers. Never text on a light surface, see ch. 2.2 |
+| `accent-hover` | `#E05A00` | Hover and pressed states |
 | `gold` | `#C9A779` | Luxury accent, dividers, and markers. Never text on a light surface |
 | `gold-dark` | `#8E6A39` | Eyebrow labels, and any gold text on a light surface |
 | `surface` | `#FFFFFF` | Card backgrounds |
@@ -44,9 +44,11 @@ Five principles govern every decision here. They are stated in PRD ch. 6.3 and r
 | `border` | `#E4E6EA` | Borders and separators |
 | `muted` | `#AAB1BB` | Placeholder and disabled text |
 | `on-ink-muted` | `#B0B7C2` | Secondary text on a dark ground. The mirror of `ink-muted`, added in #13 when the footer became the first dark surface needing two levels of text |
-| `on-accent` | `#1C2434` | Text and icons on an accent fill. A decision, not a new colour: it resolves to `ink`, for the reason in ch. 2.2 |
+| `on-accent` | `#FFFFFF` | Text and icons on an accent fill. A decision, not a new colour: it resolves to `surface`, for the reason in ch. 2.2 |
 
 `ink`, `accent`, and `gold` are taken directly from production. `ink-muted`, `surface-alt`, and `border` are additions, because production has no consistent secondary text or surface token and the page reads flatter for it.
+
+`accent` was recorded here as `#FF8737` until production's own Search button was sampled pixel by pixel and came back `#FD6501`. Same hue 24 and saturation, eleven points of lightness darker: the first draft had read the accent off a lighter element, so every accented control on this site was a paler orange than the client's. The correction is why ch. 2.2 below now records a deviation it did not have before.
 
 `accent-hover` and `gold-dark` are set by measurement rather than by eye. Both are explained in ch. 2.2.
 
@@ -54,33 +56,59 @@ Five principles govern every decision here. They are stated in PRD ch. 6.3 and r
 
 Every text and background pairing must meet WCAG AA, at least 4.5 to 1 for body text and 3 to 1 for large text.
 
-Measured on 22 August 2026 against the tokens in `web/src/app/globals.css`. The measurement is not a one-off exercise: `web/src/design/palette.test.ts` parses that stylesheet and re-checks every row below on each test run, so a token edited to an inaccessible value fails the suite rather than reaching a reviewer.
+Measured on 24 August 2026 against the tokens in `web/src/app/globals.css`. The measurement is not a one-off exercise: `web/src/design/palette.test.ts` parses that stylesheet and re-checks every row below on each test run, so a token edited to an inaccessible value fails the suite rather than reaching a reviewer.
 
 | Pairing | Ratio | Status |
 | --- | --- | --- |
 | `ink` on `surface` | 15.54 | Passes |
 | `surface` on `ink` | 15.54 | Passes |
 | `ink` on `surface-alt` | 14.49 | Passes |
+| `on-ink-muted` on `ink` | 7.70 | Passes. Fails on a light surface by design, exactly as `ink-muted` fails on a dark one |
 | `ink-muted` on `surface` | 7.61 | Passes |
 | `ink-muted` on `surface-alt` | 7.10 | Passes |
 | `gold` on `ink` | 6.87 | Passes. Gold carries text only on a dark panel |
-| `on-ink-muted` on `ink` | 7.70 | Passes. Fails on a light surface by design, exactly as `ink-muted` fails on a dark one |
-| `on-accent` on `accent` | 6.49 | Passes |
+| `ink` on `accent` | 5.21 | Passes, and is still not the foreground used. See the deviation below |
 | `gold-dark` on `surface` | 4.92 | Passes |
-| `on-accent` on `accent-hover` | 4.85 | Passes |
 | `gold-dark` on `surface-alt` | 4.58 | Passes |
-| `surface` on `accent`, and `accent` on `surface` | 2.39 | **Fails.** See below |
+| `ink` on `accent-hover` | 4.17 | Fails. The reason ink does not rescue the accent |
+| `on-accent` on `accent-hover` | 3.73 | **Fails**, and is the better of the accent's two states |
+| `on-accent` on `accent` | 2.98 | **Fails.** The one accepted deviation on the site. See below |
+| `accent` on `surface` | 2.98 | Fails. A fill colour, never text on light |
 | `gold` on `surface` | 2.26 | Fails. Decorative use only |
 | `muted` on `surface` | 2.16 | Fails. Decorative and disabled states only. Must never carry meaning |
 | `border` on `surface` | 1.25 | Fails. Separators only, never text |
 
+Two rows are not text pairings and are held to SC 1.4.11's 3 to 1 instead, because the search panel and the membership panel both put an accented button on `ink` and a fill that sinks into its panel stops being a control.
+
+| Control against its ground | Ratio | Status |
+| --- | --- | --- |
+| `accent` on `ink` | 5.21 | Passes |
+| `accent-hover` on `ink` | 4.17 | Passes |
+
 #### The white on accent decision
 
-This was flagged in the first draft as the pairing most likely to fail, to be resolved by measurement rather than assumption. It measures **2.39 to 1**, far below the 4.5 required, so the fallback named there applies: accented controls carry `ink` text at 6.49 to 1. The decision is stored as the `on-accent` token so no component has to remember it, and the value is a reference to `ink` rather than a second copy of the hex.
+The first draft flagged white on the accent as the pairing most likely to fail, to be resolved by measurement. It was, twice, and the second measurement reversed the first.
+
+Against the `#FF8737` recorded in the draft, white reached 2.39 to 1, so the fallback applied and accented controls carried `ink` text at 6.49. That held until production's Search button was sampled directly and returned `#FD6501` (ch. 2.1). Against the real accent the numbers are:
+
+| Foreground | On `accent` `#FD6501` | On `accent-hover` `#E05A00` |
+| --- | --- | --- |
+| `surface` | 2.98 | 3.73 |
+| `ink` | 5.21 | 4.17 |
+
+Neither foreground clears 4.5 on both states. Ink passes at rest and then fails the moment a pointer lands, which is the defect the `accent-hover` paragraph below was written about. **The fill is the constraint, not the choice of foreground**, and no text colour rescues this orange.
+
+So the decision is white, and it is recorded as a deviation rather than presented as a pass. Three things settle it:
+
+- It is what the client ships. inivie.com's own Search button is white on this exact orange and measures the same 2.98. A redesign that silently recoloured the brand's primary control would be answering a question nobody asked.
+- The alternatives were built and compared on the real card, not argued about. Reaching AA with white needs the fill down to about `#C75000`, eleven points of lightness below production, at which point the accent reads burnt rather than bright. `#BD4B00` clears AA at 5.04 and then falls to 2.45 against the ink panel on hover, breaking SC 1.4.11 in exchange.
+- The failure is bounded. `accent` carries nothing but short control labels at 13px medium (ch. 2.3). No body copy, no headings, no long-form reading sits on it.
+
+`palette.test.ts` asserts every number in the table above, including the failing ones. The deviation cannot drift: change the fill and the tests that record 2.98 and 3.73 fail, and so does the one holding the accent above 3 to 1 on the ink panel.
 
 #### Two failures the first draft did not anticipate
 
-**The hover fill.** `accent-hover` was drafted as `#E45826`. Ink text on it reaches only 4.23 to 1, so the primary button would have sat below AA for as long as a pointer rested on it, and white is worse again at 3.67. No text colour clears AA on that fill, so the fill had to change. `#F46100` carries ink text at 4.85 to 1 and is clearly darker than the resting fill. Darker oranges on the same hue keep passing for roughly another step of lightness, down to about `#EB5E00` at 4.54, but a hover state one rounding away from failing is not worth the extra depth.
+**The hover fill.** `accent-hover` was drafted as `#E45826`, on which ink text reaches only 4.23 to 1: the primary button would have sat below AA for as long as a pointer rested on it. The rule that came out of it survives the accent correction and now applies to the current pair as well. A hover state must not be the worse of the two, so `#E05A00` was chosen for moving white *toward* AA at 3.73 rather than away from the resting 2.98.
 
 **Gold as text.** ch. 2.1 assigned `gold` to eyebrow labels, which are text. It reaches 2.26 to 1 on `surface` and 2.11 on `surface-alt`, so a gold eyebrow on a light section would have failed AA everywhere it appeared. Production's gold is kept untouched for dividers and markers, and `gold-dark` carries the same hue and saturation at a lightness that clears AA on both light surfaces, so eyebrow labels still read as gold.
 
@@ -88,7 +116,7 @@ This was flagged in the first draft as the pairing most likely to fail, to be re
 
 `accent` appears on: the primary button, the active navigation item, and small markers such as a rating star. It does not appear as a section background, a large fill, or a decorative shape. When a section needs emphasis it uses `ink` as a dark panel, not orange.
 
-`accent` is a fill colour, never text on a light surface, because it reaches only 2.39 to 1 there. The active navigation item is therefore marked with an accent rule or underline while its label stays `ink`.
+`accent` is a fill colour, never text on a light surface, because it reaches only 2.98 to 1 there. The active navigation item is therefore marked with an accent rule or underline while its label stays `ink`.
 
 ---
 
@@ -269,7 +297,7 @@ ch. 6.10, and it is one component so the two cannot drift.
 
 A hovered or open entry is marked with a 2px `accent` rule under a label that
 keeps its own colour, the same marker as ch. 6.4's earlier active state. Accent
-reaches 2.39 to 1 on a light surface, so it marks and never carries text.
+reaches 2.98 to 1 on a light surface, so it marks and never carries text.
 Production recolours the label to accent instead, which works on its own dark
 header and would not survive the scrolled state here.
 
@@ -454,7 +482,7 @@ Appearance is the smaller half of it. A native `date` input cannot draw two mont
 
 **The month is spelled.** `23 Aug 2026`, not `23/08/2026`. NN/G's date input guidance asks for this precisely because `10/11/2016` is two different days either side of the Atlantic, and the numeric form is what a native input gave us.
 
-**The calendar.** Two months from 640px and one below it, weeks starting Monday, everything before today disabled, and a range of at least two days so a stay always has a night in it. Range ends are `ink` filled with `surface` text and the nights between them are `surface-alt`; accent marks today as a ring and never fills a day, because accent reaches 2.39 to 1 on a light ground and a selected day has to stay readable.
+**The calendar.** Two months from 640px and one below it, weeks starting Monday, everything before today disabled, and a range of at least two days so a stay always has a night in it. Range ends are `ink` filled with `surface` text and the nights between them are `surface-alt`; accent marks today as a ring and never fills a day, because accent reaches 2.98 to 1 on a light ground and a selected day has to stay readable.
 
 `react-day-picker` supplies the calendar, and it was the project's first runtime dependency in `web/`. `embla-carousel-react` is the second, for the track in ch. 6.17. Its own stylesheet is deliberately not imported: every class is supplied from this document's tokens, so there is no second source of colour to keep in step with `globals.css`.
 
@@ -495,7 +523,7 @@ The Culinary and Wellness sections are one component with two content modules. T
 
 ### 6.11 Membership band
 
-A full bleed `ink` band. Production makes this section a full bleed **orange** block, which is exactly the large decorative accent fill ch. 2.3 forbids, and white on accent measures 2.39 to 1. The section that needs the most emphasis on the page takes it from ink instead. Do not "correct" this back towards production.
+A full bleed `ink` band. Production makes this section a full bleed **orange** block, which is exactly the large decorative accent fill ch. 2.3 forbids, and white on accent measures 2.98 to 1. The section that needs the most emphasis on the page takes it from ink instead. Do not "correct" this back towards production.
 
 **Full bleed rather than a contained panel**, which is the one thing production's treatment gets right. A rounded card leaves the page's own ground running down both sides of the section that is supposed to interrupt it, and the result reads as a large card rather than as a change of register.
 
@@ -512,7 +540,7 @@ A short gold rule stood here until they replaced it. The objection recorded agai
 | Tagline | Body scale, medium weight, `surface` |
 | Body | Body scale, `on-ink-muted` |
 | Benefit marker | One drawn `gold` mark above each label: a gem, a gift, a tag, a calendar |
-| Primary | `accent` fill with `ink` text. The only accent on the panel |
+| Primary | `accent` fill with `on-accent` text. The only accent on the panel, and it clears SC 1.4.11 against the ink ground at 5.21 |
 | Secondary | `ghost` on a dark tone, which resolves to `gold` (ch. 6.3) |
 
 The two controls sit at their own width rather than stretching, on every breakpoint. A column that stretches them centres the text link under a full width button, where it reads as a caption rather than as a control.

@@ -15,6 +15,9 @@ import { parseColorTokens } from "./tokens";
 
 const AA_BODY = 4.5;
 
+/** WCAG 2.2 SC 1.4.11, for a control's fill against the ground behind it. */
+const NON_TEXT = 3;
+
 const tokens = parseColorTokens(
   readFileSync(
     fileURLToPath(new URL("../app/globals.css", import.meta.url)),
@@ -44,9 +47,16 @@ describe("palette", () => {
     ]);
   });
 
+  /**
+   * `accent` was `#ff8737` here until production's own Search button was
+   * sampled pixel by pixel and came back `#fd6501`: the same hue 24 and
+   * saturation, eleven points of lightness darker. The first draft had read
+   * the accent off a lighter element and recorded it as the brand colour, so
+   * every accented control on this site was a paler orange than the client's.
+   */
   it("keeps the brand colours taken from production untouched", () => {
     expect(tokens.ink).toBe("#1c2434");
-    expect(tokens.accent).toBe("#ff8737");
+    expect(tokens.accent).toBe("#fd6501");
     expect(tokens.gold).toBe("#c9a779");
   });
 });
@@ -65,8 +75,9 @@ describe("text pairings meet WCAG AA", () => {
     ["on-ink-muted", "ink"],
     ["gold-dark", "surface"],
     ["gold-dark", "surface-alt"],
-    ["on-accent", "accent"],
-    ["on-accent", "accent-hover"],
+    // `on-accent` on `accent` is deliberately absent. It is the one pairing on
+    // the site that does not clear AA, and the block below is where it is
+    // recorded rather than quietly listed as passing here.
   ];
 
   it.each(pairings)("%s on %s clears 4.5 to 1", (foreground, background) => {
@@ -76,29 +87,59 @@ describe("text pairings meet WCAG AA", () => {
 
 describe("the accent foreground decision", () => {
   /**
-   * DESIGN-SYSTEM ch. 2.2 flagged white on a mid orange as the pairing most
-   * likely to fail, and required it be measured rather than assumed. This is
-   * that measurement, kept as a test so the decision cannot quietly rot.
+   * This is the one recorded deviation from WCAG AA on the site, and it is a
+   * product decision rather than an oversight, so it is asserted here in the
+   * shape it actually takes. A test that merely skipped the pairing would let
+   * the numbers drift; these fail the moment somebody changes the fill without
+   * revisiting the decision.
+   *
+   * The accent is production's own button colour. White on it measures 2.98 to
+   * 1 against the 4.5 AA asks for, and the live site's button measures the same
+   * because it is the same pairing. The redesign matches the client's control.
    */
-  it("records that white on accent falls short of AA", () => {
-    expect(ratio("surface", "accent")).toBeCloseTo(2.39, 2);
-    expect(ratio("surface", "accent")).toBeLessThan(AA_BODY);
+  it("records that white on the accent falls short of AA", () => {
+    expect(ratio("on-accent", "accent")).toBeCloseTo(2.98, 2);
+    expect(ratio("on-accent", "accent")).toBeLessThan(AA_BODY);
   });
 
-  it("resolves to ink text, the fallback ch. 2.2 names", () => {
-    expect(tokens["on-accent"]).toBe(tokens.ink);
-    expect(ratio("on-accent", "accent")).toBeCloseTo(6.49, 2);
+  it("resolves to white, which is production's own foreground", () => {
+    expect(tokens["on-accent"]).toBe(tokens.surface);
   });
 
   /**
-   * The hover fill is the darkest orange that still carries ink text at AA.
-   * The value originally drafted, #e45826, reached only 4.23 to 1 and would
-   * have dropped the button below AA for the whole time a pointer rested on
-   * it.
+   * The hover fill is darker, so it moves toward AA rather than away from it.
+   * Still short, but a state that degraded the resting contrast would be a
+   * second defect on top of an accepted one.
    */
-  it("keeps the hover fill above AA as well as the resting fill", () => {
-    expect(ratio("on-accent", "accent-hover")).toBeCloseTo(4.85, 2);
-    expect(contrastRatio("#1c2434", "#e45826")).toBeLessThan(AA_BODY);
+  it("keeps the hover fill no worse than the resting fill", () => {
+    expect(ratio("on-accent", "accent-hover")).toBeCloseTo(3.73, 2);
+    expect(ratio("on-accent", "accent-hover")).toBeGreaterThan(
+      ratio("on-accent", "accent"),
+    );
+  });
+
+  /**
+   * The obvious rescue is ink text, which is what this token held before. It
+   * does clear AA on the resting fill, and then fails on the hover fill at
+   * 4.17, so swapping the foreground moves the failure rather than removing
+   * it. Nothing carries text on `#e05a00` at AA. The fill is the constraint,
+   * not the choice of foreground, and that is why white was allowed to stand.
+   */
+  it("shows ink would not rescue the pairing either", () => {
+    expect(ratio("ink", "accent")).toBeGreaterThanOrEqual(AA_BODY);
+    expect(ratio("ink", "accent-hover")).toBeLessThan(AA_BODY);
+  });
+
+  /**
+   * The requirement the accent does meet. SC 1.4.11 asks a control's fill to
+   * reach 3 to 1 against what is behind it, and the search panel and the
+   * membership panel both put an accented button on `ink`. Deepening the
+   * accent is what put this at risk: an earlier candidate, `#bd4b00`, hovered
+   * to 2.45 there and would have sunk the button into the panel.
+   */
+  it("stays identifiable as a control on the ink panel", () => {
+    expect(ratio("accent", "ink")).toBeGreaterThanOrEqual(NON_TEXT);
+    expect(ratio("accent-hover", "ink")).toBeGreaterThanOrEqual(NON_TEXT);
   });
 });
 

@@ -32,10 +32,10 @@ const FOCUS_RING =
  * viewport. That costs one callback per crossing instead of a handler on every
  * scroll frame, and it takes no space in the layout.
  *
- * Transparent is the resting state and solid is the scrolled one, so a page
- * with no hero behind the header still starts transparent. The homepage hero
- * is the only thing this header is meant to float over, and it is full bleed
- * by design (PRD ch. 6.1), which is why `main` carries no top offset here.
+ * Transparent is the resting state on the homepage alone. The homepage hero is
+ * the only thing this header is meant to float over, and it is full bleed by
+ * design (PRD ch. 6.1), which is why `main` carries no top offset here. Every
+ * other route starts solid, per `overHero` below.
  */
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -60,7 +60,25 @@ export function Header() {
     return () => observer.disconnect();
   }, []);
 
-  const labelColour = scrolled ? "text-ink" : "text-surface";
+  /**
+   * The transparent treatment belongs to the hero, and the hero belongs to
+   * the homepage (PRD ch. 6.1). Every other route has nothing behind the
+   * header, where the scrim below renders as a grey band across the top of a
+   * white page and the white labels depend on that band to be legible at all.
+   * Those routes take the settled treatment from the first paint rather than
+   * waiting for a scroll that may never come: the 404 does not scroll at all
+   * on a desktop, so the header would have stayed in its hero state for the
+   * whole visit.
+   *
+   * The 404 is the only other route this application answers, and it reports
+   * itself here as `/_not-found` rather than as the URL the visitor typed.
+   * Measured against a production build rather than assumed, because the same
+   * value decides whether the wordmark navigates or scrolls below.
+   */
+  const overHero = pathname === "/";
+  const solid = scrolled || !overHero;
+
+  const labelColour = solid ? "text-ink" : "text-surface";
 
   /**
    * The wordmark is a link to `/`, and on the homepage that is the route the
@@ -95,9 +113,9 @@ export function Header() {
 
       <header
         className={`fixed inset-x-0 top-0 z-40 transition-colors ${
-          scrolled ? "border-b border-border bg-surface" : ""
+          solid ? "border-b border-border bg-surface" : ""
         }`}
-        data-scrolled={scrolled ? "true" : "false"}
+        data-scrolled={solid ? "true" : "false"}
       >
         {/*
           A thin top down scrim rather than a full overlay, so white labels stay
@@ -105,7 +123,7 @@ export function Header() {
           per cent fading to nothing over 220px, which is deeper than the header
           so the gradient ends below it rather than at its edge.
         */}
-        {!scrolled && (
+        {!solid && (
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 h-55 bg-gradient-to-b from-ink/55 to-transparent"
@@ -133,8 +151,8 @@ export function Header() {
               id={HOME_LINK_ID}
               onClick={returnToTop}
             >
-              <LogoTone alt="" eager hidden={scrolled} src={BRAND_LOGO.light} />
-              <LogoTone alt="" hidden={!scrolled} src={BRAND_LOGO.ink} />
+              <LogoTone alt="" eager hidden={solid} src={BRAND_LOGO.light} />
+              <LogoTone alt="" hidden={!solid} src={BRAND_LOGO.ink} />
             </Link>
 
             <nav aria-label="Primary" className="hidden lg:block">

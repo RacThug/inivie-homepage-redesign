@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import {
@@ -7,7 +9,7 @@ import {
   LEGAL,
   SOCIAL_LINKS,
 } from "@/content/footer";
-import { BRAND_NAME } from "@/content/navigation";
+import { BRAND_LOGO, BRAND_NAME } from "@/content/navigation";
 
 /**
  * Column heading treatment. Gold reaches 6.87 to 1 on ink, so this is the one
@@ -66,7 +68,26 @@ export function Footer() {
       <Container>
         <div className="grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-4 lg:py-24">
           <section>
-            <p className="font-heading text-h3">{BRAND_NAME}</p>
+            {/*
+              The mark, in the light tone the ink ground needs. ch. 6.5 calls
+              this column's first element the wordmark, and the wordmark is
+              the asset the header and the drawer already carry: setting the
+              two words in the heading face instead left the foot of the page
+              as the one place on the site the brand was spelled rather than
+              shown.
+
+              Static rather than the header's crossfading pair, because the
+              ground under it never changes. The name carries the alt text,
+              so the accessible content of this column is what it was when
+              the name was a paragraph.
+            */}
+            <Image
+              alt={BRAND_NAME}
+              className="h-16 w-16 object-contain"
+              height={BRAND_LOGO.height}
+              src={BRAND_LOGO.light}
+              width={BRAND_LOGO.width}
+            />
 
             <h2 className={`${COLUMN_HEADING} mt-8`}>Head Office</h2>
             <address className={`${SECONDARY} mt-3 not-italic`}>

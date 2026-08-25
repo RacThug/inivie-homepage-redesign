@@ -3,10 +3,26 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { COMPANY_LINKS, DEPARTMENTS, SOCIAL_LINKS } from "@/content/footer";
+import { BRAND_LOGO, BRAND_NAME } from "@/content/navigation";
 
 import { Footer } from "./Footer";
 
 describe("Footer", () => {
+  /**
+   * DESIGN-SYSTEM ch. 6.5 opens the first column with the wordmark, and the
+   * wordmark is the asset the header and the drawer carry rather than the
+   * name set in the heading face. The light tone is not incidental: the ink
+   * tone on this ground is a mark nobody can see.
+   */
+  it("shows the mark, in the tone the ink ground needs", () => {
+    render(<Footer />);
+
+    const mark = screen.getByRole("img", { name: BRAND_NAME });
+
+    expect(mark).toHaveAttribute("src", expect.stringContaining("logo-light"));
+    expect(BRAND_LOGO.light).toContain("logo-light");
+  });
+
   it("keeps all six contact routes reachable", () => {
     render(<Footer />);
 

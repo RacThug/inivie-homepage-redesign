@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { CAROUSEL_IMAGE_SIZES } from "@/components/ui/carouselTrack";
 import { PinIcon } from "@/components/ui/PinIcon";
 import { PROPERTY_CARD_ACTION } from "@/content/featured-properties";
-import type { ImageFocus, Property } from "@/types/property";
+import type { Property } from "@/types/property";
 
 interface PropertyCardProps {
   property: Property;
@@ -30,27 +30,22 @@ interface PropertyCardProps {
  */
 const GROUPING = new Intl.NumberFormat("en-US");
 
-/**
- * `image_focus` as the utility that carries it, per DESIGN-SYSTEM ch. 6.1.
- *
- * A map of literals rather than a template string, because Tailwind reads
- * this file as text: `object-${focus}` compiles to a class that was never
- * generated, and the card would silently fall back to the centre crop the
- * editor was trying to move away from.
- */
-const FOCUS: Record<ImageFocus, string> = {
-  top: "object-top",
-  center: "object-center",
-  bottom: "object-bottom",
-};
-
 export function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Card as="article">
+      {/*
+        A fixed 4:3 box, covered, per DESIGN-SYSTEM ch. 6.1. Anything that is
+        not 4:3 loses its edges to the middle, and nothing in the payload or
+        the layout tries to rescue it: the CMS carried an `image_focus`
+        column for one release and it was dropped again, and containing the
+        photograph instead would trade the crop for bars on every card that
+        is not 4:3. The site's own photography is 4:3, so the crop takes
+        nothing from it.
+      */}
       <div className="relative aspect-4/3 overflow-hidden">
         <Image
           alt={property.image_alt}
-          className={`object-cover ${FOCUS[property.image_focus]} transition-transform group-hover:scale-104`}
+          className="object-cover transition-transform group-hover:scale-104"
           fill
           sizes={CAROUSEL_IMAGE_SIZES}
           src={property.image_url}

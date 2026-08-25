@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\ImageFocus;
 use App\Enums\PropertyCategory;
 use App\Models\Property;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -41,9 +40,6 @@ class PropertyFactory extends Factory
             'excerpt' => fake()->sentence(12),
             'image_path' => "properties/{$slug}.webp",
             'image_alt' => "The pool terrace at {$title} at dusk.",
-            // The seed photography is 4:3 already, so the crop takes
-            // everything and the default is the one that changes nothing.
-            'image_focus' => ImageFocus::Center,
             // Whole rupiah. See DATA-MODEL ch. 2.1 on why this is an integer.
             'price_from' => fake()->numberBetween(15, 120) * 100_000,
             'currency' => 'IDR',

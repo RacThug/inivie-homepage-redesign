@@ -212,7 +212,7 @@ Implements the information requirements in PRD ch. 6.2. This section covers only
 
 | Element | Treatment |
 | --- | --- |
-| Image | 4:3 aspect ratio, `object-cover` anchored by `image_focus`, 12px radius, scales to 1.04 on card hover with the overflow clipped |
+| Image | 4:3 aspect ratio, `object-cover`, 12px radius, scales to 1.04 on card hover with the overflow clipped |
 | Category badge | Overlaid at the top left of the image, `surface` background at high opacity, `ink` text, small label size |
 | Rating | Top right of the content area. A `gold` star icon and a one decimal value in small size. The star is decorative and the value is named to assistive technology, because "4.8" beside an icon says nothing when it is read aloud |
 | Title | H3 scale, `ink`, clamped to 2 lines |
@@ -222,7 +222,13 @@ Implements the information requirements in PRD ch. 6.2. This section covers only
 | Button | Full width on mobile, auto width on desktop. `accent` background with text colour resolved per ch. 2.2 |
 | Card | `surface` background, 1px `border`, 12px radius, rest elevation, raised on hover |
 
-**The crop is the editor's, not the layout's.** The box is a fixed 4:3 and the photograph is covered into it, so anything that is not 4:3 loses its edges. Which edges is a question only the person who took the picture can answer: the middle of a wide shot of a pool is the pool, and the middle of a portrait of a person is a torso. `image_focus` carries the answer from the CMS as one of `top`, `center` or `bottom`, and the card maps it to `object-top`, `object-center` or `object-bottom`. Centre is the default and is what every property rendered before the field existed.
+**The crop is the layout's, and it is not configurable.** The box is a fixed 4:3 and the photograph covers it, so anything that is not 4:3 loses its edges from the middle outwards. Nothing in the payload, the CMS or the layout moves where that falls, and that is a decision rather than an omission.
+
+The alternatives were built or costed and each one charges more than the crop does. A `properties.image_focus` column shipped for one release, letting an editor name the end to keep; it was dropped again because it put a question about framing on every upload, including the great majority that are already 4:3 and have no answer to give. `object-contain` trades the crop for bars, which fills a card designed around full bleed photography with ground colour. Letting the box take the image's own aspect fits perfectly and breaks the equal height rule below, leaving the titles and buttons of a carousel row out of line with each other. Rejecting non-4:3 uploads removes the problem at its source, and charges the editor for a crop they must now perform by hand, which is the rule `b805d69` had just finished removing on the neighbouring dimension. Making the CMS crop to 4:3 on upload only moves the same crop earlier and bakes it into the file.
+
+So the crop stays where it costs least, and the answer to a photograph that suffers from it is a better photograph. The site's own is 4:3 already: all eight seed files are exactly 1600 by 1200, and every other image section (`VenueCard`, Special Offers, What's New) covers the same way from content curated at 4:3 in the repository.
+
+There is no fourth `object-fit` value that would settle this, and there is no help coming from the framework either: `next/image` resizes on width alone and never crops, which is why the choice belongs to CSS in the first place.
 
 **Equal height rule.** Cards in a row must be the same height regardless of content length. Achieved by clamping the title and description and by pinning the button to the bottom of the card, not by fixing a card height.
 

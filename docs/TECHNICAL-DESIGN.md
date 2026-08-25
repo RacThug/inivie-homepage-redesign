@@ -736,6 +736,8 @@ inivie-homepage-redesign/
     │   │   ├── globals.css    the design tokens, single source for the palette
     │   │   ├── layout.tsx
     │   │   ├── page.tsx
+    │   │   ├── not-found.tsx  every unmatched URL, in the site's own shell:
+    │   │   │                  DESIGN-SYSTEM ch. 6.19
     │   │   ├── robots.ts      both generated rather than static, so the host
     │   │   ├── sitemap.ts     in them is the one the canonical uses: ch. 7.2
     │   │   └── api/revalidate/route.ts

@@ -134,6 +134,24 @@ describe("Header", () => {
     );
   });
 
+  /**
+   * The hero is the homepage's, so the transparent treatment is too. On any
+   * other route the scrim behind the labels is a grey band over a white page,
+   * and the white labels it exists to rescue have nothing else holding them
+   * up. The 404 is the route that found this: short enough on a desktop that
+   * a scroll never arrives to settle the header.
+   */
+  it("settles from the first paint on a page with no hero", () => {
+    route.pathname = "/about";
+
+    const { container } = render(<Header />);
+
+    expect(container.querySelector("header")).toHaveAttribute(
+      "data-scrolled",
+      "true",
+    );
+  });
+
   describe("the brand family panels", () => {
     it("stays shut until asked, and reports that to assistive technology", () => {
       render(<Header />);

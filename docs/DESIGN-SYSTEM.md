@@ -287,6 +287,16 @@ The state is read from a sentinel one header tall at the top of the document,
 watched by an `IntersectionObserver`. A scroll listener would run on every
 frame to answer a question that changes twice.
 
+**The resting state belongs to the homepage alone.** It is written for a full
+bleed photograph behind it, and the homepage hero is the only one on the site.
+Anywhere else the scrim is a grey band across the top of a white page, and the
+`surface` labels it exists to rescue have nothing else holding them up. So a
+route with no hero takes the scrolled treatment from its first paint rather
+than waiting for a scroll: ch. 6.19's 404 does not scroll at all on a desktop,
+and the header would otherwise have stayed in its hero state for the whole
+visit. The route reports itself as `/_not-found` rather than as the URL that
+was typed, which is measured in `Header.tsx` rather than assumed.
+
 **The wordmark**, 48px on mobile and 64px from the desktop breakpoint, in the
 tone the state above sets. Both tones are in the markup at once and crossfade
 with the header, rather than one `src` swapping on scroll: a swap flashes on
@@ -372,12 +382,21 @@ one below that.
 
 | Column | Contents |
 | --- | --- |
-| 1 | Wordmark, head office address, general phone and email, map link |
+| 1 | Wordmark at 64px, head office address, general phone and email, map link |
 | 2 | The five department desks, each with its own phone, email, and any secondary action |
 | 3 | Company links, including the B2B consultancy lines the header no longer carries |
 | 4 | Newsletter field and button, then social channels |
 
 A legal row closes it, separated by a 1px rule at 15 per cent `surface`.
+
+**The wordmark is the mark, not the name set in type.** It is the same asset
+ch. 6.4 gives the header and the drawer carries, in the `light` tone the ink
+ground needs, and it is static rather than the header's crossfading pair
+because the ground under it never changes. It opened as the two words in the
+heading face, which left the foot of the page as the one place on the site
+where the brand was spelled instead of shown. The name is the image's
+alternative text, so what the column says to assistive technology is what it
+said before.
 
 **Text.** Column headings are eyebrow scale in `gold`, which is the one surface
 on the site where gold is allowed to carry text, at 6.87 to 1. Primary values
@@ -687,6 +706,18 @@ One component draws all three. It holds no data and no words of its own: the car
 **The corner is reserved.** The footer's last row carries 80px of bottom padding rather than the 24px above it. The control is fixed to the window, so at the foot of the page it stands in that row, and at 320px it sat across the end of "All Rights Reserved". Reserving the 64px it occupies is the fix; hiding the control over the footer would take it away exactly where it is most wanted.
 
 **Reduced motion.** The scroll is smooth unless `prefers-reduced-motion: reduce` is set, read at the moment of the click rather than held in state, for the reason ch. 6.17 gives about the same query. `globals.css` already collapses every CSS transition and animation under it; a scroll the browser runs itself is the one piece of motion CSS cannot reach.
+
+### 6.19 Not found
+
+**Why it exists.** The deliverable is the homepage, so every destination in `content/` that is not an absolute URL points at a route this application does not have. There are nineteen of them, across the footer, the hero, offers, the journal and the membership band, and until now each one landed on the framework's own default: black on white, no header, no footer, nothing that read as this site. A reviewer clicking "About Us" in the footer met what looked like a broken application.
+
+**The page.** The shell of ch. 6.4 and ch. 6.5, then centred inside the container: `404` as the ch. 6.2 eyebrow, the heading as an `h1` at the h2 scale, one line of body copy, and the primary button back to the homepage. It reuses `SectionHeading` rather than restating its type, and it says nothing about this project or its scope: a visitor who mistypes a URL is owed the same page as a visitor who followed a stale link.
+
+**It owns its top spacing.** ch. 6.4's header is fixed and the layout adds no offset under it, because the homepage hero is full bleed and runs beneath it. A page with no hero clears the header itself.
+
+**What the framework gives and what it does not.** The response carries a real 404 status rather than a 200, and `noindex` is injected on that status without being asked. The title is not: it comes from a `metadata` export that this version of Next documents on `global-not-found` and not on `not-found`, and which works all the same. `e2e/not-found.spec.ts` pins all three, because the middle one is undocumented behaviour that an upgrade could take away silently, leaving the 404 titled as the homepage.
+
+**Why not `global-not-found`.** It bypasses the root layout, which means re-importing the stylesheet and the fonts and losing the header and the footer that make the page read as this site. It exists for an app with several root layouts or a dynamic segment at the top; this one has a single shell worth keeping.
 
 ---
 

@@ -28,7 +28,6 @@ const leedon: Property = {
     "A walled garden villa two streets back from Petitenget beach, with a private pool and a full kitchen.",
   image_url: "http://localhost:8000/storage/properties/leedon.webp",
   image_alt: "The private pool and garden terrace at Leedon Villa Seminyak",
-  image_focus: "center",
   price_from: 3_200_000,
   currency: "IDR",
   rating: 4.8,

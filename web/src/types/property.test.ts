@@ -23,7 +23,6 @@ const CONTRACT_KEYS = [
   "excerpt",
   "image_url",
   "image_alt",
-  "image_focus",
   "price_from",
   "currency",
   "rating",
@@ -41,7 +40,6 @@ const populated: Property = {
   image_url:
     "http://localhost:8000/storage/properties/leedon-villa-seminyak.webp",
   image_alt: "Private pool at Leedon Villa Seminyak at dusk",
-  image_focus: "center",
   price_from: 3_200_000,
   currency: "IDR",
   rating: 4.8,

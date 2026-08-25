@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ImageFocus;
 use App\Enums\PropertyCategory;
 use App\Models\Property;
 
@@ -25,7 +24,6 @@ const CONTRACT_KEYS = [
     'excerpt',
     'image_url',
     'image_alt',
-    'image_focus',
     'price_from',
     'currency',
     'rating',
@@ -74,7 +72,6 @@ it('types every field as docs/API-SPEC.md ch. 3.3 declares it', function () {
         ->excerpt->toBeString()
         ->image_url->toBeString()
         ->image_alt->toBeString()
-        ->image_focus->toBe('center')
         ->price_from->toBe(3_200_000)
         ->currency->toBeString()
         // A float, not the "4.8" the decimal:1 cast produces. The frontend
@@ -82,14 +79,6 @@ it('types every field as docs/API-SPEC.md ch. 3.3 declares it', function () {
         ->rating->toBe(4.8)
         ->cta_url->toBeString()
         ->sort_order->toBe(10);
-});
-
-it('carries the focus the editor chose, not the default', function () {
-    // The frontend cannot work this out: only the editor knows where the
-    // subject of their photograph is, so the value has to travel.
-    Property::factory()->published()->create(['image_focus' => ImageFocus::Top]);
-
-    expect($this->getJson('/api/v1/properties')->json('data.0.image_focus'))->toBe('top');
 });
 
 it('serialises the nullable fields as null rather than omitting them', function () {

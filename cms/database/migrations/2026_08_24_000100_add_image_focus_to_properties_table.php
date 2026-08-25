@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ImageFocus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,14 +15,22 @@ use Illuminate\Support\Facades\Schema;
  * The default is what makes it safe on a populated table. Every existing row
  * gets `center`, which is exactly the behaviour they had before the column
  * existed, so no row changes appearance on the way through.
+ *
+ * The column is dropped again by the migration two days after this one. The
+ * values here are literals rather than `App\Enums\ImageFocus::values()`,
+ * which is what they were until that enum was deleted along with the column:
+ * a migration that names an application class stops running the moment the
+ * class is refactored away, and a migration that cannot run is a database
+ * nobody can rebuild from scratch. History is a record of the schema, not a
+ * consumer of the code that happened to be present when it was written.
  */
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::table('properties', function (Blueprint $table) {
-            $table->enum('image_focus', ImageFocus::values())
-                ->default(ImageFocus::Center->value)
+            $table->enum('image_focus', ['top', 'center', 'bottom'])
+                ->default('center')
                 ->after('image_alt');
         });
     }

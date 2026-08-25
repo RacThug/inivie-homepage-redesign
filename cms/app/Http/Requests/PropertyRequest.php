@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\ImageFocus;
 use App\Enums\PropertyCategory;
 use App\Models\Property;
 use Illuminate\Foundation\Http\FormRequest;
@@ -47,10 +46,6 @@ abstract class PropertyRequest extends FormRequest
             'excerpt' => ['required', 'string', 'max:240'],
             'image' => $this->imageRules(),
             'image_alt' => ['required', 'string', 'max:160'],
-            // Required rather than nullable with a default: the form always
-            // renders the select with a value, so an absent one means a
-            // request that did not come from the form.
-            'image_focus' => ['required', new Enum(ImageFocus::class)],
             // Whole rupiah, per DATA-MODEL ch. 2.1. Optional, because a
             // property may be listed before its rate card exists.
             'price_from' => ['nullable', 'integer', 'min:0'],
@@ -118,7 +113,6 @@ abstract class PropertyRequest extends FormRequest
         return [
             'cta_url' => 'link',
             'image_alt' => 'image description',
-            'image_focus' => 'image focus',
             'price_from' => 'price',
             'sort_order' => 'order',
         ];

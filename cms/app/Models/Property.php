@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ImageFocus;
 use App\Enums\PropertyCategory;
 use App\Observers\PropertyObserver;
 use Database\Factories\PropertyFactory;
@@ -52,7 +51,6 @@ class Property extends Model
         'excerpt',
         'image_path',
         'image_alt',
-        'image_focus',
         'price_from',
         'currency',
         'rating',
@@ -69,7 +67,6 @@ class Property extends Model
     {
         return [
             'category' => PropertyCategory::class,
-            'image_focus' => ImageFocus::class,
             'price_from' => 'integer',
             'rating' => 'decimal:1',
             'sort_order' => 'integer',

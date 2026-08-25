@@ -182,20 +182,24 @@ test.describe("with properties published", () => {
   });
 
   /**
-   * The crop anchor travels from the CMS and has to survive the whole way:
-   * column, payload, type guard, utility class. The stub gives the second
-   * property `top`, and nothing between here and there is allowed to quietly
-   * put it back in the middle. DESIGN-SYSTEM ch. 6.1.
+   * DESIGN-SYSTEM ch. 6.1: the photograph covers its 4:3 box, so the card is
+   * always full and no field in the payload moves where the crop falls. Read
+   * off the computed style rather than the class list, because a utility
+   * Tailwind failed to generate is still present in `class` and would pass a
+   * class assertion while the browser laid the image out some other way.
    */
-  test("crops each card where the CMS said to", async ({ page }) => {
+  test("covers its box with the photograph", async ({ page }) => {
     await page.goto(url);
 
-    const cards = page
+    const image = page
       .getByRole("region", { name: HEADING })
-      .getByRole("article");
+      .getByRole("article")
+      .first()
+      .getByRole("img");
 
-    await expect(cards.first().getByRole("img")).toHaveClass(/object-center/);
-    await expect(cards.nth(1).getByRole("img")).toHaveClass(/object-top/);
+    await expect
+      .poll(() => image.evaluate((node) => getComputedStyle(node).objectFit))
+      .toBe("cover");
   });
 });
 

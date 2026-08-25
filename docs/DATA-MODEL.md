@@ -32,8 +32,7 @@ The scope needs only one domain table beyond Laravel's defaults.
 │ identity     id, title, slug               │
 │ taxonomy     category                      │
 │ display      location, excerpt             │
-│ media        image_path, image_alt,        │
-│              image_focus                   │
+│ media        image_path, image_alt         │
 │ commercial   price_from, currency, rating  │
 │ linking      cta_url                       │
 │ publishing   sort_order, is_published,     │
@@ -59,7 +58,6 @@ There is intentionally no relation between `users` and `properties`. Attributing
 | `excerpt` | `varchar(240)` | not null | Short description shown on the card |
 | `image_path` | `varchar(255)` | not null | Relative path on the configured filesystem disk, never a full URL |
 | `image_alt` | `varchar(160)` | **not null** | Required, not nullable, so alternative text can never be missing |
-| `image_focus` | `enum` | not null, default `center` | `top`, `center`, `bottom`. Which part of the photograph survives the card's 4:3 crop |
 | `price_from` | `int unsigned` | nullable | Starting nightly rate in whole currency units |
 | `currency` | `char(3)` | not null, default `IDR` | ISO 4217 code |
 | `rating` | `decimal(2,1)` | nullable | Range 0.0 to 5.0 |
@@ -82,7 +80,6 @@ There is intentionally no relation between `users` and `properties`. Attributing
 | `sort_order` | `smallint unsigned` | An explicit ordering column, because insertion order is not an editorial decision |
 | `slug` | Present despite there being no detail page | Costs nothing now, and is the prerequisite for the property detail page in PRD ch. 12. Also gives every row a stable human readable identifier |
 | `deleted_at` | Soft delete | An accidental deletion in a CMS should be recoverable. Also lets image cleanup be deferred safely |
-| `image_focus` | Three named positions rather than coordinates | A focal point stored as x and y is more expressive and asks an editor to think in percentages about a crop they cannot see. The card is one fixed 4:3 box, so the only question it ever asks is which end of a tall photograph to keep, and three answers cover it. Coordinates remain available later without a data migration: `top` and `bottom` are already the two extremes a percentage would express |
 | `image_path` | Relative path, never a full URL | A stored URL bakes the host into every row, so changing where media lives would need a data migration to rewrite them, and any row missed stays broken forever. The absolute URL is derived at the API layer instead. See TECHNICAL-DESIGN ch. 5.5 |
 
 ### 2.2 Indexes

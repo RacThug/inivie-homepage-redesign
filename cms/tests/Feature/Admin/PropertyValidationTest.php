@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ImageFocus;
 use App\Models\Property;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -163,34 +162,6 @@ describe('image', function () {
         $this->post(route('admin.properties.store'), propertyForm([
             'image' => FakeImage::png('huge.png', 1200, 900, padToKilobytes: 2100),
         ]))->assertSessionHasErrors(['image' => 'The image may not be larger than 2 MB.']);
-    });
-});
-
-describe('image focus', function () {
-    it('takes each of the three the enum names', function () {
-        foreach (ImageFocus::cases() as $index => $focus) {
-            $this->post(route('admin.properties.store'), propertyForm([
-                'title' => "Focus {$focus->value}",
-                'slug' => "focus-{$focus->value}",
-                'image_focus' => $focus->value,
-            ]))->assertSessionHasNoErrors();
-
-            expect(Property::where('slug', "focus-{$focus->value}")->value('image_focus'))
-                ->toBe($focus);
-        }
-    });
-
-    it('refuses a position that is not one of them', function () {
-        // The select offers three, so anything else is a request that did
-        // not come from the form, and the card has no CSS for it.
-        $this->post(route('admin.properties.store'), propertyForm([
-            'image_focus' => 'north-by-northwest',
-        ]))->assertSessionHasErrors('image_focus');
-    });
-
-    it('is required, because the form always sends one', function () {
-        $this->post(route('admin.properties.store'), propertyForm(['image_focus' => null]))
-            ->assertSessionHasErrors('image_focus');
     });
 });
 
